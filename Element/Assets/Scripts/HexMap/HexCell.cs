@@ -6,18 +6,16 @@ public class HexCell : MonoBehaviour
 {
     HexCellMesh hexMesh;
     public HexCoordinates hexCoordinates;
+    [HideInInspector] public HexCell[] neighbors;
 
-    [SerializeField]
-    HexCell[] neighbors;
-
-    List<WayPoint> wayPoints;
-
-    public FullColorBrush brush;
+    Track track;
+    public Brush brush;
+    public Connecter connecter;
+    public ConnecterBrushSlot connecterSlot;
     public void Setup(Vector3 position, Transform parent, HexCoordinates coordinates)
     {
         neighbors = new HexCell[6];
         hexMesh = GetComponentInChildren<HexCellMesh>();
-        wayPoints = new List<WayPoint>();
         hexMesh.Init();
 
         transform.position = position;
@@ -27,15 +25,40 @@ public class HexCell : MonoBehaviour
         gameObject.name = hexCoordinates.ToString();
     }
 
-    public HexCell GetNeighbor(HexDirection direction)
+    public Direction GetHexDirection(HexCell cell)
+    {
+        for (int i = 0; i < neighbors.Length; i++)
+        {
+            if(neighbors[i] == cell)
+            {
+                return (Direction)i;
+            }
+        }
+
+        return Direction.E;
+    }
+
+    public HexCell GetNeighbor(Direction direction)
     {
         return neighbors[(int)direction];
     }
 
-    public void SetNeighbor(HexDirection direction, HexCell cell)
+    public void SetNeighbor(Direction direction, HexCell cell)
     {
         neighbors[(int)direction] = cell;
         cell.neighbors[(int)direction.Opposite()] = this;
+    }
+
+    public HexCell PreviousCell(HexCell cell)
+    {
+        Direction direction = GetHexDirection(cell);
+        return neighbors[(int)direction.Previous()];
+    }
+
+    public HexCell NextCell(HexCell cell)
+    {
+        Direction direction = GetHexDirection(cell);
+        return neighbors[(int)direction.Next()];
     }
 
     public bool IsNeighbor(HexCell cell)
@@ -50,46 +73,58 @@ public class HexCell : MonoBehaviour
         return false;
     }
     
-    public bool CanInitNewWire()
+    public bool IsEmpty()
     {
-        return wayPoints.Count == 0;
+        return track == null;
     }
 
-    public WayPoint GetEndOfWireWayPoint()
+    public void SetTrack(Track track_)
     {
-        for (int i = 0; i < wayPoints.Count; i++)
+        track = track_;
+    }
+
+    public void ClearTrack()
+    {
+        track = null;
+    }
+
+    public bool CanInitNewBrush()
+    {
+        return brush == null;
+    }
+
+    public bool CanInitNewConnecterSlot(out Connecter connecter_, out Direction direction_)
+    {
+        if(connecterSlot == null && connecter == null)
         {
-            if(wayPoints[i].GetWirePointType() == WirePointType.START ||
-                wayPoints[i].GetWirePointType() == WirePointType.END)
+            for (int i = 0; i < neighbors.Length; i++)
             {
-                return wayPoints[i];
+                if(neighbors[i].connecter != null)
+                {
+                    connecter_ = neighbors[i].connecter;
+                    direction_ = ((Direction)i).Opposite();
+                    return true;
+                }
             }
         }
-        return null;
+        connecter_ = null;
+        direction_ = 0;
+        return false;
     }
 
-    public void AddNewWayPoint(WayPoint wayPoint)
+    public bool CanEnterConnecterOrSlot()
     {
-        wayPoints.Add(wayPoint);
-    }
-
-    public void RemoveWayPoint(WayPoint wayPoint)
-    {
-        wayPoints.Remove(wayPoint);
-    }
-
-    public void SetBrush(FullColorBrush brush_)
-    {
-        brush = brush_;
-    }
-
-    public void ClearBrush()
-    {
-        brush = null;
+        return connecter == null && connecterSlot == null;
     }
 
     public void Coloring(Color col)
     {
         hexMesh.Coloring(col);
+        ProcessSystem.Instance.colorCells.Add(this);
+    }
+
+    public void ClearColor()
+    {
+        hexMesh.ResetColor();
     }
 }

@@ -9,22 +9,22 @@ public class CodeSlot : MonoBehaviour, IDropHandler
 {
     Color normalCol;
     Color highlightCol;
-    [SerializeField] Image background;
+    Image background;
 
     Command command;
-    CodeConsole console;
+    CommandConsole brushConsole;
 
-    public event Action<CodeSlot, CommandSO> OnCommandIconDropped;
     public event Action<CodeSlot, Command> OnCommandDropped;
 
     public int index { get; private set; }
 
-    public void Setup(Color normalCol_, Color highlightCol_, int index_, CodeConsole console_)
+    public void Setup(Color normalCol_, Color highlightCol_, int index_, CommandConsole brushConsole_)
     {
+        background = GetComponent<Image>();
         normalCol = normalCol_;
         highlightCol = highlightCol_;
         index = index_;
-        console = console_;
+        brushConsole = brushConsole_;
     }
 
     public void SetHighlight()
@@ -41,13 +41,6 @@ public class CodeSlot : MonoBehaviour, IDropHandler
     {
         if (IsEmpty())
         {
-            CommandIcon draggingCommand = eventData.pointerDrag.GetComponent<CommandIcon>();
-            if (draggingCommand != null)
-            {
-                OnCommandIconDropped?.Invoke(this, draggingCommand.commandSO);
-                return;
-            }
-
             Command newCommand = eventData.pointerDrag.GetComponent<Command>();
             if (newCommand != null)
             {
@@ -74,6 +67,6 @@ public class CodeSlot : MonoBehaviour, IDropHandler
     public void ClearCommand()
     {
         command = null;
-        console.RecordCommand(index, null);
+        brushConsole.RecordCommand(index, null);
     }
 }

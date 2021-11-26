@@ -40,17 +40,17 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
         canvasGroup.blocksRaycasts = true;
     }
 
-    public void Setup(CommandSO commandSO_, CodeSlot codeSlot_)
+    public void Setup(CommandSO commandSO_)
     {
         commandSO = commandSO_;
-        codeSlot = codeSlot_;
         icon.sprite = commandSO.icon;
+        dropValid = false;
+        canvasGroup.blocksRaycasts = false;
     }
 
     public void DroppedOnSlot(CodeSlot codeSlot_)
     {
         codeSlot = codeSlot_;
-
         transform.position = codeSlot.transform.position;
         transform.parent = codeSlot.transform;
         dropValid = true;

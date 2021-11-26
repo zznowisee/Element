@@ -5,39 +5,70 @@ using System;
 
 public class BuildSystem : MonoBehaviour
 {
-    public event Action<ControlPoint> OnCreateNewControlPoint;
+    public event Action<Brush> OnCreateNewBrush;
+    public event Action<Brush> OnDestoryBrush;
+
+    public event Action<Connecter> OnCreateNewConnecter;
+    public event Action<Connecter> OnDestoryConnecter;
+
+    public event Action<ConnecterBrushSlot> OnCreateNewSlot;
+    public event Action<ConnecterBrushSlot> OnDestorySlot;
 
     public static BuildSystem Instance { get; private set; }
 
-    [SerializeField] Wire pfWire;
-    Wire trackingWire;
-    HexCell trackingCell;
 
-    [SerializeField] FullColorBrush pfFullColorBrush;
+    [SerializeField] Track pfTrack;
+    [SerializeField] Brush pfColorBrush;
     [SerializeField] ColorPicker pfColorPicker;
-    [SerializeField] ControlPoint pfControlPoint;
-    [SerializeField] Command pfCommand;
-
-    FullColorBrush currentBrush;
+    [SerializeField] Connecter pfConnecter;
+    [SerializeField] ConnecterBrushSlot pfConnecterBrushSlot;
+ 
+    HexCell currentCell;
+    Track currentTrack;
+    Brush currentBrush;
     ColorPicker currentColorPicker;
+    Connecter currentConnecter;
+    ConnecterBrushSlot currentConnecterSlot;
     ControlPoint currentControlPoint;
-    Command currentCommand;
-
-    List<int> controlPointIndices;
+    List<int> commandReadersIndices;
 
     void Awake()
     {
         Instance = this;
-        controlPointIndices = new List<int>();
+        commandReadersIndices = new List<int>();
     }
 
     void Update()
     {
         HandleMouseDrag();
-        HandleControlPointBuilding();
-        HandleColorPickerBuilding();
+        HandleControlPoint();
         HandleBrushBuilding();
-        HandleWireBuilding();
+        HandleConnecterBuilding();
+        HandleColorPickerBuilding();
+        HandleTrackBuilding();
+        HandleConnecterSlotBuilding();
+    }
+
+    void HandleControlPoint()
+    {
+        if(Input.GetMouseButtonDown(0) && !InputHelper.IsMouseOverUIObject())
+        {
+            ControlPoint controlPoint = InputHelper.GetControlPointUnderPosition2D();
+            if(controlPoint != null)
+            {
+                currentControlPoint = controlPoint;
+            }
+        }
+
+        if (currentControlPoint != null)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                currentControlPoint = null;
+                return;
+            }
+            currentControlPoint.controlBody.RotateInEditMode();
+        }
     }
 
     void HandleMouseDrag()
@@ -48,57 +79,25 @@ public class BuildSystem : MonoBehaviour
             if (mouseDrag != null)
             {
                 mouseDrag.StartDragging();
+                return;
             }
         }
-
     }
 
-    int GetControlPointIndex()
+    int GetIndexFromIndicesList(List<int> indicesList)
     {
-        for (int i = 0; i < controlPointIndices.Count; i++)
+        for (int i = 0; i < indicesList.Count; i++)
         {
-            if (i != controlPointIndices[i])
+            if (i != indicesList[i])
             {
-                controlPointIndices.Insert(i, i);
+                indicesList.Insert(i, i);
                 return i;
             }
         }
 
-        int index = controlPointIndices.Count;
-        controlPointIndices.Add(index);
+        int index = indicesList.Count;
+        indicesList.Add(index);
         return index;
-    }
-
-    void HandleControlPointBuilding()
-    {
-        if(currentControlPoint != null)
-        {
-            if (Input.GetMouseButtonUp(0))
-            {
-                WayPoint wayPoint = InputHelper.GetWayPointPosition2D();
-                if(wayPoint != null)
-                {
-                    if (wayPoint.IsEmptyForControlPoint())
-                    {
-                        if (!currentControlPoint.isReady)
-                        {
-                            OnCreateNewControlPoint?.Invoke(currentControlPoint);
-                        }
-
-                        currentControlPoint.Setup(wayPoint);
-                        currentControlPoint = null;
-                        return;
-                    }
-                }
-
-                controlPointIndices.Remove(currentControlPoint.index);
-                currentControlPoint.Delete();
-                currentControlPoint = null;
-                return;
-            }
-
-            currentControlPoint.transform.position = InputHelper.MouseWorldPositionIn2D;
-        }
     }
 
     void HandleColorPickerBuilding()
@@ -107,7 +106,7 @@ public class BuildSystem : MonoBehaviour
         {
             if (Input.GetMouseButtonUp(0))
             {
-                FullColorBrush brush = InputHelper.GetColorBrushUnderPosition2D();
+                Brush brush = InputHelper.GetColorBrushUnderPosition2D();
                 if (brush != null)
                 {
                     brush.SetColorSO(currentColorPicker.color);
@@ -127,29 +126,37 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
-    void HandleWireBuilding()
+    void HandleTrackBuilding()
     {
-        if (InputHelper.IsMouseOverUIObject())
+        if(currentTrack != null)
         {
-            return;
-        }
-        if (currentBrush != null || currentColorPicker != null ||
-            currentCommand != null || currentControlPoint != null)
-        {
-            return;
-        }
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (InputHelper.IsMouseOverUIObject())
+                {
+                    Destroy(currentTrack.gameObject);
+                    currentTrack = null;
+                    return;
+                }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            InitWire();
-        }
-        else if (Input.GetMouseButton(0))
-        {
-            BuildWire();
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            FinishWire();
+                HexCell cell = InputHelper.GetHexCellUnderPosition3D();
+                if(cell != null)
+                {
+                    if (cell.IsEmpty())
+                    {
+                        cell.SetTrack(currentTrack);
+                        currentTrack.Setup(cell);
+                        currentTrack = null;
+                        return;
+                    }
+                }
+
+                Destroy(currentTrack.gameObject);
+                currentTrack = null;
+                return;
+            }
+
+            currentTrack.transform.position = InputHelper.MouseWorldPositionIn2D;
         }
     }
 
@@ -161,31 +168,127 @@ public class BuildSystem : MonoBehaviour
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
+                    OnDestoryBrush?.Invoke(currentBrush);
                     Destroy(currentBrush.gameObject);
                 }
 
                 HexCell cell = InputHelper.GetHexCellUnderPosition3D();
                 if (cell != null)
                 {
-                    currentBrush.Setup(cell);
-                    currentBrush = null;
-                    return;
+                    if (cell.CanInitNewBrush())
+                    {
+                        currentBrush.Setup(cell);
+                        currentBrush = null;
+                        return;
+                    }
                 }
             }
 
             currentBrush.transform.position = InputHelper.MouseWorldPositionIn2D;
+            return;
         }
     }
 
-    public void CreateNewControlPoint()
+    void HandleConnecterBuilding()
     {
-        currentControlPoint = Instantiate(pfControlPoint);
-        currentControlPoint.SetIndex(GetControlPointIndex());
+        if (currentConnecter != null)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (InputHelper.IsMouseOverUIObject())
+                {
+                    commandReadersIndices.Remove(currentConnecter.index);
+                    OnDestoryConnecter?.Invoke(currentConnecter);
+                    Destroy(currentConnecter.gameObject);
+                }
+
+                HexCell cell = InputHelper.GetHexCellUnderPosition3D();
+                if (cell != null)
+                {
+                    if (cell.CanInitNewBrush())
+                    {
+                        if (!currentConnecter.HasBeenSetup)
+                        {
+                            currentConnecter.Setup(cell);
+                        }
+                        else
+                        {
+                            currentConnecter.EnterNewCell(cell);
+                        }
+                        currentConnecter = null;
+                        return;
+                    }
+                }
+            }
+
+            currentConnecter.transform.position = InputHelper.MouseWorldPositionIn2D;
+            return;
+        }
     }
 
-    public void CreateNewFullColorBrush()
+    void HandleConnecterSlotBuilding()
     {
-        currentBrush = Instantiate(pfFullColorBrush);
+        if (currentConnecterSlot != null)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (InputHelper.IsMouseOverUIObject())
+                {
+                    commandReadersIndices.Remove(currentConnecterSlot.index);
+                    OnDestorySlot?.Invoke(currentConnecterSlot);
+                    Destroy(currentConnecterSlot.gameObject);
+                }
+
+                HexCell cell = InputHelper.GetHexCellUnderPosition3D();
+                if (cell != null)
+                {
+                    Connecter connecter;
+                    Direction direction;
+                    if (cell.CanInitNewConnecterSlot(out connecter, out direction))
+                    {
+                        currentConnecterSlot.Setup(connecter, cell, direction);
+                        OnCreateNewSlot?.Invoke(currentConnecterSlot);
+                        currentConnecterSlot = null;
+                        return;
+                    }
+                    else
+                    {
+                        commandReadersIndices.Remove(currentConnecterSlot.index);
+                        OnDestorySlot?.Invoke(currentConnecterSlot);
+                        Destroy(currentConnecterSlot.gameObject);
+                    }
+                }
+            }
+
+            currentConnecterSlot.transform.position = InputHelper.MouseWorldPositionIn2D;
+            return;
+        }
+    }
+
+    public void CreateNewTrack()
+    {
+        currentTrack = Instantiate(pfTrack);
+    }
+
+    public void CreateNewColorBrush()
+    {
+        currentBrush = Instantiate(pfColorBrush);
+        OnCreateNewBrush?.Invoke(currentBrush);
+    }
+
+    public void CreateNewConnecterSlot()
+    {
+        currentConnecterSlot = Instantiate(pfConnecterBrushSlot);
+        int index = GetIndexFromIndicesList(commandReadersIndices);
+        currentConnecterSlot.SetIndex(index);
+    }
+
+    public void CreateNewConnecter()
+    {
+        currentConnecter = Instantiate(pfConnecter);
+        int index = GetIndexFromIndicesList(commandReadersIndices);
+        currentConnecter.SetIndex(index);
+        OnCreateNewConnecter?.Invoke(currentConnecter);
     }
 
     public void CreateColorPicker(ColorSO color_)
@@ -194,87 +297,13 @@ public class BuildSystem : MonoBehaviour
         currentColorPicker.Setup(color_);
     }
 
-    public void SetCurrentTrackingControlPoint(ControlPoint point)
-    {
-        currentControlPoint = point;
-    }
-
-    public void SetCurrentTrackingBrush(FullColorBrush brush)
+    public void SetCurrentTrackingBrush(Brush brush)
     {
         currentBrush = brush;
     }
 
-    void InitWire()
+    public void SetCurrentTrackingConnecter(Connecter connecter)
     {
-        HexCell cell = InputHelper.GetHexCellUnderPosition3D();
-        if(cell != null)
-        {
-            if (cell.CanInitNewWire())
-            {
-                trackingWire = Instantiate(pfWire, cell.transform.position, Quaternion.identity);
-                trackingWire.Init(cell);
-
-                trackingCell = cell;
-            }
-            else
-            {
-                WayPoint endOfWire = cell.GetEndOfWireWayPoint();
-                if(endOfWire != null)
-                {
-                    trackingWire = endOfWire.wire;
-                    trackingWire.BeSelected(endOfWire, cell);
-                    trackingCell = cell;
-                }
-            }
-        }
-    }
-
-    bool IsValid(HexCell cell)
-    {
-        if(trackingCell == null)
-        {
-            return false;
-        }
-        return trackingCell.IsNeighbor(cell);
-    }
-
-    void BuildWire()
-    {
-        HexCell cell = InputHelper.GetHexCellUnderPosition3D();
-        if(cell != null)
-        {
-            if(cell != trackingCell)
-            {
-                if (IsValid(cell))
-                {
-                    if (trackingWire != null)
-                    {
-                        if (trackingWire.IsLastCell(cell))
-                        {
-                            trackingWire.RemovePreviousCell();
-                        }
-                        else
-                        {
-                            trackingWire.SetToNewCell(cell);
-                        }
-
-                        trackingCell = cell;
-                    }
-                }
-            }
-        }
-    }
-
-    void FinishWire()
-    {
-        if (Input.GetMouseButtonUp(0))
-        {
-            if(trackingWire != null)
-            {
-                trackingWire.Finish();
-                trackingWire = null;
-                trackingCell = null;
-            }
-        }
+        currentConnecter = connecter;
     }
 }

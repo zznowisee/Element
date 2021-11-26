@@ -73,24 +73,24 @@ public class HexMap : MonoBehaviour
 
         if(x > 0)
         {
-            cell.SetNeighbor(HexDirection.W, cells[i - 1]);
+            cell.SetNeighbor(Direction.W, cells[i - 1]);
         }
         if(y > 0)
         {
             if((y & 1) == 0)
             {
-                cell.SetNeighbor(HexDirection.SE, cells[i - width]);
+                cell.SetNeighbor(Direction.SE, cells[i - width]);
                 if(x > 0)
                 {
-                    cell.SetNeighbor(HexDirection.SW, cells[i - width - 1]);
+                    cell.SetNeighbor(Direction.SW, cells[i - width - 1]);
                 }
             }
             else
             {
-                cell.SetNeighbor(HexDirection.SW, cells[i - width]);
+                cell.SetNeighbor(Direction.SW, cells[i - width]);
                 if(x < width - 1)
                 {
-                    cell.SetNeighbor(HexDirection.SE, cells[i - width + 1]);
+                    cell.SetNeighbor(Direction.SE, cells[i - width + 1]);
                 }
             }
         }

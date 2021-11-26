@@ -6,7 +6,9 @@ using TMPro;
 
 public class UISystem : MonoBehaviour
 {
-
+    public static UISystem Instance { get; private set; }
+    [SerializeField] Color btnDisable;
+    [SerializeField] Color btnEnable;
     [SerializeField] Transform colorPickerPanel;
     [SerializeField] Transform consolePanel;
     [SerializeField] Transform commandPanel;
@@ -14,18 +16,20 @@ public class UISystem : MonoBehaviour
     [SerializeField] ColorPaletteSO colorPaletteSO;
 
     [SerializeField] Button stepBtn;
-    [SerializeField] Button playBtn;
-    [SerializeField] Button pauseBtn;
-
-    [SerializeField] CodeConsole pfCodeConsole;
-    [SerializeField] CommandIcon pfCommandIcon;
+    [SerializeField] Button playPauseBtn;
+    [SerializeField] Button stopBtn;
+    [SerializeField] TextMeshProUGUI cycleNumText;
+    [SerializeField] CommandBtn pfCommandIcon;
+    [SerializeField] CommandConsole pfCommandConsole;
     public List<CommandSO> commandSOList;
+    Dictionary<ICommandReaderObj, CommandConsole> commandReaderConsoleDictionary;
 
-    Dictionary<ControlPoint, CodeConsole> controlPointConsoleDictionary;
-
+    bool isPlayBtn = true;
+    bool finished = false;
     private void Awake()
     {
-        controlPointConsoleDictionary = new Dictionary<ControlPoint, CodeConsole>();
+        Instance = this;
+        commandReaderConsoleDictionary = new Dictionary<ICommandReaderObj, CommandConsole>();
         for (int i = 0; i < colorPaletteSO.colors.Count; i++)
         {
             Color color = colorPaletteSO.colors[i].color;
@@ -36,41 +40,174 @@ public class UISystem : MonoBehaviour
 
         for (int i = 0; i < commandSOList.Count; i++)
         {
-            CommandIcon command = Instantiate(pfCommandIcon, commandPanel);
+            CommandBtn command = Instantiate(pfCommandIcon, commandPanel);
             command.Setup(commandSOList[i]);
         }
 
         stepBtn.onClick.AddListener(() =>
         {
-            ProcessingSystem.Instance.Step();
+            ProcessSystem.Instance.Step();
+
+            EnableStopBtn();
         });
-        playBtn.onClick.AddListener(() =>
+
+        playPauseBtn.onClick.AddListener(() =>
         {
-            ProcessingSystem.Instance.Play();
+            EnableStopBtn();
+            if (isPlayBtn) SwitchToPauseBtn();
+            else SWitchToPlayBtn();
+
+            ProcessSystem.Instance.PlayPause(!isPlayBtn);
         });
-        pauseBtn.onClick.AddListener(() =>
+
+        stopBtn.onClick.AddListener(() =>
         {
-            ProcessingSystem.Instance.Pause();
+            foreach (CommandConsole console in commandReaderConsoleDictionary.Values)
+            {
+                if (ProcessSystem.Instance.commandLineIndex > 0)
+                {
+                    console.slots[ProcessSystem.Instance.commandLineIndex - 1].SetNormal();
+                }
+            }
+            cycleNumText.text = "0";
+            ProcessSystem.Instance.Stop();
+            DisableStopBtn();
+            playPauseBtn.gameObject.SetActive(true);
+
+            if (finished)
+            {
+                finished = false;
+                playPauseBtn.GetComponent<Image>().color = btnEnable;
+                stepBtn.GetComponent<Image>().color = btnEnable;
+                playPauseBtn.enabled = true;
+                stepBtn.enabled = true;
+            }
         });
+
+        DisableStopBtn();
+    }
+
+    void SwitchToPauseBtn()
+    {
+        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PAUSE";
+        isPlayBtn = false;
+    }
+
+    void SWitchToPlayBtn()
+    {
+        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PLAY";
+        isPlayBtn = true;
+    }
+
+    void DisableStopBtn()
+    {
+        stopBtn.GetComponent<Image>().color = btnDisable;
+        stopBtn.enabled = false;
+        if (!isPlayBtn)
+        {
+            SWitchToPlayBtn();
+        }
+    }
+
+    void EnableStopBtn()
+    {
+        stopBtn.GetComponent<Image>().color = btnEnable;
+        stopBtn.enabled = true;
     }
 
     void Start()
     {
-        BuildSystem.Instance.OnCreateNewControlPoint += BuildSystem_OnCreateNewControlPoint;
+        BuildSystem.Instance.OnCreateNewBrush += BuildSystem_OnCreateNewBrush;
+        BuildSystem.Instance.OnDestoryBrush += BuildSystem_OnDestoryBrush;
+        //
+        BuildSystem.Instance.OnCreateNewConnecter += BuildSystem_OnCreateNewConnecter;
+        BuildSystem.Instance.OnDestoryConnecter += BuildSystem_OnDestoryConnecter;
+        BuildSystem.Instance.OnCreateNewSlot += BuildSystem_OnCreateNewSlot;
+        BuildSystem.Instance.OnDestorySlot += BuildSystem_OnDestorySlot;
+        // can only use two event : CommandReader
+        ProcessSystem.Instance.OnReadNextCommandLine += ProcessSystem_OnEnterNextCycle;
+        ProcessSystem.Instance.OnFinishAllCommands += ProcessSystem_OnFinishAllCommands;
     }
 
-    private void BuildSystem_OnCreateNewControlPoint(ControlPoint controlPoint)
+    private void ProcessSystem_OnFinishAllCommands()
     {
-        CodeConsole codeConsole = Instantiate(pfCodeConsole, consolePanel);
-        codeConsole.transform.SetSiblingIndex(controlPoint.index);
-        codeConsole.Setup(controlPoint);
-        controlPointConsoleDictionary[controlPoint] = codeConsole;
-        controlPoint.OnDestory += ControlPoint_OnDestory;
+        finished = true;
+        playPauseBtn.GetComponent<Image>().color = btnDisable;
+        if (!isPlayBtn)
+        {
+            SWitchToPlayBtn();
+        }
+        stepBtn.GetComponent<Image>().color = btnDisable;
+        playPauseBtn.enabled = false;
+        stepBtn.enabled = false;
     }
 
-    private void ControlPoint_OnDestory(ControlPoint controlPoint)
+    private void BuildSystem_OnDestorySlot(ConnecterBrushSlot slot)
     {
-        Destroy(controlPointConsoleDictionary[controlPoint].gameObject);
-        controlPointConsoleDictionary.Remove(controlPoint);
+        if (commandReaderConsoleDictionary.ContainsKey(slot))
+        {
+            Destroy(commandReaderConsoleDictionary[slot].gameObject);
+            commandReaderConsoleDictionary.Remove(slot);
+        }
+    }
+
+    private void BuildSystem_OnCreateNewSlot(ConnecterBrushSlot slot)
+    {
+        CommandConsole connecterConsole = Instantiate(pfCommandConsole, consolePanel);
+        connecterConsole.Setup(slot);
+        connecterConsole.transform.SetSiblingIndex(connecterConsole.index);
+
+        commandReaderConsoleDictionary[slot] = connecterConsole;
+    }
+
+    private void BuildSystem_OnDestoryConnecter(Connecter connecter)
+    {
+        Destroy(commandReaderConsoleDictionary[connecter].gameObject);
+        commandReaderConsoleDictionary.Remove(connecter);
+    }
+
+    private void BuildSystem_OnCreateNewConnecter(Connecter connecter)
+    {
+        CommandConsole connecterConsole = Instantiate(pfCommandConsole, consolePanel);
+        connecterConsole.Setup(connecter);
+        connecterConsole.transform.SetSiblingIndex(connecterConsole.index);
+
+        commandReaderConsoleDictionary[connecter] = connecterConsole;
+    }
+
+    private void ProcessSystem_OnEnterNextCycle(int commandLineIndex)
+    {
+        foreach (CommandConsole console in commandReaderConsoleDictionary.Values)
+        {
+            if (commandLineIndex > 0)
+            {
+                console.slots[commandLineIndex - 1].SetNormal();
+            }
+            console.slots[commandLineIndex].SetHighlight();
+        }
+        cycleNumText.text = (commandLineIndex + 1).ToString();
+    }
+
+    private void BuildSystem_OnDestoryBrush(Brush brush) { }
+
+    private void BuildSystem_OnCreateNewBrush(Brush brush) { }
+
+    public int GetCommandLineMaxIndex()
+    {
+        int maxIndex = 0;
+        foreach(CommandConsole console in commandReaderConsoleDictionary.Values)
+        {
+            int index = console.GetLastCommandIndex();
+            if (index >= maxIndex)
+            {
+                maxIndex = index;
+            }
+        }
+        return maxIndex;
+    }
+
+    public CommandSO GetEachReaderCommandSO(int lineIndex, ICommandReaderObj commandReader)
+    {
+        return commandReaderConsoleDictionary[commandReader].GetCommandSOFromLineIndex(lineIndex);
     }
 }

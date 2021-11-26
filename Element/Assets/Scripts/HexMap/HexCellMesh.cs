@@ -29,7 +29,7 @@ public class HexCellMesh : MonoBehaviour
         uvs = new List<Vector2>();
         triangles = new List<int>();
 
-        for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
+        for (Direction d = Direction.NE; d <= Direction.NW; d++)
         {
             AddTriangle(center,
                         center + HexMatrix.conrners[(int)d],
@@ -66,5 +66,11 @@ public class HexCellMesh : MonoBehaviour
     {
         meshRenderer.material = colorMat;
         meshRenderer.material.color = col;
+    }
+
+    public void ResetColor()
+    {
+        meshRenderer.material = defaultMat;
+        meshRenderer.material.color = Color.white;
     }
 }

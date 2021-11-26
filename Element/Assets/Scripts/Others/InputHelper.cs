@@ -39,6 +39,23 @@ public static class InputHelper
         return null;
     }
     
+    public static TrackControlPoint GetTrackControlPointUnderPosition2D()
+    {
+        RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider)
+            {
+                TrackControlPoint controlPoint = hits[i].collider.GetComponent<TrackControlPoint>();
+                if (controlPoint != null)
+                {
+                    return controlPoint;
+                }
+            }
+        }
+        return null;
+    }
+
     public static IMouseDrag GetIMouseDragUnderPosition2D()
     {
         RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
@@ -56,34 +73,34 @@ public static class InputHelper
         return null;
     }
 
-    public static FullColorBrush GetColorBrushUnderPosition2D()
+    public static ControlPoint GetControlPointUnderPosition2D()
     {
         RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider)
             {
-                FullColorBrush brush = hits[i].collider.GetComponent<FullColorBrush>();
-                if(brush != null)
+                ControlPoint controlPoint = hits[i].collider.GetComponent<ControlPoint>();
+                if (controlPoint != null)
                 {
-                    return brush;
+                    return controlPoint;
                 }
             }
         }
         return null;
     }
 
-    public static WayPoint GetWayPointPosition2D()
+    public static Brush GetColorBrushUnderPosition2D()
     {
         RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider)
             {
-                WayPoint wayPoint = hits[i].collider.GetComponent<WayPoint>();
-                if (wayPoint != null)
+                Brush brush = hits[i].collider.GetComponent<Brush>();
+                if(brush != null)
                 {
-                    return wayPoint;
+                    return brush;
                 }
             }
         }
@@ -114,15 +131,15 @@ public static class InputHelper
         return false;
     }
 
-    public static HexDirection GetHexDirectionFromAngle(float angle)
+    public static Direction GetHexDirectionFromAngle(float angle)
     {
         if (angle < 0f) angle += 360f;
-        if (angle <= 60f && angle > 0) return HexDirection.NE;
-        else if (angle > 60f && angle <= 120f) return HexDirection.E;
-        else if (angle > 120f && angle <= 180f) return HexDirection.SE;
-        else if (angle > 180f && angle <= 240f) return HexDirection.SW;
-        else if (angle > 240f & angle <= 300f) return HexDirection.W;
-        else return HexDirection.NW;
+        if (angle <= 60f && angle > 0) return Direction.NE;
+        else if (angle > 60f && angle <= 120f) return Direction.E;
+        else if (angle > 120f && angle <= 180f) return Direction.SE;
+        else if (angle > 180f && angle <= 240f) return Direction.SW;
+        else if (angle > 240f & angle <= 300f) return Direction.W;
+        else return Direction.NW;
     }
 
     public static Vector3 GetDirectionFromAngleInHex(float angle)
@@ -151,5 +168,12 @@ public static class InputHelper
             float y = k * x + b;
             return new Vector3(x, y) + startPosition;
         }
+    }
+
+    public static float GetAngleFromMousePositionIn2D(Vector3 startPos)
+    {
+        Vector3 dir = ((Vector3)MouseWorldPositionIn2D - startPos).normalized;
+        float angle = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
+        return angle;
     }
 }
