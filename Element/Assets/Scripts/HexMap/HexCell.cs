@@ -1,17 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class HexCell : MonoBehaviour
 {
     HexCellMesh hexMesh;
     public HexCoordinates hexCoordinates;
     [HideInInspector] public HexCell[] neighbors;
+    [SerializeField] TextMeshPro indexText;
 
     Track track;
     public Brush brush;
-    public Connecter connecter;
-    public ConnecterBrushSlot connecterSlot;
+    public Connector connector;
+    public Controller controller;
+    public ICommandReciever reciever;
     public void Setup(Vector3 position, Transform parent, HexCoordinates coordinates)
     {
         neighbors = new HexCell[6];
@@ -23,6 +26,15 @@ public class HexCell : MonoBehaviour
         hexCoordinates = coordinates;
 
         gameObject.name = hexCoordinates.ToString();
+        bool debug = false;
+        if (debug)
+        {
+            indexText.text = $"{hexCoordinates.X}\n{hexCoordinates.Y}\n{hexCoordinates.Z}";
+        }
+        else
+        {
+            indexText.text = "";
+        }
     }
 
     public Direction GetHexDirection(HexCell cell)
@@ -91,30 +103,6 @@ public class HexCell : MonoBehaviour
     public bool CanInitNewBrush()
     {
         return brush == null;
-    }
-
-    public bool CanInitNewConnecterSlot(out Connecter connecter_, out Direction direction_)
-    {
-        if(connecterSlot == null && connecter == null)
-        {
-            for (int i = 0; i < neighbors.Length; i++)
-            {
-                if(neighbors[i].connecter != null)
-                {
-                    connecter_ = neighbors[i].connecter;
-                    direction_ = ((Direction)i).Opposite();
-                    return true;
-                }
-            }
-        }
-        connecter_ = null;
-        direction_ = 0;
-        return false;
-    }
-
-    public bool CanEnterConnecterOrSlot()
-    {
-        return connecter == null && connecterSlot == null;
     }
 
     public void Coloring(Color col)

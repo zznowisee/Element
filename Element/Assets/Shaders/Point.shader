@@ -48,7 +48,7 @@
 					float2 centreOffset = (i.uv.xy - 0.5) * 2;
 					float sqrDst = dot(centreOffset, centreOffset);
 					float delta = fwidth(sqrt(sqrDst));
-					float alpha = 1 - smoothstep(0.95 - delta, 0.95 +delta,sqrDst);
+					float alpha = 1 - smoothstep(0.95 - delta, 0.95 + delta,sqrDst);
 					alpha *= _Alpha;
 
 					return float4(_Color.xyz, alpha);

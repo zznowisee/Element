@@ -7,7 +7,7 @@ using TMPro;
 public class CommandConsole : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI indexText;
-    [SerializeField] CommandReader commandReader;
+    [SerializeField] CommandRunner commandReader;
     [HideInInspector] public int index;
 
     [SerializeField] Color codeSlotNormalCol;
@@ -16,7 +16,7 @@ public class CommandConsole : MonoBehaviour
     [HideInInspector] public CodeSlot[] slots;
     public Command[] commands;
     public int slotNum = 18;
-    public void Setup(CommandReader connecter_)
+    public void Setup(CommandRunner connecter_)
     {
         commandReader = connecter_;
         slots = new CodeSlot[slotNum];

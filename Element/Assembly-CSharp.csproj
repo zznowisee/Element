@@ -56,6 +56,7 @@
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Connector.cs" />
     <Compile Include="Assets\Scripts\Command.cs" />
     <Compile Include="Assets\Scripts\CodeSlot.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\UISystem.cs" />
@@ -64,20 +65,22 @@
     <Compile Include="Assets\Scripts\HexMap\HexMatrix.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\ColorPaletteSO.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexCell.cs" />
+    <Compile Include="Assets\Scripts\LevelEditor\ControllerBtn.cs" />
     <Compile Include="Assets\Scripts\Others\Test.cs" />
     <Compile Include="Assets\Scripts\Others\BezierCurve.cs" />
     <Compile Include="Assets\Scripts\ConnecterBtn.cs" />
-    <Compile Include="Assets\Scripts\Connecter.cs" />
+    <Compile Include="Assets\Scripts\Controller.cs" />
     <Compile Include="Assets\Scripts\Track.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexMap.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\LineBrushBtn.cs" />
+    <Compile Include="Assets\Scripts\ICommandReader.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\ColorSO.cs" />
     <Compile Include="Assets\Scripts\Brush\Brush.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\TrackBtn.cs" />
-    <Compile Include="Assets\Scripts\CommandReader.cs" />
+    <Compile Include="Assets\Scripts\ICommandReciever.cs" />
+    <Compile Include="Assets\Scripts\CommandRunner.cs" />
     <Compile Include="Assets\Scripts\ProcessSystem.cs" />
     <Compile Include="Assets\Scripts\HexMap\Direction.cs" />
-    <Compile Include="Assets\Scripts\LevelEditor\ConnecterBrushSlotBtn.cs" />
     <Compile Include="Assets\Scripts\BuildSystem.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\ColorPickerBtn.cs" />
     <Compile Include="Assets\Scripts\TrackControlPoint.cs" />
@@ -90,15 +93,14 @@
     <Compile Include="Assets\Scripts\TrackMesh.cs" />
     <Compile Include="Assets\Scripts\Brush\ColorPicker.cs" />
     <Compile Include="Assets\Scripts\Others\InputHelper.cs" />
-    <Compile Include="Assets\Scripts\ICommandReaderObj.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\ColorBrushBtn.cs" />
-    <Compile Include="Assets\Scripts\ConnecterBrushSlot.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\Point.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\Shaders\Line.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
+    <None Include="Assets\Shaders\DottedLine.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
     <None Include="Assets\Shaders\Shape.shader" />
     <None Include="Assets\Shaders\VertexColor.shader" />
@@ -125,6 +127,7 @@
     <None Include="Assets\Shaders\Texture.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
+    <None Include="Assets\Shaders\Wireframe.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
   </ItemGroup>
   <ItemGroup>

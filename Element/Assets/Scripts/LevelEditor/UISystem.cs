@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
 public class UISystem : MonoBehaviour
 {
@@ -19,17 +20,19 @@ public class UISystem : MonoBehaviour
     [SerializeField] Button playPauseBtn;
     [SerializeField] Button stopBtn;
     [SerializeField] TextMeshProUGUI cycleNumText;
-    [SerializeField] CommandBtn pfCommandIcon;
+    [SerializeField] CommandBtn pfCommandBtn;
+    [SerializeField] Command pfCommand;
     [SerializeField] CommandConsole pfCommandConsole;
     public List<CommandSO> commandSOList;
-    Dictionary<ICommandReaderObj, CommandConsole> commandReaderConsoleDictionary;
+    Dictionary<ICommandReader, CommandConsole> commandReaderConsoleDictionary;
 
+    public PointerEventData pointerData;
     bool isPlayBtn = true;
     bool finished = false;
     private void Awake()
     {
         Instance = this;
-        commandReaderConsoleDictionary = new Dictionary<ICommandReaderObj, CommandConsole>();
+        commandReaderConsoleDictionary = new Dictionary<ICommandReader, CommandConsole>();
         for (int i = 0; i < colorPaletteSO.colors.Count; i++)
         {
             Color color = colorPaletteSO.colors[i].color;
@@ -40,7 +43,7 @@ public class UISystem : MonoBehaviour
 
         for (int i = 0; i < commandSOList.Count; i++)
         {
-            CommandBtn command = Instantiate(pfCommandIcon, commandPanel);
+            CommandBtn command = Instantiate(pfCommandBtn, commandPanel);
             command.Setup(commandSOList[i]);
         }
 
@@ -87,6 +90,11 @@ public class UISystem : MonoBehaviour
         DisableStopBtn();
     }
 
+    void Update()
+    {
+
+    }
+
     void SwitchToPauseBtn()
     {
         playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PAUSE";
@@ -120,13 +128,29 @@ public class UISystem : MonoBehaviour
         BuildSystem.Instance.OnCreateNewBrush += BuildSystem_OnCreateNewBrush;
         BuildSystem.Instance.OnDestoryBrush += BuildSystem_OnDestoryBrush;
         //
-        BuildSystem.Instance.OnCreateNewConnecter += BuildSystem_OnCreateNewConnecter;
-        BuildSystem.Instance.OnDestoryConnecter += BuildSystem_OnDestoryConnecter;
-        BuildSystem.Instance.OnCreateNewSlot += BuildSystem_OnCreateNewSlot;
-        BuildSystem.Instance.OnDestorySlot += BuildSystem_OnDestorySlot;
+        BuildSystem.Instance.OnCreateNewConnector += BuildSystem_OnCreateNewConnecter;
+        BuildSystem.Instance.OnDestoryConnector += BuildSystem_OnDestoryConnecter;
+        //
+        BuildSystem.Instance.OnCreateNewController += BuildSystem_OnCreateNewController;
+        BuildSystem.Instance.OnDestoryController += BuildSystem_OnDestoryController;
         // can only use two event : CommandReader
         ProcessSystem.Instance.OnReadNextCommandLine += ProcessSystem_OnEnterNextCycle;
         ProcessSystem.Instance.OnFinishAllCommands += ProcessSystem_OnFinishAllCommands;
+    }
+
+    private void BuildSystem_OnDestoryController(Controller controller)
+    {
+        Destroy(commandReaderConsoleDictionary[controller].gameObject);
+        commandReaderConsoleDictionary.Remove(controller);
+    }
+
+    private void BuildSystem_OnCreateNewController(Controller controller)
+    {
+        CommandConsole connecterConsole = Instantiate(pfCommandConsole, consolePanel);
+        connecterConsole.Setup(controller);
+        connecterConsole.transform.SetSiblingIndex(connecterConsole.index);
+
+        commandReaderConsoleDictionary[controller] = connecterConsole;
     }
 
     private void ProcessSystem_OnFinishAllCommands()
@@ -142,39 +166,10 @@ public class UISystem : MonoBehaviour
         stepBtn.enabled = false;
     }
 
-    private void BuildSystem_OnDestorySlot(ConnecterBrushSlot slot)
-    {
-        if (commandReaderConsoleDictionary.ContainsKey(slot))
-        {
-            Destroy(commandReaderConsoleDictionary[slot].gameObject);
-            commandReaderConsoleDictionary.Remove(slot);
-        }
-    }
-
-    private void BuildSystem_OnCreateNewSlot(ConnecterBrushSlot slot)
-    {
-        CommandConsole connecterConsole = Instantiate(pfCommandConsole, consolePanel);
-        connecterConsole.Setup(slot);
-        connecterConsole.transform.SetSiblingIndex(connecterConsole.index);
-
-        commandReaderConsoleDictionary[slot] = connecterConsole;
-    }
-
-    private void BuildSystem_OnDestoryConnecter(Connecter connecter)
-    {
-        Destroy(commandReaderConsoleDictionary[connecter].gameObject);
-        commandReaderConsoleDictionary.Remove(connecter);
-    }
-
-    private void BuildSystem_OnCreateNewConnecter(Connecter connecter)
-    {
-        CommandConsole connecterConsole = Instantiate(pfCommandConsole, consolePanel);
-        connecterConsole.Setup(connecter);
-        connecterConsole.transform.SetSiblingIndex(connecterConsole.index);
-
-        commandReaderConsoleDictionary[connecter] = connecterConsole;
-    }
-
+    private void BuildSystem_OnDestoryConnecter(Connector connecter) { }
+    private void BuildSystem_OnCreateNewConnecter(Connector connecter) { }
+    private void BuildSystem_OnDestoryBrush(Brush brush) { }
+    private void BuildSystem_OnCreateNewBrush(Brush brush) { }
     private void ProcessSystem_OnEnterNextCycle(int commandLineIndex)
     {
         foreach (CommandConsole console in commandReaderConsoleDictionary.Values)
@@ -187,10 +182,6 @@ public class UISystem : MonoBehaviour
         }
         cycleNumText.text = (commandLineIndex + 1).ToString();
     }
-
-    private void BuildSystem_OnDestoryBrush(Brush brush) { }
-
-    private void BuildSystem_OnCreateNewBrush(Brush brush) { }
 
     public int GetCommandLineMaxIndex()
     {
@@ -206,7 +197,7 @@ public class UISystem : MonoBehaviour
         return maxIndex;
     }
 
-    public CommandSO GetEachReaderCommandSO(int lineIndex, ICommandReaderObj commandReader)
+    public CommandSO GetEachReaderCommandSO(int lineIndex, ICommandReader commandReader)
     {
         return commandReaderConsoleDictionary[commandReader].GetCommandSOFromLineIndex(lineIndex);
     }

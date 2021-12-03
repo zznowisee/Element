@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Connect
   m_EditorClassIdentifier: 
   name: Connect
+  key: 99
   icon: {fileID: 21300000, guid: 1953a2b86fc98d84bbeb7d7b50ce8122, type: 3}

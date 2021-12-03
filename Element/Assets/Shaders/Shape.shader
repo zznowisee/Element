@@ -47,7 +47,7 @@ Shader "Unlit/Shape"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float N = 3.0;
+                float N = 2.0;
                 float2 pos = i.uv * 2.0 - 1.0;
                 float angle = atan(pos.x / pos.y) + PI;
                 float r = TWO_PI / N;

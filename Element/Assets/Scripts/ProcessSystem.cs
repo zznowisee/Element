@@ -22,20 +22,24 @@ public class ProcessSystem : MonoBehaviour
 
     [Header("Command SO")]
     [SerializeField] CommandSO splitSO;
-    [SerializeField] CommandSO clockwiseRotateSO;
-    [SerializeField] CommandSO counterClockwiseRotateSO;
+    [SerializeField] CommandSO brushCWRotateSO;
+    [SerializeField] CommandSO brushCCWRotateSO;
     [SerializeField] CommandSO connectSO;
     [SerializeField] CommandSO goAheadSO;
     [SerializeField] CommandSO backSO;
     [SerializeField] CommandSO dropSO;
     [SerializeField] CommandSO pickSO;
     [SerializeField] CommandSO delaySO;
+    [SerializeField] CommandSO controllerCCWSO;
+    [SerializeField] CommandSO controllerCWSO;
 
-    Dictionary<CommandSO, Action<ICommandReaderObj>> commandDictionary;
-    public List<Connecter> connecters;
-    public List<ConnecterBrushSlot> connecterSlots;
+    Dictionary<CommandSO, Action<ICommandReader>> commandDictionary;
+
+    public List<Controller> controllers;
+    public List<Connector> connectors;
     public List<Brush> brushes;
     public List<HexCell> colorCells;
+
     public float commandSpacingTime = .3f;
     public float commandDurationTime = .3f;
 
@@ -48,21 +52,23 @@ public class ProcessSystem : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        commandDictionary = new Dictionary<CommandSO, Action<ICommandReaderObj>>();
-        connecters = new List<Connecter>();
-        connecterSlots = new List<ConnecterBrushSlot>();
+        commandDictionary = new Dictionary<CommandSO, Action<ICommandReader>>();
+        connectors = new List<Connector>();
         colorCells = new List<HexCell>();
         brushes = new List<Brush>();
+        controllers = new List<Controller>();
 
         commandDictionary[splitSO] = Split;
-        commandDictionary[clockwiseRotateSO] = ClockwiseRotate;
-        commandDictionary[counterClockwiseRotateSO] = CounterClockwiseRotate;
+        commandDictionary[brushCWRotateSO] = ClockwiseRotate;
+        commandDictionary[brushCCWRotateSO] = CounterClockwiseRotate;
         commandDictionary[connectSO] = Connect;
         commandDictionary[dropSO] = Drop;
         commandDictionary[pickSO] = Pick;
         commandDictionary[delaySO] = Delay;
         commandDictionary[goAheadSO] = GoAhead;
         commandDictionary[backSO] = Back;
+        commandDictionary[controllerCWSO] = ControllerCWRotate;
+        commandDictionary[controllerCCWSO] = ControllerCCWRotate;
 
         processType = ProcessType.EDIT;
         uiSystem = FindObjectOfType<UISystem>();
@@ -74,16 +80,27 @@ public class ProcessSystem : MonoBehaviour
     {
         BuildSystem.Instance.OnCreateNewBrush += BuildSystem_OnCreateNewBrush;
         BuildSystem.Instance.OnDestoryBrush += BuildSystem_OnDestoryBrush;
-        BuildSystem.Instance.OnCreateNewConnecter += BuildSystem_OnCreateNewConnecter;
-        BuildSystem.Instance.OnDestoryConnecter += BuildSystem_OnDestoryConnecter;
-        BuildSystem.Instance.OnCreateNewSlot += BuildSystem_OnCreateNewSlot;
-        BuildSystem.Instance.OnDestorySlot += BuildSystem_OnDestorySlot;
+        BuildSystem.Instance.OnCreateNewConnector += BuildSystem_OnCreateNewConnector;
+        BuildSystem.Instance.OnDestoryConnector += BuildSystem_OnDestoryConnector;
+        BuildSystem.Instance.OnCreateNewController += BuildSystem_OnCreateNewController;
+        BuildSystem.Instance.OnDestoryController += BuildSystem_OnDestoryController;
+    }
+
+    private void BuildSystem_OnDestoryController(Controller controller)
+    {
+        controllers.Remove(controller);
+        controller.OnFinishCommand -= OnReaderFinishCommand;
+    }
+
+    private void BuildSystem_OnCreateNewController(Controller controller)
+    {
+        controllers.Add(controller);
+        controller.OnFinishCommand += OnReaderFinishCommand;
     }
 
     private void BuildSystem_OnDestoryBrush(Brush brush)
     {
         brushes.Remove(brush);
-
     }
 
     private void BuildSystem_OnCreateNewBrush(Brush brush)
@@ -91,44 +108,31 @@ public class ProcessSystem : MonoBehaviour
         brushes.Add(brush);
     }
 
-    private void BuildSystem_OnDestorySlot(ConnecterBrushSlot slot)
+    private void BuildSystem_OnDestoryConnector(Connector connecter)
     {
-        connecterSlots.Remove(slot);
-        slot.OnFinishCommand -= OnReaderFinishCommand;
+        connectors.Remove(connecter);
     }
 
-    private void BuildSystem_OnCreateNewSlot(ConnecterBrushSlot slot)
+    private void BuildSystem_OnCreateNewConnector(Connector connecter)
     {
-        connecterSlots.Add(slot);
-        slot.OnFinishCommand += OnReaderFinishCommand;
+        connectors.Add(connecter);
     }
-
-    private void BuildSystem_OnDestoryConnecter(Connecter connecter)
-    {
-        connecters.Remove(connecter);
-        connecter.OnFinishCommand -= OnReaderFinishCommand;
-    }
-
-    private void BuildSystem_OnCreateNewConnecter(Connecter connecter)
-    {
-        connecters.Add(connecter);
-        connecter.OnFinishCommand += OnReaderFinishCommand;
-    }
-
-    void Split(ICommandReaderObj reader) => reader.Split();
-    void Connect(ICommandReaderObj reader) => reader.Connect();
-    void ClockwiseRotate(ICommandReaderObj reader) => reader.ClockwiseRotate();
-    void CounterClockwiseRotate(ICommandReaderObj reader) => reader.CounterClockwiseRotate();
-    void Drop(ICommandReaderObj reader) => reader.Drop();
-    void Pick(ICommandReaderObj reader) => reader.Pick();
-    void Delay(ICommandReaderObj reader) => reader.Delay();
-    void GoAhead(ICommandReaderObj reader) => reader.GoAhead();
-    void Back(ICommandReaderObj reader) => reader.Back();
+    void ControllerCWRotate(ICommandReader reader) => reader.ControllerCWRotate();
+    void ControllerCCWRotate(ICommandReader reader) => reader.ControllerCCWRotate();
+    void Split(ICommandReader reader) => reader.Split();
+    void Connect(ICommandReader reader) => reader.Connect();
+    void ClockwiseRotate(ICommandReader reader) => reader.ConnectorCWRotate();
+    void CounterClockwiseRotate(ICommandReader reader) => reader.ConnectorCCWRotate();
+    void Drop(ICommandReader reader) => reader.Putdown();
+    void Pick(ICommandReader reader) => reader.Putup();
+    void Delay(ICommandReader reader) => reader.Delay();
+    void GoAhead(ICommandReader reader) => reader.Push();
+    void Back(ICommandReader reader) => reader.Pull();
 
     public void OnReaderFinishCommand()
     {
         currentNum++;
-
+        print("Reader Finish Command");
         if (targetNum == currentNum)
         {
             switch (processType)
@@ -157,25 +161,12 @@ public class ProcessSystem : MonoBehaviour
         if (commandLineIndex <= commandLineMaxIndex)
         {
             OnReadNextCommandLine?.Invoke(commandLineIndex);
-            targetNum = connecters.Count + connecterSlots.Count;
+            targetNum = controllers.Count;
             currentNum = 0;
-            for (int i = 0; i < connecters.Count; i++)
-            {
-                ICommandReaderObj readerObj = connecters[i].GetComponent<ICommandReaderObj>();
-                CommandSO cmd = uiSystem.GetEachReaderCommandSO(commandLineIndex, readerObj);
-                if (cmd != null)
-                {
-                    commandDictionary[cmd].Invoke(readerObj);
-                }
-                else
-                {
-                    readerObj.Delay();
-                }
-            }
 
-            for (int i = 0; i < connecterSlots.Count; i++)
+            for (int i = 0; i < controllers.Count; i++)
             {
-                ICommandReaderObj readerObj = connecterSlots[i].GetComponent<ICommandReaderObj>();
+                ICommandReader readerObj = controllers[i].GetComponent<ICommandReader>();
                 CommandSO cmd = uiSystem.GetEachReaderCommandSO(commandLineIndex, readerObj);
                 if (cmd != null)
                 {
@@ -188,44 +179,44 @@ public class ProcessSystem : MonoBehaviour
             }
 
             commandLineIndex++;
-        }
-        else
-        {
-            print("Finished");
-            processType = ProcessType.PAUSE;
-            OnFinishAllCommands?.Invoke();
+            if(commandLineIndex > commandLineMaxIndex)
+            {
+                print("Finished");
+                processType = ProcessType.PAUSE;
+                OnFinishAllCommands?.Invoke();
+            }
         }
     }
 
     void Record()
     {
-        for (int i = 0; i < connecters.Count; i++)
+        for (int i = 0; i < connectors.Count; i++)
         {
-            connecters[i].Record();
-        }
-        for (int i = 0; i < connecterSlots.Count; i++)
-        {
-            connecterSlots[i].Record();
+            connectors[i].Record();
         }
         for (int i = 0; i < brushes.Count; i++)
         {
             brushes[i].Record();
         }
+        for (int i = 0; i < controllers.Count; i++)
+        {
+            controllers[i].Record();
+        }
     }
 
     void Read()
     {
-        for (int i = 0; i < connecters.Count; i++)
+        for (int i = 0; i < connectors.Count; i++)
         {
-            connecters[i].Read();
-        }
-        for (int i = 0; i < connecterSlots.Count; i++)
-        {
-            connecterSlots[i].Read();
+            connectors[i].Read();
         }
         for (int i = 0; i < brushes.Count; i++)
         {
             brushes[i].Read();
+        }
+        for (int i = 0; i < controllers.Count; i++)
+        {
+            controllers[i].Read();
         }
     }
 
@@ -274,13 +265,9 @@ public class ProcessSystem : MonoBehaviour
 
     public void Stop()
     {
-        for (int i = 0; i < connecters.Count; i++)
+        for (int i = 0; i < connectors.Count; i++)
         {
-            connecters[i].StopAllCoroutines();
-        }
-        for (int i = 0; i < connecterSlots.Count; i++)
-        {
-            connecterSlots[i].StopAllCoroutines();
+            connectors[i].StopAllCoroutines();
         }
 
         isRunning = false;

@@ -1,15 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class CommandBtn : MonoBehaviour, IBeginDragHandler, IDragHandler
 {
     public CommandSO commandSO { get; private set; }
     public Command pfCommand;
     [SerializeField] Image icon;
-
+    [SerializeField] TextMeshProUGUI keyText;
     public void OnBeginDrag(PointerEventData eventData)
     {
         Command command = Instantiate(pfCommand, transform.position, Quaternion.identity, UISystem.Instance.transform);
@@ -23,5 +22,6 @@ public class CommandBtn : MonoBehaviour, IBeginDragHandler, IDragHandler
     {
         commandSO = commandSO_;
         icon.sprite = commandSO.icon;
+        keyText.text = commandSO.key.ToString();
     }
 }

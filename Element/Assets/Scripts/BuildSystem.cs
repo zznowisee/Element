@@ -8,27 +8,26 @@ public class BuildSystem : MonoBehaviour
     public event Action<Brush> OnCreateNewBrush;
     public event Action<Brush> OnDestoryBrush;
 
-    public event Action<Connecter> OnCreateNewConnecter;
-    public event Action<Connecter> OnDestoryConnecter;
+    public event Action<Connector> OnCreateNewConnector;
+    public event Action<Connector> OnDestoryConnector;
 
-    public event Action<ConnecterBrushSlot> OnCreateNewSlot;
-    public event Action<ConnecterBrushSlot> OnDestorySlot;
+    public event Action<Controller> OnCreateNewController;
+    public event Action<Controller> OnDestoryController;
 
     public static BuildSystem Instance { get; private set; }
-
 
     [SerializeField] Track pfTrack;
     [SerializeField] Brush pfColorBrush;
     [SerializeField] ColorPicker pfColorPicker;
-    [SerializeField] Connecter pfConnecter;
-    [SerializeField] ConnecterBrushSlot pfConnecterBrushSlot;
+    [SerializeField] Connector pfConnecter;
+    [SerializeField] Controller pfController;
  
     HexCell currentCell;
     Track currentTrack;
     Brush currentBrush;
     ColorPicker currentColorPicker;
-    Connecter currentConnecter;
-    ConnecterBrushSlot currentConnecterSlot;
+    Connector currentConnector;
+    Controller currentController;
     ControlPoint currentControlPoint;
     List<int> commandReadersIndices;
 
@@ -42,11 +41,11 @@ public class BuildSystem : MonoBehaviour
     {
         HandleMouseDrag();
         HandleControlPoint();
+        HandleControllerBuilding();
         HandleBrushBuilding();
-        HandleConnecterBuilding();
+        HandleConnectorBuilding();
         HandleColorPickerBuilding();
         HandleTrackBuilding();
-        HandleConnecterSlotBuilding();
     }
 
     void HandleControlPoint()
@@ -84,19 +83,19 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
-    int GetIndexFromIndicesList(List<int> indicesList)
+    int GetIndexFromIndicesList()
     {
-        for (int i = 0; i < indicesList.Count; i++)
+        for (int i = 0; i < commandReadersIndices.Count; i++)
         {
-            if (i != indicesList[i])
+            if (i != commandReadersIndices[i])
             {
-                indicesList.Insert(i, i);
+                commandReadersIndices.Insert(i, i);
                 return i;
             }
         }
 
-        int index = indicesList.Count;
-        indicesList.Add(index);
+        int index = commandReadersIndices.Count;
+        commandReadersIndices.Add(index);
         return index;
     }
 
@@ -189,17 +188,16 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
-    void HandleConnecterBuilding()
+    void HandleConnectorBuilding()
     {
-        if (currentConnecter != null)
+        if (currentConnector != null)
         {
             if (Input.GetMouseButtonUp(0))
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
-                    commandReadersIndices.Remove(currentConnecter.index);
-                    OnDestoryConnecter?.Invoke(currentConnecter);
-                    Destroy(currentConnecter.gameObject);
+                    OnDestoryConnector?.Invoke(currentConnector);
+                    Destroy(currentConnector.gameObject);
                 }
 
                 HexCell cell = InputHelper.GetHexCellUnderPosition3D();
@@ -207,60 +205,59 @@ public class BuildSystem : MonoBehaviour
                 {
                     if (cell.CanInitNewBrush())
                     {
-                        if (!currentConnecter.HasBeenSetup)
+                        if (!currentConnector.HasBeenSetup)
                         {
-                            currentConnecter.Setup(cell);
+                            currentConnector.Setup(cell);
                         }
                         else
                         {
-                            currentConnecter.EnterNewCell(cell);
+                            currentConnector.EnterNewCell(cell);
                         }
-                        currentConnecter = null;
+                        currentConnector = null;
                         return;
                     }
                 }
             }
 
-            currentConnecter.transform.position = InputHelper.MouseWorldPositionIn2D;
+            currentConnector.transform.position = InputHelper.MouseWorldPositionIn2D;
             return;
         }
     }
 
-    void HandleConnecterSlotBuilding()
+    void HandleControllerBuilding()
     {
-        if (currentConnecterSlot != null)
+        if(currentController != null)
         {
-            if (Input.GetMouseButtonUp(0))
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                currentController.Rotate(-1);
+            }
+            else if (Input.GetKeyDown(KeyCode.E))
+            {
+                currentController.Rotate(1);
+            }
+            else if (Input.GetMouseButtonUp(0))
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
-                    commandReadersIndices.Remove(currentConnecterSlot.index);
-                    OnDestorySlot?.Invoke(currentConnecterSlot);
-                    Destroy(currentConnecterSlot.gameObject);
+                    commandReadersIndices.Remove(currentController.index);
+                    OnDestoryController?.Invoke(currentController);
+                    Destroy(currentController.gameObject);
                 }
 
                 HexCell cell = InputHelper.GetHexCellUnderPosition3D();
                 if (cell != null)
                 {
-                    Connecter connecter;
-                    Direction direction;
-                    if (cell.CanInitNewConnecterSlot(out connecter, out direction))
+                    if (cell.CanInitNewBrush())
                     {
-                        currentConnecterSlot.Setup(connecter, cell, direction);
-                        OnCreateNewSlot?.Invoke(currentConnecterSlot);
-                        currentConnecterSlot = null;
+                        currentController.Setup(cell);
+                        currentController = null;
                         return;
-                    }
-                    else
-                    {
-                        commandReadersIndices.Remove(currentConnecterSlot.index);
-                        OnDestorySlot?.Invoke(currentConnecterSlot);
-                        Destroy(currentConnecterSlot.gameObject);
                     }
                 }
             }
 
-            currentConnecterSlot.transform.position = InputHelper.MouseWorldPositionIn2D;
+            currentController.transform.position = InputHelper.MouseWorldPositionIn2D;
             return;
         }
     }
@@ -270,25 +267,24 @@ public class BuildSystem : MonoBehaviour
         currentTrack = Instantiate(pfTrack);
     }
 
+    public void CreateNewController()
+    {
+        currentController = Instantiate(pfController);
+        int index = GetIndexFromIndicesList();
+        currentController.SetIndex(index);
+        OnCreateNewController?.Invoke(currentController);
+    }
+
     public void CreateNewColorBrush()
     {
         currentBrush = Instantiate(pfColorBrush);
         OnCreateNewBrush?.Invoke(currentBrush);
     }
 
-    public void CreateNewConnecterSlot()
-    {
-        currentConnecterSlot = Instantiate(pfConnecterBrushSlot);
-        int index = GetIndexFromIndicesList(commandReadersIndices);
-        currentConnecterSlot.SetIndex(index);
-    }
-
     public void CreateNewConnecter()
     {
-        currentConnecter = Instantiate(pfConnecter);
-        int index = GetIndexFromIndicesList(commandReadersIndices);
-        currentConnecter.SetIndex(index);
-        OnCreateNewConnecter?.Invoke(currentConnecter);
+        currentConnector = Instantiate(pfConnecter);
+        OnCreateNewConnector?.Invoke(currentConnector);
     }
 
     public void CreateColorPicker(ColorSO color_)
@@ -302,8 +298,13 @@ public class BuildSystem : MonoBehaviour
         currentBrush = brush;
     }
 
-    public void SetCurrentTrackingConnecter(Connecter connecter)
+    public void SetCurrentTrackingConnector(Connector connector)
     {
-        currentConnecter = connecter;
+        currentConnector = connector;
+    }
+
+    public void SetCurrentTrackingController(Controller controller)
+    {
+        currentController = controller;
     }
 }
