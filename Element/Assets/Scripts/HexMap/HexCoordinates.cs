@@ -18,7 +18,8 @@ public struct HexCoordinates
 
     public static HexCoordinates SetCoordinates(int x_, int y_)
     {
-        return new HexCoordinates(x_ - y_ / 2, y_);
+        //return new HexCoordinates(x_ - y_ / 2, y_);
+        return new HexCoordinates(x_ , y_);
     }
 
     public override string ToString()

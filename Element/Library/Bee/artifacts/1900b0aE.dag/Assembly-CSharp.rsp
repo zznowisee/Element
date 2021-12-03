@@ -353,6 +353,7 @@
 "Assets/Scripts/Controller.cs"
 "Assets/Scripts/ControlPoint.cs"
 "Assets/Scripts/HexMap/Direction.cs"
+"Assets/Scripts/HexMap/GridMap.cs"
 "Assets/Scripts/HexMap/HexCell.cs"
 "Assets/Scripts/HexMap/HexCellMesh.cs"
 "Assets/Scripts/HexMap/HexCoordinates.cs"

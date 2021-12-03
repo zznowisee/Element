@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1984767047
 CanvasRenderer:
@@ -113,8 +113,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 1080}
+  m_AnchoredPosition: {x: -7.3745728, y: 0}
+  m_SizeDelta: {x: 25, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2900268772220364039
 CanvasRenderer:
@@ -167,14 +167,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   indexText: {fileID: 2239115108518078406}
-  connecter: {fileID: 0}
+  commandReader: {fileID: 0}
   index: 0
   codeSlotNormalCol: {r: 0.54901963, g: 0.54901963, b: 0.54901963, a: 1}
   codeSlotHighlightCol: {r: 0.9951428, g: 1, b: 0, a: 1}
   pfCodeSlot: {fileID: 4838164428390581485, guid: 25bb1f95f1171a74c8d86d2b04abcb58, type: 3}
   slots: []
   commands: []
-  slotNum: 18
+  slotNum: 36
 --- !u!114 &3577637816669991994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -293,8 +293,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 25
+  m_fontSizeBase: 25
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
