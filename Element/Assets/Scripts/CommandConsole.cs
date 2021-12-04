@@ -12,14 +12,14 @@ public class CommandConsole : MonoBehaviour
 
     [SerializeField] Color codeSlotNormalCol;
     [SerializeField] Color codeSlotHighlightCol;
-    [SerializeField] CodeSlot pfCodeSlot;
-    [HideInInspector] public CodeSlot[] slots;
+    [SerializeField] CommandSlot pfCodeSlot;
+    [HideInInspector] public CommandSlot[] slots;
     public Command[] commands;
-    public int slotNum = 18;
+    public int slotNum = 36;
     public void Setup(CommandRunner connecter_)
     {
         commandReader = connecter_;
-        slots = new CodeSlot[slotNum];
+        slots = new CommandSlot[slotNum];
         commands = new Command[slotNum];
         index = commandReader.index;
         indexText.text = index.ToString();
@@ -29,7 +29,6 @@ public class CommandConsole : MonoBehaviour
         {
             slots[i] = Instantiate(pfCodeSlot, transform);
             slots[i].Setup(codeSlotNormalCol, codeSlotHighlightCol, i, this);
-            slots[i].OnCommandDropped += ConnecterConsole_OnCommandDropped;
             slots[i].gameObject.name = $"CodeSlot_{ i }";
         }
     }
@@ -42,13 +41,6 @@ public class CommandConsole : MonoBehaviour
         }
 
         return null;
-    }
-
-    private void ConnecterConsole_OnCommandDropped(CodeSlot slot, Command command)
-    {
-        slot.SetCommand(command);
-        command.DroppedOnSlot(slot);
-        RecordCommand(slot.index, command);
     }
 
     public void RecordCommand(int index, Command newCommand)

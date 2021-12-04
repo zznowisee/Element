@@ -1,18 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class LineBrushBtn : MonoBehaviour
+public class LineBrushBtn : MonoBehaviour, IPointerDownHandler
 {
-    // Start is called before the first frame update
-    void Start()
+    public void OnPointerDown(PointerEventData eventData)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        BuildSystem.Instance.CreateNewLineBrush();
     }
 }

@@ -8,7 +8,7 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 {
     public CommandSO commandSO { get; private set; }
     [SerializeField] Image icon;
-    CodeSlot codeSlot;
+    CommandSlot commandSlot;
     CanvasGroup canvasGroup;
     Transform draggingParent;
     bool dropValid = false;
@@ -20,10 +20,11 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        print("Dragging");
         dropValid = false;
         canvasGroup.blocksRaycasts = false;
         transform.parent = draggingParent;
-        codeSlot.ClearCommand();
+        commandSlot.ClearCommand();
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -48,11 +49,21 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
         canvasGroup.blocksRaycasts = false;
     }
 
-    public void DroppedOnSlot(CodeSlot codeSlot_)
+    public void DroppedOnSlot(CommandSlot commandSlot_)
     {
-        codeSlot = codeSlot_;
-        transform.position = codeSlot.transform.position;
-        transform.parent = codeSlot.transform;
+        commandSlot = commandSlot_;
+        if (!commandSlot.IsEmpty())
+        {
+            Destroy(commandSlot.GetCommand().gameObject);
+            commandSlot.ClearCommand();
+        }
+
+        transform.position = commandSlot.transform.position;
+        transform.parent = commandSlot.transform;
+        canvasGroup.blocksRaycasts = true;
         dropValid = true;
+
+        commandSlot.SetCommand(this);
+        commandSlot.commandConsole.RecordCommand(commandSlot.index, this);
     }
 }

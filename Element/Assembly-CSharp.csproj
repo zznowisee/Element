@@ -55,7 +55,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Connector.cs" />
     <Compile Include="Assets\Scripts\Command.cs" />
-    <Compile Include="Assets\Scripts\CodeSlot.cs" />
+    <Compile Include="Assets\Scripts\CommandSlot.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\UISystem.cs" />
     <Compile Include="Assets\Scripts\ControlPoint.cs" />
     <Compile Include="Assets\Scripts\CommandConsole.cs" />
@@ -69,19 +69,24 @@
     <Compile Include="Assets\Scripts\Controller.cs" />
     <Compile Include="Assets\Scripts\Track.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexMap.cs" />
+    <Compile Include="Assets\Scripts\PatternLineMesh.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\LineBrushBtn.cs" />
     <Compile Include="Assets\Scripts\ICommandReader.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\ColorSO.cs" />
-    <Compile Include="Assets\Scripts\Brush\Brush.cs" />
+    <Compile Include="Assets\Scripts\Brush\ColorBrush.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\TrackBtn.cs" />
+    <Compile Include="Assets\Scripts\PatternLine.cs" />
     <Compile Include="Assets\Scripts\ICommandReciever.cs" />
     <Compile Include="Assets\Scripts\CommandRunner.cs" />
     <Compile Include="Assets\Scripts\ProcessSystem.cs" />
     <Compile Include="Assets\Scripts\HexMap\Direction.cs" />
     <Compile Include="Assets\Scripts\BuildSystem.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\ColorPickerBtn.cs" />
+    <Compile Include="Assets\Scripts\Brush\LineBrush.cs" />
     <Compile Include="Assets\Scripts\TrackControlPoint.cs" />
     <Compile Include="Assets\Scripts\CommandBtn.cs" />
+    <Compile Include="Assets\Scripts\HexMap\GridMap.cs" />
+    <Compile Include="Assets\Scripts\Brush\Brush.cs" />
     <Compile Include="Assets\Scripts\IMouseDrag.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexCoordinates.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexCellMesh.cs" />
@@ -91,7 +96,8 @@
     <Compile Include="Assets\Scripts\Brush\ColorPicker.cs" />
     <Compile Include="Assets\Scripts\Others\InputHelper.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\ColorBrushBtn.cs" />
-    <Compile Include="Assets\Scripts\HexMap\GridMap.cs" />
+    <Compile Include="Assets\Scripts\CommandGhost.cs" />
+    <Compile Include="Assets\Scripts\SelectBox.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\Point.shader" />

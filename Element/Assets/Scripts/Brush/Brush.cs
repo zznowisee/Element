@@ -6,15 +6,14 @@ using System;
 public class Brush : MonoBehaviour, IMouseDrag
 {
     public HexCell cell;
-    HexCell recorderCell;
-
-    [SerializeField] LineRenderer connectLine;
-    [SerializeField] MeshRenderer meshRenderer;
-    [SerializeField] GameObject putDownSprite;
-
+    public HexCell recorderCell;
     public Connector connector;
     public ColorSO colorSO;
-    public bool coloring;
+    public bool putdown;
+
+    [SerializeField] protected LineRenderer connectLine;
+    [SerializeField] MeshRenderer meshRenderer;
+    [SerializeField] GameObject putDownSprite;
 
     public event Action OnFinishThirdLevelCommand;
 
@@ -28,7 +27,6 @@ public class Brush : MonoBehaviour, IMouseDrag
     public void Setup(HexCell cell_)
     {
         cell = cell_;
-
         cell.brush = this;
         transform.position = cell.transform.position;
     }
@@ -62,7 +60,7 @@ public class Brush : MonoBehaviour, IMouseDrag
         connectLine.SetPosition(0, Vector3.zero);
         connectLine.SetPosition(1, Vector3.zero);
         connectLine.gameObject.SetActive(false);
-        if(connector != null)
+        if (connector != null)
         {
             connector.OnMoveActionStart -= Connector_OnMoveActionStart;
             connector.OnRotateActionStart -= Connector_OnRotateActionStart;
@@ -70,12 +68,12 @@ public class Brush : MonoBehaviour, IMouseDrag
         }
 
         putDownSprite.SetActive(false);
-        coloring = false;
+        putdown = false;
     }
 
     public void ConnectWithConnector(Connector connector_)
     {
-        if(connector == null)
+        if (connector == null)
         {
             connector = connector_;
             connector.OnMoveActionStart += Connector_OnMoveActionStart;
@@ -103,7 +101,7 @@ public class Brush : MonoBehaviour, IMouseDrag
         StartCoroutine(Sleep());
     }
 
-    private void Connector_OnRotateActionStart(int rotateIndex)
+    public void Connector_OnRotateActionStart(int rotateIndex)
     {
         HexCell target;
         switch (rotateIndex)
@@ -122,54 +120,24 @@ public class Brush : MonoBehaviour, IMouseDrag
         }
     }
 
-    public void PutDownUp(bool coloring_)
+    public virtual void PutDownUp(bool putdown_)
     {
-        if (coloring_)
-        {
-            putDownSprite.SetActive(true);
-            coloring = true;
-        }
-        else
-        {
-            putDownSprite.SetActive(false);
-            coloring = false;
-        }
+        putdown = putdown_;
+        putDownSprite.SetActive(putdown);
         StartCoroutine(Sleep());
     }
 
-    private void Connector_OnMoveActionStart(Direction direction)
+    public void Connector_OnMoveActionStart(Direction direction)
     {
         StartCoroutine(MoveToTarget(cell.GetNeighbor(direction), OnFinishThirdLevelCommand));
     }
 
-    IEnumerator MoveToTarget(HexCell target, Action callback)
+    public virtual IEnumerator MoveToTarget(HexCell target, Action callback)
     {
-        cell.brush = null;
-        
-        float percent = 0f;
-        Vector3 startPosition = transform.position;
-        Vector3 endPosition = target.transform.position;
-        while (percent < 1f)
-        {
-            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
-            percent = Mathf.Clamp01(percent);
-            transform.position = Vector3.Lerp(startPosition, endPosition, percent);
-            connectLine.SetPosition(1, connector.transform.position - transform.position);
-            yield return null;
-        }
-
-        cell = target;
-        cell.brush = this;
-        Coloring();
-        callback?.Invoke();
+        yield return null;
     }
 
-    public void Coloring()
-    {
-        cell.Coloring(colorSO.color);
-    }
-
-    IEnumerator Sleep()
+    public IEnumerator Sleep()
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
         OnFinishThirdLevelCommand?.Invoke();

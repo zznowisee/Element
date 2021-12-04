@@ -119,7 +119,6 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         for (int i = 0; i < brushes.Count; i++)
         {
             brushes[i].PutDownUp(coloring);
-            brushes[i].Coloring();
         }
     }
 

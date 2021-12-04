@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public static class InputHelper
 {
@@ -25,7 +27,7 @@ public static class InputHelper
 
     public static bool IsMouseOverUIObject()
     {
-        return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+        return EventSystem.current.IsPointerOverGameObject();
     }
 
     public static HexCell GetHexCellUnderPosition3D()
@@ -90,7 +92,7 @@ public static class InputHelper
         return null;
     }
 
-    public static Brush GetColorBrushUnderPosition2D()
+    public static Brush GetBrushUnderPosition2D()
     {
         RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
         for (int i = 0; i < hits.Length; i++)
@@ -106,7 +108,34 @@ public static class InputHelper
         }
         return null;
     }
+    public static CommandSlot GetCommandSlotUnderPosition2D()
+    {
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = Input.mousePosition;
+        List<RaycastResult> list = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, list);
+        for (int i = 0; i < list.Count; i++)
+        {
+            CommandSlot slot = list[i].gameObject.GetComponent<CommandSlot>();
+            if (slot != null)
+            {
+                return slot;
+            }
+        }
+        return null;
+    }
 
+    public static KeyCode HeldKeysInThese(params KeyCode[] keyCodes)
+    {
+        for (int i = 0; i < keyCodes.Length; i++)
+        {
+            if (Input.GetKey(keyCodes[i]))
+            {
+                return keyCodes[i];
+            }
+        }
+        return KeyCode.Escape;
+    }
     public static bool IsTheseKeysDown(params KeyCode[] keyCodes)
     {
         for (int i = 0; i < keyCodes.Length; i++)

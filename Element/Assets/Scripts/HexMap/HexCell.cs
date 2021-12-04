@@ -15,6 +15,7 @@ public class HexCell : MonoBehaviour
     public Connector connector;
     public Controller controller;
     public ICommandReciever reciever;
+    public Transform patternLineHolder;
     public void Setup(Vector3 position, Transform parent, HexCoordinates coordinates)
     {
         neighbors = new HexCell[6];
@@ -105,14 +106,28 @@ public class HexCell : MonoBehaviour
         return brush == null;
     }
 
-    public void Coloring(Color col)
+    public void PaintingWithColor(Color col)
     {
         hexMesh.Coloring(col);
         ProcessSystem.Instance.colorCells.Add(this);
     }
 
+    public void PaintingWithLine(PatternLine line)
+    {
+        line.transform.parent = patternLineHolder;
+        ProcessSystem.Instance.lineCells.Add(this);
+    }
+
     public void ClearColor()
     {
         hexMesh.ResetColor();
+    }
+
+    public void ClearLine()
+    {
+        for (int i = 0; i < patternLineHolder.childCount; i++)
+        {
+            Destroy(patternLineHolder.GetChild(i).gameObject);
+        }
     }
 }

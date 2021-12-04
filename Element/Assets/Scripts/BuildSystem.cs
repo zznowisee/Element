@@ -17,7 +17,8 @@ public class BuildSystem : MonoBehaviour
     public static BuildSystem Instance { get; private set; }
 
     [SerializeField] Track pfTrack;
-    [SerializeField] Brush pfColorBrush;
+    [SerializeField] ColorBrush pfColorBrush;
+    [SerializeField] LineBrush pfLineBrush;
     [SerializeField] ColorPicker pfColorPicker;
     [SerializeField] Connector pfConnecter;
     [SerializeField] Controller pfController;
@@ -105,7 +106,7 @@ public class BuildSystem : MonoBehaviour
         {
             if (Input.GetMouseButtonUp(0))
             {
-                Brush brush = InputHelper.GetColorBrushUnderPosition2D();
+                Brush brush = InputHelper.GetBrushUnderPosition2D();
                 if (brush != null)
                 {
                     brush.SetColorSO(currentColorPicker.color);
@@ -273,6 +274,12 @@ public class BuildSystem : MonoBehaviour
         int index = GetIndexFromIndicesList();
         currentController.SetIndex(index);
         OnCreateNewController?.Invoke(currentController);
+    }
+
+    public void CreateNewLineBrush()
+    {
+        currentBrush = Instantiate(pfLineBrush);
+        OnCreateNewBrush?.Invoke(currentBrush);
     }
 
     public void CreateNewColorBrush()

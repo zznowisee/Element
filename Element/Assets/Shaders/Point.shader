@@ -4,6 +4,7 @@
 	{
 		_Color ("Color", Color) = (1,1,1,1)
 		_Alpha ("Alpha",Range(0.0,1.0)) = 1.0
+		_Radius("Radius", Range(0.0, 1.0)) = 0.95
 	}
 	SubShader
 	{
@@ -34,6 +35,7 @@
 
 			float4 _Color;
 			float _Alpha;
+			float _Radius;
 
 			v2f vert (appdata v)
 			{
@@ -48,7 +50,7 @@
 					float2 centreOffset = (i.uv.xy - 0.5) * 2;
 					float sqrDst = dot(centreOffset, centreOffset);
 					float delta = fwidth(sqrt(sqrDst));
-					float alpha = 1 - smoothstep(0.95 - delta, 0.95 + delta,sqrDst);
+					float alpha = 1 - smoothstep(_Radius - delta, _Radius + delta,sqrDst);
 					alpha *= _Alpha;
 
 					return float4(_Color.xyz, alpha);

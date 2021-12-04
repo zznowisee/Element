@@ -23,16 +23,26 @@ public class UISystem : MonoBehaviour
     [SerializeField] CommandBtn pfCommandBtn;
     [SerializeField] Command pfCommand;
     [SerializeField] CommandConsole pfCommandConsole;
+    [SerializeField] CommandGhost commandGhost;
     public List<CommandSO> commandSOList;
     Dictionary<ICommandReader, CommandConsole> commandReaderConsoleDictionary;
+    Dictionary<KeyCode, CommandSO> keyCodeCommandSODictionary;
+    KeyCode[] keys;
 
-    public PointerEventData pointerData;
+    CommandSO trackingCommandSO;
+
     bool isPlayBtn = true;
     bool finished = false;
     private void Awake()
     {
         Instance = this;
         commandReaderConsoleDictionary = new Dictionary<ICommandReader, CommandConsole>();
+        keyCodeCommandSODictionary = new Dictionary<KeyCode, CommandSO>();
+        keys = new KeyCode[commandSOList.Count];
+        for (int i = 0; i < keys.Length; i++)
+        {
+            keys[i] = commandSOList[i].key;
+        }
         for (int i = 0; i < colorPaletteSO.colors.Count; i++)
         {
             Color color = colorPaletteSO.colors[i].color;
@@ -43,8 +53,11 @@ public class UISystem : MonoBehaviour
 
         for (int i = 0; i < commandSOList.Count; i++)
         {
+            CommandSO commandSO = commandSOList[i];
             CommandBtn command = Instantiate(pfCommandBtn, commandPanel);
-            command.Setup(commandSOList[i]);
+            command.Setup(commandSO);
+
+            keyCodeCommandSODictionary[commandSO.key] = commandSO;
         }
 
         stepBtn.onClick.AddListener(() =>
@@ -92,7 +105,38 @@ public class UISystem : MonoBehaviour
 
     void Update()
     {
+        trackingCommandSO = null;
+        KeyCode key = InputHelper.HeldKeysInThese(keys);
+        if (keyCodeCommandSODictionary.ContainsKey(key))
+        {
+            trackingCommandSO = keyCodeCommandSODictionary[key];
+        }
+        else
+        {
+            commandGhost.gameObject.SetActive(false);
+        }
 
+        if(trackingCommandSO != null)
+        {
+            CommandSlot slot = InputHelper.GetCommandSlotUnderPosition2D();
+            if(slot != null)
+            {
+                commandGhost.Setup(trackingCommandSO);
+                commandGhost.transform.position = slot.transform.position;
+                commandGhost.gameObject.SetActive(true);
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Command command = Instantiate(pfCommand, transform);
+                    command.Setup(trackingCommandSO);
+                    command.DroppedOnSlot(slot);
+                }
+            }
+            else
+            {
+                commandGhost.gameObject.SetActive(false);
+            }
+        }
     }
 
     void SwitchToPauseBtn()

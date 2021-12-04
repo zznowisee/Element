@@ -39,6 +39,7 @@ public class ProcessSystem : MonoBehaviour
     public List<Connector> connectors;
     public List<Brush> brushes;
     public List<HexCell> colorCells;
+    public List<HexCell> lineCells;
 
     public float commandSpacingTime = .3f;
     public float commandDurationTime = .3f;
@@ -55,6 +56,7 @@ public class ProcessSystem : MonoBehaviour
         commandDictionary = new Dictionary<CommandSO, Action<ICommandReader>>();
         connectors = new List<Connector>();
         colorCells = new List<HexCell>();
+        lineCells = new List<HexCell>();
         brushes = new List<Brush>();
         controllers = new List<Controller>();
 
@@ -263,6 +265,17 @@ public class ProcessSystem : MonoBehaviour
         colorCells.Clear();
     }
 
+    void ClearLine()
+    {
+        for (int i = 0; i < lineCells.Count; i++)
+        {
+            HexCell cell = lineCells[i];
+            cell.ClearLine();
+        }
+
+        lineCells.Clear();
+    }
+
     public void Stop()
     {
         for (int i = 0; i < connectors.Count; i++)
@@ -275,6 +288,7 @@ public class ProcessSystem : MonoBehaviour
         // read all infos
         Read();
         ClearColor();
+        ClearLine();
         processType = ProcessType.EDIT;
     }
 }
