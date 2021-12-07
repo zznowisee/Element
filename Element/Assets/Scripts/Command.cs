@@ -11,7 +11,6 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
     CommandSlot commandSlot;
     CanvasGroup canvasGroup;
     Transform draggingParent;
-    bool dropValid = false;
     void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -20,32 +19,43 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        print("Dragging");
-        dropValid = false;
-        canvasGroup.blocksRaycasts = false;
-        transform.parent = draggingParent;
-        commandSlot.ClearCommand();
+        if (ProcessSystem.Instance.CanOperate())
+        {
+            print("Dragging");
+            canvasGroup.blocksRaycasts = false;
+            transform.parent = draggingParent;
+            commandSlot.ClearCommand();
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        transform.position = InputHelper.MouseWorldPositionIn2D;
+        if (ProcessSystem.Instance.CanOperate())
+        {
+            transform.position = InputHelper.MouseWorldPositionIn2D;
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!dropValid)
+        if (ProcessSystem.Instance.CanOperate())
         {
-            Destroy(gameObject);
+            CommandSlot slot = InputHelper.GetCommandSlotUnderPosition2D();
+            if (slot != null)
+            {
+                DroppedOnSlot(slot);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
-        canvasGroup.blocksRaycasts = true;
     }
 
     public void Setup(CommandSO commandSO_)
     {
         commandSO = commandSO_;
         icon.sprite = commandSO.icon;
-        dropValid = false;
         canvasGroup.blocksRaycasts = false;
     }
 
@@ -54,16 +64,20 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
         commandSlot = commandSlot_;
         if (!commandSlot.IsEmpty())
         {
-            Destroy(commandSlot.GetCommand().gameObject);
+            if(commandSlot.command.commandSO == commandSO)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Destroy(commandSlot.command.gameObject);
             commandSlot.ClearCommand();
         }
 
         transform.position = commandSlot.transform.position;
         transform.parent = commandSlot.transform;
         canvasGroup.blocksRaycasts = true;
-        dropValid = true;
 
         commandSlot.SetCommand(this);
-        commandSlot.commandConsole.RecordCommand(commandSlot.index, this);
     }
 }

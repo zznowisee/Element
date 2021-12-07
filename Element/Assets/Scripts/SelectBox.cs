@@ -17,17 +17,21 @@ public class SelectBox : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            rectTransform.sizeDelta = Vector2.zero;
             startPosition = Input.mousePosition;
             selectionRect = new Rect();
         }
-        if (Input.GetMouseButton(0))
+        else if (Input.GetMouseButton(0))
         {
             endPosition = Input.mousePosition;
-            Vector2 center = (startPosition + endPosition) / 2f;
-            rectTransform.position = center;
-            float sizeX = Mathf.Abs(startPosition.x - endPosition.x);
-            float sizeY = Mathf.Abs(startPosition.y - endPosition.y);
-            rectTransform.sizeDelta = new Vector2(sizeX, sizeY);
+            float sizeX = endPosition.x - startPosition.x;
+            float sizeY = endPosition.y - startPosition.y;
+            rectTransform.anchoredPosition = startPosition + new Vector3(sizeX / 2f, sizeY / 2f);
+            rectTransform.sizeDelta = new Vector2(Mathf.Abs(sizeX), Mathf.Abs(sizeY));
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            rectTransform.sizeDelta = Vector2.zero;
         }
     }
 }

@@ -63,7 +63,10 @@ public class UISystem : MonoBehaviour
         stepBtn.onClick.AddListener(() =>
         {
             ProcessSystem.Instance.Step();
-
+            if (!isPlayBtn)
+            {
+                SWitchToPlayBtn();
+            }
             EnableStopBtn();
         });
 

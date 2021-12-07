@@ -40,6 +40,11 @@ public class BuildSystem : MonoBehaviour
 
     void Update()
     {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
+
         HandleMouseDrag();
         HandleControlPoint();
         HandleControllerBuilding();
@@ -265,11 +270,19 @@ public class BuildSystem : MonoBehaviour
 
     public void CreateNewTrack()
     {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
         currentTrack = Instantiate(pfTrack);
     }
 
     public void CreateNewController()
     {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
         currentController = Instantiate(pfController);
         int index = GetIndexFromIndicesList();
         currentController.SetIndex(index);
@@ -278,24 +291,40 @@ public class BuildSystem : MonoBehaviour
 
     public void CreateNewLineBrush()
     {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
         currentBrush = Instantiate(pfLineBrush);
         OnCreateNewBrush?.Invoke(currentBrush);
     }
 
     public void CreateNewColorBrush()
     {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
         currentBrush = Instantiate(pfColorBrush);
         OnCreateNewBrush?.Invoke(currentBrush);
     }
 
     public void CreateNewConnecter()
     {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
         currentConnector = Instantiate(pfConnecter);
         OnCreateNewConnector?.Invoke(currentConnector);
     }
 
     public void CreateColorPicker(ColorSO color_)
     {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
         currentColorPicker = Instantiate(pfColorPicker);
         currentColorPicker.Setup(color_);
     }

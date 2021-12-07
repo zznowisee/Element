@@ -11,9 +11,12 @@ public class CommandBtn : MonoBehaviour, IBeginDragHandler, IDragHandler
     [SerializeField] TextMeshProUGUI keyText;
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Command command = Instantiate(pfCommand, transform.position, Quaternion.identity, UISystem.Instance.transform);
-        command.Setup(commandSO);
-        eventData.pointerDrag = command.gameObject;
+        if (ProcessSystem.Instance.CanOperate())
+        {
+            Command command = Instantiate(pfCommand, transform.position, Quaternion.identity, UISystem.Instance.transform);
+            command.Setup(commandSO);
+            eventData.pointerDrag = command.gameObject;
+        }
     }
 
     public void OnDrag(PointerEventData eventData) { }

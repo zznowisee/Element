@@ -5,16 +5,23 @@ using System;
 
 public class ProcessSystem : MonoBehaviour
 {
-    bool isRunning;
-
     public enum ProcessType
     {
         EDIT,
         PLAY,
-        PAUSE
+        PAUSE,
+        STEP
+    }
+
+    public enum ProcessState
+    {
+        RUNNING,
+        WAITING,
+        NOTSTART
     }
 
     [SerializeField] ProcessType processType;
+    [SerializeField] ProcessState processState;
 
     public event Action<int> OnReadNextCommandLine;
     public event Action OnFinishAllCommands;
@@ -73,9 +80,14 @@ public class ProcessSystem : MonoBehaviour
         commandDictionary[controllerCCWSO] = ControllerCCWRotate;
 
         processType = ProcessType.EDIT;
-        uiSystem = FindObjectOfType<UISystem>();
+        processState = ProcessState.NOTSTART;
 
-        isRunning = false;
+        uiSystem = FindObjectOfType<UISystem>();
+    }
+
+    public bool CanOperate()
+    {
+        return processType == ProcessType.EDIT;
     }
 
     void Start()
@@ -134,7 +146,6 @@ public class ProcessSystem : MonoBehaviour
     public void OnReaderFinishCommand()
     {
         currentNum++;
-        print("Reader Finish Command");
         if (targetNum == currentNum)
         {
             switch (processType)
@@ -142,8 +153,14 @@ public class ProcessSystem : MonoBehaviour
                 case ProcessType.PLAY:
                     StartCoroutine(Spacing(commandSpacingTime));
                     break;
+                case ProcessType.STEP:
+                    print("PAUSE");
+                    processType = ProcessType.PAUSE;
+                    processState = ProcessState.WAITING;
+                    break;
                 case ProcessType.PAUSE:
-                    print("Pause");
+                    print("PAUSE");
+                    processState = ProcessState.WAITING;
                     break;
             }
         }
@@ -152,10 +169,7 @@ public class ProcessSystem : MonoBehaviour
     IEnumerator Spacing(float spacingTime)
     {
         yield return new WaitForSeconds(spacingTime);
-        if (isRunning)
-        {
-            RunOnce();
-        }
+        RunOnce();
     }
 
     void RunOnce()
@@ -183,7 +197,6 @@ public class ProcessSystem : MonoBehaviour
             commandLineIndex++;
             if(commandLineIndex > commandLineMaxIndex)
             {
-                print("Finished");
                 processType = ProcessType.PAUSE;
                 OnFinishAllCommands?.Invoke();
             }
@@ -224,17 +237,29 @@ public class ProcessSystem : MonoBehaviour
 
     public void PlayPause(bool isPlayCommand)
     {
+        //play btn
         if (isPlayCommand)
         {
-            if (!isRunning)
-            {
-                isRunning = true;
-                Record();
-            }
             commandLineMaxIndex = uiSystem.GetCommandLineMaxIndex();
-            processType = ProcessType.PLAY;
-            RunOnce();
+            switch (processType)
+            {
+                case ProcessType.EDIT:
+                    Record();
+                    RunOnce();
+                    processType = ProcessType.PLAY;
+                    processState = ProcessState.RUNNING;
+                    break;
+                case ProcessType.PAUSE:
+                    processType = ProcessType.PLAY;
+                    processState = ProcessState.RUNNING;
+                    RunOnce();
+                    break;
+                case ProcessType.STEP:
+                    processType = ProcessType.STEP;
+                    break;
+            }
         }
+        //pause btn
         else
         {
             processType = ProcessType.PAUSE;
@@ -243,15 +268,24 @@ public class ProcessSystem : MonoBehaviour
 
     public void Step()
     {
-        if (!isRunning)
+        switch (processType)
         {
-            isRunning = true;
-            Record();
+            case ProcessType.EDIT:
+                processType = ProcessType.STEP;
+                Record();
+                commandLineMaxIndex = uiSystem.GetCommandLineMaxIndex();
+                processState = ProcessState.RUNNING;
+                RunOnce();
+                break;
+            case ProcessType.PAUSE:
+                processType = ProcessType.STEP;
+                processState = ProcessState.RUNNING;
+                RunOnce();
+                break;
+            case ProcessType.PLAY:
+                processType = ProcessType.STEP;
+                break;
         }
-
-        commandLineMaxIndex = uiSystem.GetCommandLineMaxIndex();
-        processType = ProcessType.PAUSE;
-        RunOnce();
     }
 
     void ClearColor()
@@ -278,17 +312,22 @@ public class ProcessSystem : MonoBehaviour
 
     public void Stop()
     {
+        StopAllCoroutines();
         for (int i = 0; i < connectors.Count; i++)
         {
             connectors[i].StopAllCoroutines();
         }
-
-        isRunning = false;
+        for (int i = 0; i < controllers.Count; i++)
+        {
+            controllers[i].StopAllCoroutines();
+        }
         commandLineIndex = 0;
         // read all infos
         Read();
         ClearColor();
         ClearLine();
+
         processType = ProcessType.EDIT;
+        processState = ProcessState.NOTSTART;
     }
 }

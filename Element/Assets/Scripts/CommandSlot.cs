@@ -5,13 +5,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class CommandSlot : MonoBehaviour, IDropHandler
+public class CommandSlot : MonoBehaviour
 {
     Color normalCol;
     Color highlightCol;
     Image background;
 
-    Command command;
+    [HideInInspector] public Command command;
     [HideInInspector] public CommandConsole commandConsole;
 
     public int index { get; private set; }
@@ -35,31 +35,15 @@ public class CommandSlot : MonoBehaviour, IDropHandler
         background.color = normalCol;
     }
 
-    public void OnDrop(PointerEventData eventData)
-    {
-        if (IsEmpty())
-        {
-            Command newCommand = eventData.pointerDrag.GetComponent<Command>();
-            if (newCommand != null)
-            {
-                newCommand.DroppedOnSlot(this);
-            }
-        }
-    }
-
     public bool IsEmpty()
     {
         return command == null;
     }
 
-    public Command GetCommand()
-    {
-        return command;
-    }
-
     public void SetCommand(Command command_)
     {
         command = command_;
+        commandConsole.RecordCommand(index, command);
     }
 
     public void ClearCommand()
