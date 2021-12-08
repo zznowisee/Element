@@ -17,14 +17,15 @@ public class ProcessSystem : MonoBehaviour
     {
         RUNNING,
         WAITING,
-        NOTSTART
+        NOTSTART,
+        WARNING
     }
 
     [SerializeField] ProcessType processType;
     [SerializeField] ProcessState processState;
 
     public event Action<int> OnReadNextCommandLine;
-    public event Action OnFinishAllCommands;
+    public event Action OnFinishAllCommandsOrWarning;
     public static ProcessSystem Instance { get; private set; }
 
     [Header("Command SO")]
@@ -45,16 +46,15 @@ public class ProcessSystem : MonoBehaviour
     public List<Controller> controllers;
     public List<Connector> connectors;
     public List<Brush> brushes;
-    public List<HexCell> colorCells;
-    public List<HexCell> lineCells;
+    public List<HexCell> recordCells;
 
     public float commandSpacingTime = .3f;
     public float commandDurationTime = .3f;
 
     int targetNum = 0;
     int currentNum;
-    public int commandLineIndex = 0;
-    public int commandLineMaxIndex = 0;
+    [HideInInspector] public int commandLineIndex = 0;
+    [HideInInspector] public int commandLineMaxIndex = 0;
 
     UISystem uiSystem;
     void Awake()
@@ -62,8 +62,7 @@ public class ProcessSystem : MonoBehaviour
         Instance = this;
         commandDictionary = new Dictionary<CommandSO, Action<ICommandReader>>();
         connectors = new List<Connector>();
-        colorCells = new List<HexCell>();
-        lineCells = new List<HexCell>();
+        recordCells = new List<HexCell>();
         brushes = new List<Brush>();
         controllers = new List<Controller>();
 
@@ -104,32 +103,46 @@ public class ProcessSystem : MonoBehaviour
     {
         controllers.Remove(controller);
         controller.OnFinishCommand -= OnReaderFinishCommand;
+        controller.OnWarning -= OnWarning;
     }
 
     private void BuildSystem_OnCreateNewController(Controller controller)
     {
         controllers.Add(controller);
         controller.OnFinishCommand += OnReaderFinishCommand;
+        controller.OnWarning += OnWarning;
+    }
+
+    private void OnWarning(HexCell target, string warningText)
+    {
+        OnFinishAllCommandsOrWarning?.Invoke();
+        processState = ProcessState.WARNING;
+        processType = ProcessType.PAUSE;
+        TooltipSystem.Instance.ShowWarning(target, warningText);
     }
 
     private void BuildSystem_OnDestoryBrush(Brush brush)
     {
         brushes.Remove(brush);
+        brush.OnWarning -= OnWarning;
     }
 
     private void BuildSystem_OnCreateNewBrush(Brush brush)
     {
         brushes.Add(brush);
+        brush.OnWarning += OnWarning;
     }
 
-    private void BuildSystem_OnDestoryConnector(Connector connecter)
+    private void BuildSystem_OnDestoryConnector(Connector connector)
     {
-        connectors.Remove(connecter);
+        connectors.Remove(connector);
+        connector.OnWarning -= OnWarning;
     }
 
-    private void BuildSystem_OnCreateNewConnector(Connector connecter)
+    private void BuildSystem_OnCreateNewConnector(Connector connector)
     {
-        connectors.Add(connecter);
+        connectors.Add(connector);
+        connector.OnWarning += OnWarning;
     }
     void ControllerCWRotate(ICommandReader reader) => reader.ControllerCWRotate();
     void ControllerCCWRotate(ICommandReader reader) => reader.ControllerCCWRotate();
@@ -146,22 +159,25 @@ public class ProcessSystem : MonoBehaviour
     public void OnReaderFinishCommand()
     {
         currentNum++;
-        if (targetNum == currentNum)
+        if (processState != ProcessState.WARNING)
         {
-            switch (processType)
+            if (targetNum == currentNum)
             {
-                case ProcessType.PLAY:
-                    StartCoroutine(Spacing(commandSpacingTime));
-                    break;
-                case ProcessType.STEP:
-                    print("PAUSE");
-                    processType = ProcessType.PAUSE;
-                    processState = ProcessState.WAITING;
-                    break;
-                case ProcessType.PAUSE:
-                    print("PAUSE");
-                    processState = ProcessState.WAITING;
-                    break;
+                switch (processType)
+                {
+                    case ProcessType.PLAY:
+                        StartCoroutine(Spacing(commandSpacingTime));
+                        break;
+                    case ProcessType.STEP:
+                        print("PAUSE");
+                        processType = ProcessType.PAUSE;
+                        processState = ProcessState.WAITING;
+                        break;
+                    case ProcessType.PAUSE:
+                        print("PAUSE");
+                        processState = ProcessState.WAITING;
+                        break;
+                }
             }
         }
     }
@@ -198,7 +214,7 @@ public class ProcessSystem : MonoBehaviour
             if(commandLineIndex > commandLineMaxIndex)
             {
                 processType = ProcessType.PAUSE;
-                OnFinishAllCommands?.Invoke();
+                OnFinishAllCommandsOrWarning?.Invoke();
             }
         }
     }
@@ -223,16 +239,36 @@ public class ProcessSystem : MonoBehaviour
     {
         for (int i = 0; i < connectors.Count; i++)
         {
-            connectors[i].Read();
+            connectors[i].ClearCurrentInfo();
+        }
+        for (int i = 0; i < connectors.Count; i++)
+        {
+            connectors[i].ReadPreviousInfo();
+        }
+
+        for (int i = 0; i < brushes.Count; i++)
+        {
+            brushes[i].ClearCurrentInfo();
         }
         for (int i = 0; i < brushes.Count; i++)
         {
-            brushes[i].Read();
+            brushes[i].ReadPreviousInfo();
+        }
+
+        for (int i = 0; i < controllers.Count; i++)
+        {
+            controllers[i].ClearCurrentInfo();
         }
         for (int i = 0; i < controllers.Count; i++)
         {
-            controllers[i].Read();
+            controllers[i].ReadPreviousInfo();
         }
+
+        for (int i = 0; i < recordCells.Count; i++)
+        {
+            recordCells[i].ResetCell();
+        }
+        recordCells.Clear();
     }
 
     public void PlayPause(bool isPlayCommand)
@@ -288,28 +324,6 @@ public class ProcessSystem : MonoBehaviour
         }
     }
 
-    void ClearColor()
-    {
-        for (int i = 0; i < colorCells.Count; i++)
-        {
-            HexCell cell = colorCells[i];
-            cell.ClearColor();
-        }
-
-        colorCells.Clear();
-    }
-
-    void ClearLine()
-    {
-        for (int i = 0; i < lineCells.Count; i++)
-        {
-            HexCell cell = lineCells[i];
-            cell.ClearLine();
-        }
-
-        lineCells.Clear();
-    }
-
     public void Stop()
     {
         StopAllCoroutines();
@@ -322,12 +336,12 @@ public class ProcessSystem : MonoBehaviour
             controllers[i].StopAllCoroutines();
         }
         commandLineIndex = 0;
+        currentNum = targetNum = 0;
         // read all infos
         Read();
-        ClearColor();
-        ClearLine();
 
         processType = ProcessType.EDIT;
         processState = ProcessState.NOTSTART;
+        TooltipSystem.Instance.HideWarning();
     }
 }

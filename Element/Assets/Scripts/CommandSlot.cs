@@ -7,10 +7,8 @@ using UnityEngine.EventSystems;
 
 public class CommandSlot : MonoBehaviour
 {
-    Color normalCol;
-    Color highlightCol;
     Image background;
-
+    [SerializeField] Image highlightImage;
     [HideInInspector] public Command command;
     [HideInInspector] public CommandConsole commandConsole;
 
@@ -19,20 +17,22 @@ public class CommandSlot : MonoBehaviour
     public void Setup(Color normalCol_, Color highlightCol_, int index_, CommandConsole brushConsole_)
     {
         background = GetComponent<Image>();
-        normalCol = normalCol_;
-        highlightCol = highlightCol_;
         index = index_;
+
+        background.color = normalCol_;
+        highlightImage.color = highlightCol_;
+
         commandConsole = brushConsole_;
     }
 
     public void SetHighlight()
     {
-        background.color = highlightCol;
+        highlightImage.gameObject.SetActive(true);
     }
 
     public void SetNormal()
     {
-        background.color = normalCol;
+        highlightImage.gameObject.SetActive(false);
     }
 
     public bool IsEmpty()

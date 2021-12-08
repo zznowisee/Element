@@ -8,5 +8,6 @@ public abstract class CommandRunner : MonoBehaviour
     [HideInInspector] public HexCell cell;
     [HideInInspector] public HexCell recordCell;
     public abstract void Record();
-    public abstract void Read();
+    public abstract void ClearCurrentInfo();
+    public abstract void ReadPreviousInfo();
 }

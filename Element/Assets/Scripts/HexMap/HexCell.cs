@@ -10,6 +10,8 @@ public class HexCell : MonoBehaviour
     [HideInInspector] public HexCell[] neighbors;
     [SerializeField] TextMeshPro indexText;
 
+    public bool beColoring = false;
+
     Track track;
     public Brush brush;
     public Connector connector;
@@ -73,22 +75,10 @@ public class HexCell : MonoBehaviour
         Direction direction = GetHexDirection(cell);
         return neighbors[(int)direction.Next()];
     }
-
-    public bool IsNeighbor(HexCell cell)
-    {
-        for (int i = 0; i < neighbors.Length; i++)
-        {
-            if(neighbors[i] == cell)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
     
     public bool IsEmpty()
     {
-        return track == null;
+        return brush == null && connector == null && controller == null;
     }
 
     public void SetTrack(Track track_)
@@ -108,26 +98,25 @@ public class HexCell : MonoBehaviour
 
     public void PaintingWithColor(Color col)
     {
+        beColoring = true;
         hexMesh.Coloring(col);
-        ProcessSystem.Instance.colorCells.Add(this);
+        ProcessSystem.Instance.recordCells.Add(this);
     }
 
     public void PaintingWithLine(PatternLine line)
     {
+        beColoring = true;
         line.transform.parent = patternLineHolder;
-        ProcessSystem.Instance.lineCells.Add(this);
+        ProcessSystem.Instance.recordCells.Add(this);
     }
 
-    public void ClearColor()
+    public void ResetCell()
     {
         hexMesh.ResetColor();
-    }
-
-    public void ClearLine()
-    {
         for (int i = 0; i < patternLineHolder.childCount; i++)
         {
             Destroy(patternLineHolder.GetChild(i).gameObject);
         }
+        beColoring = false;
     }
 }

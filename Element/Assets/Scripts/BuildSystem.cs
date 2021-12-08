@@ -147,13 +147,13 @@ public class BuildSystem : MonoBehaviour
                 HexCell cell = InputHelper.GetHexCellUnderPosition3D();
                 if(cell != null)
                 {
-                    if (cell.IsEmpty())
+/*                    if (cell.IsEmpty())
                     {
                         cell.SetTrack(currentTrack);
                         currentTrack.Setup(cell);
                         currentTrack = null;
                         return;
-                    }
+                    }*/
                 }
 
                 Destroy(currentTrack.gameObject);

@@ -16,6 +16,7 @@ public class Brush : MonoBehaviour, IMouseDrag
     [SerializeField] GameObject putDownSprite;
 
     public event Action OnFinishThirdLevelCommand;
+    public virtual event Action<HexCell, string> OnWarning;
 
     public void StartDragging()
     {
@@ -47,10 +48,13 @@ public class Brush : MonoBehaviour, IMouseDrag
         recorderCell = cell;
     }
 
-    public void Read()
+    public void ClearCurrentInfo()
     {
         cell.brush = null;
+    }
 
+    public void ReadPreviousInfo()
+    {
         cell = recorderCell;
         cell.brush = this;
 
@@ -64,6 +68,7 @@ public class Brush : MonoBehaviour, IMouseDrag
         {
             connector.OnMoveActionStart -= Connector_OnMoveActionStart;
             connector.OnRotateActionStart -= Connector_OnRotateActionStart;
+            connector.OnSleepActionStart -= Connector_OnSleepActionStart;
             connector = null;
         }
 
@@ -78,12 +83,22 @@ public class Brush : MonoBehaviour, IMouseDrag
             connector = connector_;
             connector.OnMoveActionStart += Connector_OnMoveActionStart;
             connector.OnRotateActionStart += Connector_OnRotateActionStart;
+            connector.OnSleepActionStart += Connector_OnSleepActionStart;
             connectLine.gameObject.SetActive(true);
             connectLine.SetPosition(0, cell.transform.position - transform.position);
             connectLine.SetPosition(1, connector.transform.position - transform.position);
+            StartCoroutine(Sleep());
         }
+    }
 
+    private void Connector_OnSleepActionStart()
+    {
         StartCoroutine(Sleep());
+    }
+
+    public void FinishCommand()
+    {
+        OnFinishThirdLevelCommand?.Invoke();
     }
 
     public void SplitWithConnector(Connector connector_)
@@ -97,8 +112,6 @@ public class Brush : MonoBehaviour, IMouseDrag
             connectLine.SetPosition(1, Vector3.zero);
             connector = null;
         }
-
-        StartCoroutine(Sleep());
     }
 
     public void Connector_OnRotateActionStart(int rotateIndex)

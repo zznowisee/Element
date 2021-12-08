@@ -170,7 +170,7 @@ MonoBehaviour:
   commandReader: {fileID: 0}
   index: 0
   codeSlotNormalCol: {r: 0.54901963, g: 0.54901963, b: 0.54901963, a: 1}
-  codeSlotHighlightCol: {r: 0.9951428, g: 1, b: 0, a: 1}
+  codeSlotHighlightCol: {r: 0.9951428, g: 1, b: 0, a: 0.7058824}
   pfCodeSlot: {fileID: 4838164428390581485, guid: 25bb1f95f1171a74c8d86d2b04abcb58, type: 3}
   slots: []
   commands: []

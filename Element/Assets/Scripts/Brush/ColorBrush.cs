@@ -5,6 +5,7 @@ using System;
 
 public class ColorBrush : Brush
 {
+    public override event Action<HexCell, string> OnWarning;
     public override IEnumerator MoveToTarget(HexCell target, Action callback)
     {
         cell.brush = null;
@@ -21,9 +22,17 @@ public class ColorBrush : Brush
             yield return null;
         }
 
-        cell = target;
-        cell.brush = this;
-        TryPainiting();
+        if(target.IsEmpty())
+        {
+            cell = target;
+            cell.brush = this;
+            TryPainiting();
+        }
+        else
+        {
+            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+        }
+
         callback?.Invoke();
     }
 

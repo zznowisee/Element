@@ -182,7 +182,7 @@ public class UISystem : MonoBehaviour
         BuildSystem.Instance.OnDestoryController += BuildSystem_OnDestoryController;
         // can only use two event : CommandReader
         ProcessSystem.Instance.OnReadNextCommandLine += ProcessSystem_OnEnterNextCycle;
-        ProcessSystem.Instance.OnFinishAllCommands += ProcessSystem_OnFinishAllCommands;
+        ProcessSystem.Instance.OnFinishAllCommandsOrWarning += ProcessSystem_OnFinishAllCommands;
     }
 
     private void BuildSystem_OnDestoryController(Controller controller)

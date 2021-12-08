@@ -32,6 +32,11 @@ public static class InputHelper
 
     public static HexCell GetHexCellUnderPosition3D()
     {
+        if (IsMouseOverUIObject())
+        {
+            return null;
+        }
+
         Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
         if(Physics.Raycast(ray, out RaycastHit hit))
         {

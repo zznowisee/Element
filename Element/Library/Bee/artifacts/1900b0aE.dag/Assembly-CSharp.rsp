@@ -382,6 +382,8 @@
 "Assets/Scripts/ScriptableObject/ColorSO.cs"
 "Assets/Scripts/ScriptableObject/CommandSO.cs"
 "Assets/Scripts/SelectBox.cs"
+"Assets/Scripts/TooltipSystem.cs"
+"Assets/Scripts/TooltipUI.cs"
 "Assets/Scripts/Track.cs"
 "Assets/Scripts/TrackControlPoint.cs"
 "Assets/Scripts/TrackMesh.cs"

@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts\HexMap\HexMap.cs" />
     <Compile Include="Assets\Scripts\PatternLineMesh.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\LineBrushBtn.cs" />
+    <Compile Include="Assets\Scripts\TooltipUI.cs" />
     <Compile Include="Assets\Scripts\CommandGhost.cs" />
     <Compile Include="Assets\Scripts\ICommandReader.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\ColorSO.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Assets\Scripts\CommandBtn.cs" />
     <Compile Include="Assets\Scripts\HexMap\GridMap.cs" />
     <Compile Include="Assets\Scripts\Brush\Brush.cs" />
+    <Compile Include="Assets\Scripts\TooltipSystem.cs" />
     <Compile Include="Assets\Scripts\IMouseDrag.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexCoordinates.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexCellMesh.cs" />

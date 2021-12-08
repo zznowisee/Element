@@ -18,14 +18,16 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     public event Action OnMouseDragEnd;
     public event Action OnFinishCommand;
     public event Action OnFinishSecondLevelCommand;
+    public event Action<HexCell, string> OnWarning;
 
     //recorder:
-    HexCell recorderCell;
     Direction recorderDirection;
     Quaternion recorderSpriteRotation;
 
     List<ICommandReciever> recievers;
     public int connectorCommandCounter;
+    public int recievedMovingCommandNum = 0;
+
     void Awake()
     {
         predictionLine.gameObject.SetActive(false);
@@ -313,16 +315,24 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         }
     }
 
-    public override void Read()
+    public override void ClearCurrentInfo()
     {
         cell.controller = null;
         cell.reciever = null;
+        for (int i = 0; i < recievers.Count; i++)
+        {
+            recievers[i].OnFinishSecondLevelCommand -= OnConnectorFinishCommand;
+        }
+        recievers.Clear();
+    }
 
+    public override void ReadPreviousInfo()
+    {
         cell = recordCell;
 
         cell.controller = this;
         cell.reciever = this;
-
+        recievedMovingCommandNum = 0;
         direction = recorderDirection;
         UpdatePredictionLine();
         recordCell = null;
@@ -346,6 +356,14 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
 
     IEnumerator MoveToTarget(Direction direction)
     {
+        yield return null;
+        if (recievedMovingCommandNum > 1)
+        {
+            StopAllCoroutines();
+            OnWarning?.Invoke(cell, "Error#03\nTwo move commands received at the same time!");
+            yield return null;
+        }
+
         HexCell target = cell.GetNeighbor(direction);
         cell.controller = null;
         cell.reciever = null;
@@ -360,12 +378,30 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
             yield return null;
         }
-
-        cell = target;
-        cell.controller = this;
-        cell.reciever = this;
+        if (target.IsEmpty())
+        {
+            if (!target.beColoring)
+            {
+                cell = target;
+                cell.controller = this;
+                cell.reciever = this;
+                recievedMovingCommandNum = 0;
+            }
+            else
+            {
+                OnWarning?.Invoke(target, "Error#01!\nEntered the unit that has been colored!");
+            }
+        }
+        else
+        {
+            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+        }
 
         OnFinishSecondLevelCommand?.Invoke();
+        if(recievers.Count == 0)
+        {
+            OnFinishCommand?.Invoke();
+        }
     }
 
     public void ControllerCCWRotate()
@@ -391,11 +427,13 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
 
     public void RunRotate(int rotateDirection)
     {
+        recievedMovingCommandNum++;
         OnFinishCommand?.Invoke();
     }
 
     public void RunMove(Direction moveDirection)
     {
+        recievedMovingCommandNum++;
         StartCoroutine(MoveToTarget(moveDirection));
     }
 

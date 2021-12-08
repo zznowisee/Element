@@ -76,6 +76,7 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
         transform.position = commandSlot.transform.position;
         transform.parent = commandSlot.transform;
+        transform.SetSiblingIndex(0);
         canvasGroup.blocksRaycasts = true;
 
         commandSlot.SetCommand(this);

@@ -8,21 +8,23 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
 {
     public List<Brush> brushes;
     public HexCell cell;
-    [SerializeField] float controlPointSpacing = 1.5f;
     [SerializeField] float radius = 5f;
-
+    [SerializeField] GameObject spriteObj;
     //public event Action OnMouseDragBegin;
     //public event Action OnMouseDragEnd;
     public event Action<Direction> OnMoveActionStart;
     public event Action<int> OnRotateActionStart;
+    public event Action OnSleepActionStart;
     public event Action OnFinishSecondLevelCommand;
+    public event Action<HexCell, string> OnWarning;
 
-    public int brushFinishCounter;
-
+    public int brushFinishCounter = 0;
+    public int recievedMovingCommandNum = 0;
     public bool HasBeenSetup { get; private set; } = false;
 
     //recorder:
     HexCell recorderCell;
+    Quaternion recorderSpriteObjRotation;
 
     public void Setup(HexCell cell_)
     {
@@ -55,11 +57,58 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     IEnumerator Sleep()
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
+        brushFinishCounter = 0;
+        recievedMovingCommandNum = 0;
         OnFinishSecondLevelCommand?.Invoke();
+    }
+
+    IEnumerator RotateToTarget(int rotateIndex)
+    {
+        yield return null;
+        if(recievedMovingCommandNum > 1)
+        {
+            StopAllCoroutines();
+            OnWarning?.Invoke(cell, "Error#03\nTwo move commands received at the same time!");
+            yield return null;
+        }
+        else
+        {
+            OnRotateActionStart?.Invoke(rotateIndex);
+        }
+
+        float rotateAngle = rotateIndex == 1 ? -60f : 60f;
+        float percent = 0f;
+        Quaternion start = spriteObj.transform.rotation;
+        Quaternion end = Quaternion.Euler(spriteObj.transform.eulerAngles + rotateAngle * Vector3.forward);
+        while(percent < 1f)
+        {
+            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
+            percent = Mathf.Clamp01(percent);
+            spriteObj.transform.rotation = Quaternion.Lerp(start, end, percent);
+            yield return null;
+        }
+
+        if (brushes.Count == 0)
+        {
+            recievedMovingCommandNum = 0;
+            OnFinishSecondLevelCommand?.Invoke();
+        }
     }
 
     IEnumerator MoveToTarget(Direction direction)
     {
+        yield return null;
+        if(recievedMovingCommandNum > 1)
+        {
+            StopAllCoroutines();
+            OnWarning?.Invoke(cell, "Error#03\nTwo move commands received at the same time!");
+            yield return null;
+        }
+        else
+        {
+            OnMoveActionStart?.Invoke(direction);
+        }
+
         HexCell target = cell.GetNeighbor(direction);
         cell.connector = null;
         cell.reciever = null;
@@ -75,12 +124,27 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
             yield return null;
         }
 
-        cell = target;
-        cell.connector = this;
-        cell.reciever = this;
+        if (target.IsEmpty())
+        {
+            if (!target.beColoring)
+            {
+                cell = target;
+                cell.connector = this;
+                cell.reciever = this;
+            }
+            else
+            {
+                OnWarning?.Invoke(target, "Error#01!\nEntered the unit that has been colored!");
+            }
+        }
+        else
+        {
+            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+        }
 
         if(brushes.Count == 0)
         {
+            recievedMovingCommandNum = 0;
             OnFinishSecondLevelCommand?.Invoke();
         }
     }
@@ -88,19 +152,24 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     public void Record()
     {
         recorderCell = cell;
+        recorderSpriteObjRotation = spriteObj.transform.rotation;
     }
 
-    public void Read()
+    public void ClearCurrentInfo()
     {
+        recievedMovingCommandNum = 0;
+        brushFinishCounter = 0;
         cell.connector = null;
         cell.reciever = null;
+    }
 
+    public void ReadPreviousInfo()
+    {
         cell = recorderCell;
-
         cell.connector = this;
         cell.reciever = this;
-
         recorderCell = null;
+
         for (int i = 0; i < brushes.Count; i++)
         {
             if (brushes[i] != null)
@@ -112,6 +181,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
             }
         }
         transform.position = cell.transform.position;
+        spriteObj.transform.rotation = recorderSpriteObjRotation;
     }
 
     public void RunPutDownUp(bool coloring)
@@ -124,6 +194,8 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
 
     public void RunConnect()
     {
+        OnSleepActionStart?.Invoke();
+
         for (int i = 0; i < cell.neighbors.Length; i++)
         {
             if(cell.neighbors[i] != null)
@@ -131,25 +203,14 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
                 if(cell.neighbors[i].brush != null)
                 {
                     Brush newBrush = cell.neighbors[i].brush;
-                    brushes.Add(newBrush);
-                    newBrush.ConnectWithConnector(this);
-                    newBrush.OnFinishThirdLevelCommand += OnBrushFinishCommand;
+                    if (!brushes.Contains(newBrush))
+                    {
+                        brushes.Add(newBrush);
+                        newBrush.ConnectWithConnector(this);
+                        newBrush.OnFinishThirdLevelCommand += OnBrushFinishCommand;
+                    }
                 }
             }
-        }
-        if (brushes.Count == 0)
-        {
-            OnFinishSecondLevelCommand?.Invoke();
-        }
-    }
-
-    private void OnBrushFinishCommand()
-    {
-        brushFinishCounter++;
-        if(brushFinishCounter == brushes.Count)
-        {
-            brushFinishCounter = 0;
-            OnFinishSecondLevelCommand?.Invoke();
         }
     }
 
@@ -157,7 +218,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     {
         for (int i = 0; i < brushes.Count; i++)
         {
-            if(brushes[i] != null)
+            if (brushes[i] != null)
             {
                 brushes[i].OnFinishThirdLevelCommand -= OnBrushFinishCommand;
                 brushes[i].SplitWithConnector(this);
@@ -166,24 +227,30 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
                 i--;
             }
         }
-        //instead of animation
+
         StartCoroutine(Sleep());
+    }
+
+    private void OnBrushFinishCommand()
+    {
+        brushFinishCounter++;
+        if(brushFinishCounter == brushes.Count)
+        {
+            brushFinishCounter = 0;
+            recievedMovingCommandNum = 0;
+            OnFinishSecondLevelCommand?.Invoke();
+        }
     }
 
     public void RunRotate(int rotateDirection)
     {
-        if(brushes.Count == 0)
-        {
-            StartCoroutine(Sleep());
-            return;
-        }
-
-        OnRotateActionStart?.Invoke(rotateDirection);
+        recievedMovingCommandNum++;
+        StartCoroutine(RotateToTarget(rotateDirection));
     }
 
     public void RunMove(Direction moveDirection)
     {
-        OnMoveActionStart?.Invoke(moveDirection);
+        recievedMovingCommandNum++;
         StartCoroutine(MoveToTarget(moveDirection));
     }
 }
