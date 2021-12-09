@@ -324,6 +324,8 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             recievers[i].OnFinishSecondLevelCommand -= OnConnectorFinishCommand;
         }
         recievers.Clear();
+        connectorCommandCounter = 0;
+        recievedMovingCommandNum = 0;
     }
 
     public override void ReadPreviousInfo()
@@ -332,7 +334,6 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
 
         cell.controller = this;
         cell.reciever = this;
-        recievedMovingCommandNum = 0;
         direction = recorderDirection;
         UpdatePredictionLine();
         recordCell = null;
@@ -351,6 +352,8 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     IEnumerator Sleep()
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
+        connectorCommandCounter = 0;
+        recievedMovingCommandNum = 0;
         OnFinishCommand?.Invoke();
     }
 
@@ -400,6 +403,8 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         OnFinishSecondLevelCommand?.Invoke();
         if(recievers.Count == 0)
         {
+            recievedMovingCommandNum = 0;
+            connectorCommandCounter = 0;
             OnFinishCommand?.Invoke();
         }
     }

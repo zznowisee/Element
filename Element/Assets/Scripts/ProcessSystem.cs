@@ -335,6 +335,10 @@ public class ProcessSystem : MonoBehaviour
         {
             controllers[i].StopAllCoroutines();
         }
+        for (int i = 0; i < brushes.Count; i++)
+        {
+            brushes[i].StopAllCoroutines();
+        }
         commandLineIndex = 0;
         currentNum = targetNum = 0;
         // read all infos

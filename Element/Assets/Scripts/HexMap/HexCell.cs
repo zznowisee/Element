@@ -103,13 +103,6 @@ public class HexCell : MonoBehaviour
         ProcessSystem.Instance.recordCells.Add(this);
     }
 
-    public void PaintingWithLine(PatternLine line)
-    {
-        beColoring = true;
-        line.transform.parent = patternLineHolder;
-        ProcessSystem.Instance.recordCells.Add(this);
-    }
-
     public void ResetCell()
     {
         hexMesh.ResetColor();

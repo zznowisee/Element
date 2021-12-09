@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PatternLineMesh : MonoBehaviour
 {
-    float width = 1f;
+    float width = 2.5f;
     Mesh mesh;
     MeshRenderer meshRenderer;
     MeshFilter meshFilter;

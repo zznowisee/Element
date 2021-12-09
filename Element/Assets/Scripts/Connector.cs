@@ -91,6 +91,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         if (brushes.Count == 0)
         {
             recievedMovingCommandNum = 0;
+            brushFinishCounter = 0;
             OnFinishSecondLevelCommand?.Invoke();
         }
     }
@@ -145,6 +146,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         if(brushes.Count == 0)
         {
             recievedMovingCommandNum = 0;
+            brushFinishCounter = 0;
             OnFinishSecondLevelCommand?.Invoke();
         }
     }

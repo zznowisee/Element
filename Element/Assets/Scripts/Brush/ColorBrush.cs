@@ -36,7 +36,7 @@ public class ColorBrush : Brush
         callback?.Invoke();
     }
 
-    public void TryPainiting()
+    void TryPainiting()
     {
         if (putdown)
         {

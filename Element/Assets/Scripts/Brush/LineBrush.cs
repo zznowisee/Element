@@ -7,10 +7,15 @@ public class LineBrush : Brush
 {
     [SerializeField] PatternLine pfPatternLine;
     PatternLine currentDrawingLine;
+
+    public override event Action<HexCell, string> OnWarning;
     public override IEnumerator MoveToTarget(HexCell target, Action callback)
     {
         cell.brush = null;
-        StartPainting();
+        if (CanPainting())
+        {
+            StartPainting();
+        }
 
         float percent = 0f;
         Vector3 startPosition = transform.position;
@@ -30,25 +35,38 @@ public class LineBrush : Brush
             yield return null;
         }
 
-        FinishPainting();
+        if (target.IsEmpty())
+        {
+            cell = target;
+            cell.brush = this;
+        }
+        else
+        {
+            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+        }
 
-        cell = target;
-        cell.brush = this;
+        FinishPainting();
         callback?.Invoke();
     }
 
     void StartPainting()
     {
-        if (putdown)
-        {
-            currentDrawingLine = Instantiate(pfPatternLine);
-            currentDrawingLine.Setup(cell, colorSO.color);
-        }
+        currentDrawingLine = Instantiate(pfPatternLine);
+        currentDrawingLine.Setup(cell, colorSO.color, ProcessSystem.Instance.commandLineIndex);
+        ProcessSystem.Instance.recordCells.Add(cell);
     }
 
     void FinishPainting()
     {
-        cell.PaintingWithLine(currentDrawingLine);
-        currentDrawingLine = null;
+        if(currentDrawingLine != null)
+        {
+            cell.beColoring = true;
+            currentDrawingLine = null;
+        }
+    }
+
+    bool CanPainting()
+    {
+        return putdown;
     }
 }

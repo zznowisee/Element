@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Putup
   key: 120
-  icon: {fileID: 21300000, guid: a39a753af967dea438b670a0f3c3d1a4, type: 3}
+  icon: {fileID: 21300000, guid: 16ee373e7ce1aed45a155873a39cfe14, type: 3}
