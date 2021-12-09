@@ -115,6 +115,20 @@ public class ProcessSystem : MonoBehaviour
 
     private void OnWarning(HexCell target, string warningText)
     {
+        StopAllCoroutines();
+        for (int i = 0; i < connectors.Count; i++)
+        {
+            connectors[i].StopAllCoroutines();
+        }
+        for (int i = 0; i < controllers.Count; i++)
+        {
+            controllers[i].StopAllCoroutines();
+        }
+        for (int i = 0; i < brushes.Count; i++)
+        {
+            brushes[i].StopAllCoroutines();
+        }
+
         OnFinishAllCommandsOrWarning?.Invoke();
         processState = ProcessState.WARNING;
         processType = ProcessType.PAUSE;

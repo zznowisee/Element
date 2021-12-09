@@ -9,8 +9,9 @@ public class LineBrush : Brush
     PatternLine currentDrawingLine;
 
     public override event Action<HexCell, string> OnWarning;
-    public override IEnumerator MoveToTarget(HexCell target, Action callback)
+    public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
     {
+        yield return null;
         cell.brush = null;
         if (CanPainting())
         {
@@ -26,7 +27,6 @@ public class LineBrush : Brush
             percent = Mathf.Clamp01(percent);
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
             connectLine.SetPosition(1, connector.transform.position - transform.position);
-
             if (currentDrawingLine != null)
             {
                 currentDrawingLine.Painting(transform.position);
@@ -44,7 +44,6 @@ public class LineBrush : Brush
         {
             OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
         }
-
         FinishPainting();
         callback?.Invoke();
     }
@@ -68,5 +67,34 @@ public class LineBrush : Brush
     bool CanPainting()
     {
         return putdown;
+    }
+
+    public override void ConnectWithConnector(Connector connector_)
+    {
+        StartCoroutine(ConnectConnector(connector_));
+    }
+
+    IEnumerator ConnectConnector(Connector connector_)
+    {
+        yield return null;
+        if (connector == null)
+        {
+            connector = connector_;
+            connector_.OnMoveActionStart += Connector_OnMoveActionStart;
+            connector_.OnRotateActionStart += Connector_OnRotateActionStart;
+            connector_.OnSleepActionStart += Connector_OnSleepActionStart;
+
+            connectLine = Instantiate(pfConnectLine, transform);
+            connectLine.SetPosition(0, cell.transform.position - transform.position);
+            connectLine.SetPosition(1, connector_.transform.position - transform.position);
+            StartCoroutine(Sleep());
+        }
+        else
+        {
+            if (connector != connector_)
+            {
+                OnWarning?.Invoke(cell, "Error#04!\nThe brush is connected by two connectors at the same time!");
+            }
+        }
     }
 }

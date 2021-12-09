@@ -58,6 +58,13 @@ public class HexCell : MonoBehaviour
         return neighbors[(int)direction];
     }
 
+    public Direction GetTwoNeighborsMoveDirection(HexCell from, HexCell to)
+    {
+        Direction fromDir = GetHexDirection(from);
+        Direction toDir = GetHexDirection(to);
+        return fromDir.MoveDirection(toDir);
+    }
+
     public void SetNeighbor(Direction direction, HexCell cell)
     {
         neighbors[(int)direction] = cell;
@@ -96,10 +103,11 @@ public class HexCell : MonoBehaviour
         return brush == null;
     }
 
-    public void PaintingWithColor(Color col)
+    public void PaintingWithColor(Color col, int sortingOrder)
     {
         beColoring = true;
         hexMesh.Coloring(col);
+        hexMesh.GetComponent<MeshRenderer>().sortingOrder = sortingOrder;
         ProcessSystem.Instance.recordCells.Add(this);
     }
 

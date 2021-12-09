@@ -8,4 +8,5 @@ public interface ICommandReciever
     void RunMove(Direction moveDirection);
     void RunConnect();
     void RunSplit();
+    void RunDelay();
 }

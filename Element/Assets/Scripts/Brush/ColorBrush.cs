@@ -6,10 +6,10 @@ using System;
 public class ColorBrush : Brush
 {
     public override event Action<HexCell, string> OnWarning;
-    public override IEnumerator MoveToTarget(HexCell target, Action callback)
+    public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
     {
+        yield return null;
         cell.brush = null;
-
         float percent = 0f;
         Vector3 startPosition = transform.position;
         Vector3 endPosition = target.transform.position;
@@ -40,7 +40,7 @@ public class ColorBrush : Brush
     {
         if (putdown)
         {
-            cell.PaintingWithColor(colorSO.color);
+            cell.PaintingWithColor(colorSO.color, ProcessSystem.Instance.commandLineIndex);
         }
     }
 
@@ -48,5 +48,34 @@ public class ColorBrush : Brush
     {
         base.PutDownUp(coloring_);
         TryPainiting();
+    }
+
+    IEnumerator ConnectConnector(Connector connector_)
+    {
+        yield return null;
+        if (connector == null)
+        {
+            connector = connector_;
+            connector_.OnMoveActionStart += Connector_OnMoveActionStart;
+            connector_.OnRotateActionStart += Connector_OnRotateActionStart;
+            connector_.OnSleepActionStart += Connector_OnSleepActionStart;
+
+            connectLine = Instantiate(pfConnectLine, transform);
+            connectLine.SetPosition(0, cell.transform.position - transform.position);
+            connectLine.SetPosition(1, connector_.transform.position - transform.position);
+            StartCoroutine(Sleep());
+        }
+        else
+        {
+            if (connector != connector_)
+            {
+                OnWarning?.Invoke(cell, "Error#04!\nThe brush is connected by two connectors at the same time!");
+            }
+        }
+    }
+
+    public override void ConnectWithConnector(Connector connector_)
+    {
+        StartCoroutine(ConnectConnector(connector_));
     }
 }

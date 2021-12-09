@@ -76,7 +76,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1108908059
-  m_SortingLayer: 3
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1058916154
@@ -202,7 +202,7 @@ Transform:
   - {fileID: 2890177925490147288}
   - {fileID: 1058916153}
   m_Father: {fileID: 8538528339990089785}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4764924333742731325
 GameObject:
@@ -397,8 +397,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7945117601560506380}
   - {fileID: 3936995286938303304}
+  - {fileID: 4374843220132193186}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -421,9 +421,10 @@ MonoBehaviour:
   controlPointSpacing: 2
   predictionLineLength: 200
   indexText: {fileID: 1058916154}
-  predictionLine: {fileID: 7945117601560506370}
+  predictionLine: {fileID: 4374843220132193196}
   sprite: {fileID: 2669348115479748305}
   connectorCommandCounter: 0
+  recievedMovingCommandNum: 0
 --- !u!58 &7495469163831997188
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -440,7 +441,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 3
---- !u!1001 &8902664231294705879
+--- !u!1001 &2988339653369885561
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -451,20 +452,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: PredictionLine
       objectReference: {fileID: 0}
-    - target: {fileID: 1571236948936364245, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
-      propertyPath: m_SortingLayer
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1571236948936364245, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
-      propertyPath: m_SortingLayerID
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1571236948936364251, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
       propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1571236948936364251, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
-      propertyPath: m_LocalScale.x
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1571236948936364251, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
@@ -509,13 +498,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
---- !u!4 &7945117601560506380 stripped
+--- !u!4 &4374843220132193186 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1571236948936364251, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
-  m_PrefabInstance: {fileID: 8902664231294705879}
+  m_PrefabInstance: {fileID: 2988339653369885561}
   m_PrefabAsset: {fileID: 0}
---- !u!120 &7945117601560506370 stripped
+--- !u!120 &4374843220132193196 stripped
 LineRenderer:
   m_CorrespondingSourceObject: {fileID: 1571236948936364245, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
-  m_PrefabInstance: {fileID: 8902664231294705879}
+  m_PrefabInstance: {fileID: 2988339653369885561}
   m_PrefabAsset: {fileID: 0}

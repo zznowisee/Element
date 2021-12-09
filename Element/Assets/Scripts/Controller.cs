@@ -260,7 +260,23 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
 
     public void Delay()
     {
-        StartCoroutine(Sleep());
+        HexCell next = cell.GetNeighbor(direction);
+        for (int i = 0; i < 25; i++)
+        {
+            if (next != null)
+            {
+                if (next.reciever != null)
+                {
+                    TrackNewReciever(next.reciever);
+                    next.reciever.RunDelay();
+                }
+                next = next.GetNeighbor(direction);
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
     public void Push()
@@ -448,6 +464,11 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     }
 
     public void RunSplit()
+    {
+        OnFinishCommand?.Invoke();
+    }
+
+    public void RunDelay()
     {
         OnFinishCommand?.Invoke();
     }

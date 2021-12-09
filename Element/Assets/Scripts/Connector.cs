@@ -10,10 +10,9 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     public HexCell cell;
     [SerializeField] float radius = 5f;
     [SerializeField] GameObject spriteObj;
-    //public event Action OnMouseDragBegin;
-    //public event Action OnMouseDragEnd;
-    public event Action<Direction> OnMoveActionStart;
-    public event Action<int> OnRotateActionStart;
+
+    public event Action<Connector, Direction> OnMoveActionStart;
+    public event Action<Connector, int> OnRotateActionStart;
     public event Action OnSleepActionStart;
     public event Action OnFinishSecondLevelCommand;
     public event Action<HexCell, string> OnWarning;
@@ -67,13 +66,12 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         yield return null;
         if(recievedMovingCommandNum > 1)
         {
-            StopAllCoroutines();
             OnWarning?.Invoke(cell, "Error#03\nTwo move commands received at the same time!");
             yield return null;
         }
         else
         {
-            OnRotateActionStart?.Invoke(rotateIndex);
+            OnRotateActionStart?.Invoke(this, rotateIndex);
         }
 
         float rotateAngle = rotateIndex == 1 ? -60f : 60f;
@@ -107,7 +105,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         }
         else
         {
-            OnMoveActionStart?.Invoke(direction);
+            OnMoveActionStart?.Invoke(this, direction);
         }
 
         HexCell target = cell.GetNeighbor(direction);
@@ -140,10 +138,20 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         }
         else
         {
-            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+            if(target.brush != null)
+            {
+                if (!brushes.Contains(target.brush))
+                {
+                    OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+                }
+            }
+            else
+            {
+                OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+            }
         }
 
-        if(brushes.Count == 0)
+        if (brushes.Count == 0)
         {
             recievedMovingCommandNum = 0;
             brushFinishCounter = 0;
@@ -254,5 +262,11 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     {
         recievedMovingCommandNum++;
         StartCoroutine(MoveToTarget(moveDirection));
+    }
+
+    public void RunDelay()
+    {
+        OnSleepActionStart?.Invoke();
+        StartCoroutine(Sleep());
     }
 }

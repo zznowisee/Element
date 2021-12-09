@@ -41,11 +41,17 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Color
+    uniqueID: 3790357871
+    locked: 0
   - name: UI
     uniqueID: 2451686179
     locked: 0
-  - name: Element
-    uniqueID: 3790357871
+  - name: Brush
+    uniqueID: 441328383
+    locked: 0
+  - name: Mark
+    uniqueID: 2712896355
     locked: 0
   - name: Text
     uniqueID: 1108908059

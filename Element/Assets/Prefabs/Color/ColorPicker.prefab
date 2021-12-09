@@ -79,8 +79,8 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -504609425
-  m_SortingLayer: 3
+  m_SortingLayerID: -1582070941
+  m_SortingLayer: 4
   m_SortingOrder: 10
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &12669989468769520
