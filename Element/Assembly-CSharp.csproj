@@ -102,7 +102,9 @@
     <Compile Include="Assets\Scripts\TrackMesh.cs" />
     <Compile Include="Assets\Scripts\Brush\ColorPicker.cs" />
     <Compile Include="Assets\Scripts\Others\InputHelper.cs" />
+    <Compile Include="Assets\Scripts\WarningType.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\ColorBrushBtn.cs" />
+    <Compile Include="Assets\Scripts\ColorSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\Point.shader" />

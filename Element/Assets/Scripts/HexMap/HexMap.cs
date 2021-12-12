@@ -7,6 +7,7 @@ public class HexMap : MonoBehaviour
 {
     public int width = 6;
     public int height = 6;
+    public int cycleNum = 3;
     [Range(0f,1f)] public float cellScaler = .9f;
     public HexCell pfCell;
 

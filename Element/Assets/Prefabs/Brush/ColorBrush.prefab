@@ -346,6 +346,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4313754756813204118}
+  - component: {fileID: 4721155550631816661}
   - component: {fileID: 2562330223081828732}
   - component: {fileID: 7972061484336491982}
   m_Layer: 0
@@ -373,6 +374,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &4721155550631816661
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4313754756813204119}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 0
 --- !u!58 &2562330223081828732
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -405,10 +427,11 @@ MonoBehaviour:
   recorderCell: {fileID: 0}
   colorSO: {fileID: 11400000, guid: 825c28c28e404e948b9219a6ad976ebe, type: 2}
   putdown: 0
+  connectLine: {fileID: 0}
   pfConnectLine: {fileID: 8311449999290214604, guid: f0baecea667b645498911d47e9c22c33, type: 3}
   meshRenderer: {fileID: 4313754758075901283}
   putDownSprite: {fileID: 6534278471691425408}
-  recievedMovingCommandNum: 0
+  connector: {fileID: 0}
 --- !u!1 &4313754756923198577
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,11 +7,11 @@ public class HexCell : MonoBehaviour
 {
     HexCellMesh hexMesh;
     public HexCoordinates hexCoordinates;
-    [HideInInspector] public HexCell[] neighbors;
+    public HexCell[] neighbors;
     [SerializeField] TextMeshPro indexText;
 
     public bool beColoring = false;
-
+    public int order;
     Track track;
     public Brush brush;
     public Connector connector;
@@ -33,6 +33,7 @@ public class HexCell : MonoBehaviour
         if (debug)
         {
             indexText.text = $"{hexCoordinates.X}\n{hexCoordinates.Y}\n{hexCoordinates.Z}";
+            //indexText.text = order.ToString();
         }
         else
         {

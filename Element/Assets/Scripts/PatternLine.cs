@@ -5,18 +5,19 @@ using UnityEngine;
 public class PatternLine : MonoBehaviour
 {
     public int sortingOrder;
-    public HexCell cell;
+    public HexCell startCell;
+    public HexCell endCell;
     [SerializeField] PatternLineMesh patternLineMesh;
     [SerializeField] GameObject startPoint;
     [SerializeField] GameObject endPoint;
 
     public void Setup(HexCell cell_, Color color, int sortingOrder_)
     {
-        cell = cell_;
+        startCell = cell_;
         sortingOrder = sortingOrder_;
-        transform.SetParent(cell.patternLineHolder.transform, true);
-        patternLineMesh.Setup(cell.transform.position, color);
-        startPoint.transform.position = cell.transform.position;
+        transform.SetParent(startCell.patternLineHolder.transform, true);
+        patternLineMesh.Setup(startCell.transform.position, color);
+        startPoint.transform.position = startCell.transform.position;
         startPoint.GetComponent<MeshRenderer>().material.color = color;
         endPoint.GetComponent<MeshRenderer>().material.color = color;
 

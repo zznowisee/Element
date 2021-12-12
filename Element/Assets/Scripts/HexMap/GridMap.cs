@@ -25,7 +25,7 @@ public class GridMap : MonoBehaviour
             {
                 if(Mathf.Abs(-x - y) > cycleNum)
                 {
-                    //continue;
+                    continue;
                 }
                 CreateCell(originPosition, x, y, i++, cellParent);
             }
@@ -40,7 +40,9 @@ public class GridMap : MonoBehaviour
         position += originPosition;
 
         HexCell cell = Instantiate(pfCell);
+        cell.order = i;
         cell.transform.localScale *= cellScaler;
         cell.Setup(position, parent, HexCoordinates.SetCoordinates(x, y));
+
     }
 }

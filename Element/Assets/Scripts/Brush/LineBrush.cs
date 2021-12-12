@@ -8,12 +8,12 @@ public class LineBrush : Brush
     [SerializeField] PatternLine pfPatternLine;
     PatternLine currentDrawingLine;
 
-    public override event Action<HexCell, string> OnWarning;
+    public override event Action<Vector3, WarningType> OnWarning;
     public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
     {
         yield return null;
         cell.brush = null;
-        if (CanPainting())
+        if (CanPaint())
         {
             StartPainting();
         }
@@ -35,15 +35,8 @@ public class LineBrush : Brush
             yield return null;
         }
 
-        if (target.IsEmpty())
-        {
-            cell = target;
-            cell.brush = this;
-        }
-        else
-        {
-            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
-        }
+        cell = target;
+        cell.brush = this;
         FinishPainting();
         callback?.Invoke();
     }
@@ -60,11 +53,13 @@ public class LineBrush : Brush
         if(currentDrawingLine != null)
         {
             cell.beColoring = true;
+            currentDrawingLine.endCell = cell;
+            ProcessSystem.Instance.recordCells.Add(cell);
             currentDrawingLine = null;
         }
     }
 
-    bool CanPainting()
+    bool CanPaint()
     {
         return putdown;
     }
@@ -93,7 +88,19 @@ public class LineBrush : Brush
         {
             if (connector != connector_)
             {
-                OnWarning?.Invoke(cell, "Error#04!\nThe brush is connected by two connectors at the same time!");
+                OnWarning?.Invoke(transform.position, WarningType.BrushConnectedByTwoConnectors);
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other != null)
+        {
+            if (!ProcessSystem.Instance.CanOperate())
+            {
+                print("Enter");
+                OnWarning?.Invoke(transform.position, WarningType.Collision);
             }
         }
     }

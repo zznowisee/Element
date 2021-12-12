@@ -15,7 +15,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     public event Action<Connector, int> OnRotateActionStart;
     public event Action OnSleepActionStart;
     public event Action OnFinishSecondLevelCommand;
-    public event Action<HexCell, string> OnWarning;
+    public event Action<Vector3, WarningType> OnWarning;
 
     public int brushFinishCounter = 0;
     public int recievedMovingCommandNum = 0;
@@ -66,7 +66,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         yield return null;
         if(recievedMovingCommandNum > 1)
         {
-            OnWarning?.Invoke(cell, "Error#03\nTwo move commands received at the same time!");
+            OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
         else
@@ -100,7 +100,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         if(recievedMovingCommandNum > 1)
         {
             StopAllCoroutines();
-            OnWarning?.Invoke(cell, "Error#03\nTwo move commands received at the same time!");
+            OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
         else
@@ -123,32 +123,15 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
             yield return null;
         }
 
-        if (target.IsEmpty())
+        if (!target.beColoring)
         {
-            if (!target.beColoring)
-            {
-                cell = target;
-                cell.connector = this;
-                cell.reciever = this;
-            }
-            else
-            {
-                OnWarning?.Invoke(target, "Error#01!\nEntered the unit that has been colored!");
-            }
+            cell = target;
+            cell.connector = this;
+            cell.reciever = this;
         }
         else
         {
-            if(target.brush != null)
-            {
-                if (!brushes.Contains(target.brush))
-                {
-                    OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
-                }
-            }
-            else
-            {
-                OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
-            }
+            OnWarning?.Invoke(transform.position, WarningType.EnteredColoredUnit);
         }
 
         if (brushes.Count == 0)
@@ -200,6 +183,11 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         {
             brushes[i].PutDownUp(coloring);
         }
+
+        if (brushes.Count == 0)
+        {
+            StartCoroutine(Sleep());
+        }
     }
 
     public void RunConnect()
@@ -221,6 +209,11 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
                     }
                 }
             }
+        }
+
+        if(brushes.Count == 0)
+        {
+            StartCoroutine(Sleep());
         }
     }
 
@@ -268,5 +261,17 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     {
         OnSleepActionStart?.Invoke();
         StartCoroutine(Sleep());
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other != null)
+        {
+            if (!ProcessSystem.Instance.CanOperate())
+            {
+                print("Enter");
+                OnWarning?.Invoke(transform.position, WarningType.Collision);
+            }
+        }
     }
 }

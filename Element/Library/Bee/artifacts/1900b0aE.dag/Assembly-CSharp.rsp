@@ -345,6 +345,7 @@
 "Assets/Scripts/Brush/ColorPicker.cs"
 "Assets/Scripts/Brush/LineBrush.cs"
 "Assets/Scripts/BuildSystem.cs"
+"Assets/Scripts/ColorSystem.cs"
 "Assets/Scripts/Command.cs"
 "Assets/Scripts/CommandBtn.cs"
 "Assets/Scripts/CommandConsole.cs"
@@ -387,6 +388,7 @@
 "Assets/Scripts/Track.cs"
 "Assets/Scripts/TrackControlPoint.cs"
 "Assets/Scripts/TrackMesh.cs"
+"Assets/Scripts/WarningType.cs"
 -langversion:8.0
 
 /deterministic

@@ -5,7 +5,7 @@ using System;
 
 public class ColorBrush : Brush
 {
-    public override event Action<HexCell, string> OnWarning;
+    public override event Action<Vector3, WarningType> OnWarning;
     public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
     {
         yield return null;
@@ -22,16 +22,9 @@ public class ColorBrush : Brush
             yield return null;
         }
 
-        if(target.IsEmpty())
-        {
-            cell = target;
-            cell.brush = this;
-            TryPainiting();
-        }
-        else
-        {
-            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
-        }
+        cell = target;
+        cell.brush = this;
+        TryPainiting();
 
         callback?.Invoke();
     }
@@ -69,7 +62,7 @@ public class ColorBrush : Brush
         {
             if (connector != connector_)
             {
-                OnWarning?.Invoke(cell, "Error#04!\nThe brush is connected by two connectors at the same time!");
+                OnWarning?.Invoke(transform.position, WarningType.BrushConnectedByTwoConnectors);
             }
         }
     }
@@ -77,5 +70,17 @@ public class ColorBrush : Brush
     public override void ConnectWithConnector(Connector connector_)
     {
         StartCoroutine(ConnectConnector(connector_));
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if(other != null)
+        {
+            if (!ProcessSystem.Instance.CanOperate())
+            {
+                print("Enter");
+                OnWarning?.Invoke(transform.position, WarningType.Collision);
+            }
+        }
     }
 }

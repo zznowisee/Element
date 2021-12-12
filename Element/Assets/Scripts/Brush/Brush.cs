@@ -15,7 +15,7 @@ public class Brush : MonoBehaviour, IMouseDrag
     [SerializeField] GameObject putDownSprite;
     public Connector connector;
     public event Action OnFinishThirdLevelCommand;
-    public virtual event Action<HexCell, string> OnWarning;
+    public virtual event Action<Vector3, WarningType> OnWarning;
 
     public void StartDragging()
     {
@@ -99,19 +99,16 @@ public class Brush : MonoBehaviour, IMouseDrag
 
     public void Connector_OnRotateActionStart(Connector connector, int rotateIndex)
     {
-        HexCell target;
         switch (rotateIndex)
         {
             //ccw
             case -1:
                 //from connector to this 's cell direction
-                target = connector.cell.PreviousCell(cell);
-                StartCoroutine(MoveToTarget(connector, target, OnFinishThirdLevelCommand));
+                StartCoroutine(MoveToTarget(connector, connector.cell.PreviousCell(cell), OnFinishThirdLevelCommand));
                 break;
             //cw
             case 1:
-                target = connector.cell.PreviousCell(cell);
-                StartCoroutine(MoveToTarget(connector, target, OnFinishThirdLevelCommand));
+                StartCoroutine(MoveToTarget(connector, connector.cell.NextCell(cell), OnFinishThirdLevelCommand));
                 break;
         }
     }

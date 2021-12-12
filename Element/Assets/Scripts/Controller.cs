@@ -18,7 +18,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     public event Action OnMouseDragEnd;
     public event Action OnFinishCommand;
     public event Action OnFinishSecondLevelCommand;
-    public event Action<HexCell, string> OnWarning;
+    public event Action<Vector3, WarningType> OnWarning;
 
     //recorder:
     Direction recorderDirection;
@@ -235,6 +235,11 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
                 break;
             }
         }
+
+        if (recievers.Count == 0)
+        {
+            StartCoroutine(Sleep());
+        }
     }
 
     public void Split()
@@ -256,6 +261,11 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
                 break;
             }
         }
+
+        if (recievers.Count == 0)
+        {
+            StartCoroutine(Sleep());
+        }
     }
 
     public void Delay()
@@ -276,6 +286,11 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             {
                 break;
             }
+        }
+
+        if (recievers.Count == 0)
+        {
+            StartCoroutine(Sleep());
         }
     }
 
@@ -379,7 +394,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         if (recievedMovingCommandNum > 1)
         {
             StopAllCoroutines();
-            OnWarning?.Invoke(cell, "Error#03\nTwo move commands received at the same time!");
+            OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
 
@@ -397,23 +412,17 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
             yield return null;
         }
-        if (target.IsEmpty())
+
+        if (!target.beColoring)
         {
-            if (!target.beColoring)
-            {
-                cell = target;
-                cell.controller = this;
-                cell.reciever = this;
-                recievedMovingCommandNum = 0;
-            }
-            else
-            {
-                OnWarning?.Invoke(target, "Error#01!\nEntered the unit that has been colored!");
-            }
+            cell = target;
+            cell.controller = this;
+            cell.reciever = this;
+            recievedMovingCommandNum = 0;
         }
         else
         {
-            OnWarning?.Invoke(target, "Error#00!\nTwo devices enter one unit at the same time!");
+            OnWarning?.Invoke(transform.position, WarningType.EnteredColoredUnit);
         }
 
         OnFinishSecondLevelCommand?.Invoke();
@@ -471,5 +480,17 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     public void RunDelay()
     {
         OnFinishCommand?.Invoke();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other != null)
+        {
+            if (!ProcessSystem.Instance.CanOperate())
+            {
+                print("Enter");
+                OnWarning?.Invoke(transform.position, WarningType.Collision);
+            }
+        }
     }
 }

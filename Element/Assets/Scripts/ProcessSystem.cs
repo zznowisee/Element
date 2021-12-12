@@ -113,7 +113,7 @@ public class ProcessSystem : MonoBehaviour
         controller.OnWarning += OnWarning;
     }
 
-    private void OnWarning(HexCell target, string warningText)
+    private void OnWarning(Vector3 position, WarningType warningType)
     {
         StopAllCoroutines();
         for (int i = 0; i < connectors.Count; i++)
@@ -132,7 +132,7 @@ public class ProcessSystem : MonoBehaviour
         OnFinishAllCommandsOrWarning?.Invoke();
         processState = ProcessState.WARNING;
         processType = ProcessType.PAUSE;
-        TooltipSystem.Instance.ShowWarning(target, warningText);
+        TooltipSystem.Instance.ShowWarning(position, warningType);
     }
 
     private void BuildSystem_OnDestoryBrush(Brush brush)
