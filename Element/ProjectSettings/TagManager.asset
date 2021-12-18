@@ -41,8 +41,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Color
+  - name: Cell
     uniqueID: 3790357871
+    locked: 0
+  - name: PredictionLine
+    uniqueID: 1295420725
     locked: 0
   - name: UI
     uniqueID: 2451686179

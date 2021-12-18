@@ -2,7 +2,7 @@ Shader "Unlit/ColorHex"
 {
     Properties
     {
-        _Color("_Color", Color) = (1,1,1,1)
+        _Color("Color", Color) = (1,1,1,1)
         _Outter("_Outter", Range(0.9,1)) = 0.98
     }
         SubShader
@@ -47,7 +47,7 @@ Shader "Unlit/ColorHex"
             {
                 float delta = fwidth(i.uv.x);
                 float a = 1 - smoothstep(_Outter - delta, _Outter + delta, i.uv.x);
-                return fixed4(_Color.xyz,a);
+                return fixed4(_Color.xyz, a * _Color.a);
             }
             ENDCG
         }

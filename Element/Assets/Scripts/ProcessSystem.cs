@@ -5,6 +5,9 @@ using System;
 
 public class ProcessSystem : MonoBehaviour
 {
+
+    public OperatorDataSO current;
+
     public enum ProcessType
     {
         EDIT,
@@ -26,6 +29,8 @@ public class ProcessSystem : MonoBehaviour
 
     public event Action<int> OnReadNextCommandLine;
     public event Action OnFinishAllCommandsOrWarning;
+    public event Action OnSwitchToMainScene;
+    public event Action OnPlayerWin;
     public static ProcessSystem Instance { get; private set; }
 
     [Header("Command SO")]
@@ -56,7 +61,17 @@ public class ProcessSystem : MonoBehaviour
     [HideInInspector] public int commandLineIndex = 0;
     [HideInInspector] public int commandLineMaxIndex = 0;
 
-    UISystem uiSystem;
+    [SerializeField] OperatorUISystem operatorUISystem;
+    [SerializeField] MainUISystem mainUISystem;
+    [SerializeField] HexMap hexMap;
+
+    [SerializeField] ProductLine pfProductLine;
+    [SerializeField] ProductCell pfProductCell;
+
+    List<CheckProductColorCell> productColorCells;
+    List<CheckProductHalfLine> productHalfLines;
+    List<CheckProductColorCell> finishedColorCells;
+    List<CheckProductHalfLine> finishedHalfLines;
     void Awake()
     {
         Instance = this;
@@ -65,6 +80,11 @@ public class ProcessSystem : MonoBehaviour
         recordCells = new List<HexCell>();
         brushes = new List<Brush>();
         controllers = new List<Controller>();
+
+        productColorCells = new List<CheckProductColorCell>();
+        productHalfLines = new List<CheckProductHalfLine>();
+        finishedColorCells = new List<CheckProductColorCell>();
+        finishedHalfLines = new List<CheckProductHalfLine>();
 
         commandDictionary[splitSO] = Split;
         commandDictionary[brushCWRotateSO] = ClockwiseRotate;
@@ -80,8 +100,6 @@ public class ProcessSystem : MonoBehaviour
 
         processType = ProcessType.EDIT;
         processState = ProcessState.NOTSTART;
-
-        uiSystem = FindObjectOfType<UISystem>();
     }
 
     public bool CanOperate()
@@ -91,22 +109,83 @@ public class ProcessSystem : MonoBehaviour
 
     void Start()
     {
-        BuildSystem.Instance.OnCreateNewBrush += BuildSystem_OnCreateNewBrush;
-        BuildSystem.Instance.OnDestoryBrush += BuildSystem_OnDestoryBrush;
-        BuildSystem.Instance.OnCreateNewConnector += BuildSystem_OnCreateNewConnector;
+        BuildSystem.Instance.OnCreateNewBrush += OnCreateNewBrush;
+        BuildSystem.Instance.OnDestoryBrush += OnDestroyBrush;
+        BuildSystem.Instance.OnCreateNewConnector += OnCreateNewConnector;
         BuildSystem.Instance.OnDestoryConnector += BuildSystem_OnDestoryConnector;
-        BuildSystem.Instance.OnCreateNewController += BuildSystem_OnCreateNewController;
-        BuildSystem.Instance.OnDestoryController += BuildSystem_OnDestoryController;
+        BuildSystem.Instance.OnCreateNewController += OnCreateNewController;
+        BuildSystem.Instance.OnDestoryController += OnDestroyController;
+
+        operatorUISystem.OnSwitchToMainScene += OperatorUISystem_OnSwitchToMainScene;
+        mainUISystem.OnSwitchToOperatorScene += MainUISystem_OnSwitchToOperatorScene;
     }
 
-    private void BuildSystem_OnDestoryController(Controller controller)
+    private void MainUISystem_OnSwitchToOperatorScene(LevelDataSO levelData_, OperatorDataSO operatorData_)
+    {
+        current = operatorData_;
+
+        for (int i = 0; i < levelData_.productData.cells.Length; i++)
+        {
+            CellData data = levelData_.productData.cells[i];
+            Vector2Int coord = data.coord + hexMap.centerCellCoord;
+            HexCell cell = hexMap.coordCellDictionary[coord];
+            ProductCell productCell = Instantiate(pfProductCell, hexMap.productHolder);
+            productCell.Setup(cell.transform.position, data.buildColor.color);
+
+            productColorCells.Add(new CheckProductColorCell(cell, data.drawColor));
+        }
+        for (int i = 0; i < levelData_.productData.lines.Length; i++)
+        {
+            LineData data = levelData_.productData.lines[i];
+            Vector2Int aCoord = data.pointA + hexMap.centerCellCoord;
+            Vector2Int bCoord = data.pointB + hexMap.centerCellCoord;
+            HexCell start = hexMap.coordCellDictionary[aCoord];
+            HexCell end = hexMap.coordCellDictionary[bCoord];
+
+            ProductLine productLine = Instantiate(pfProductLine);
+            productLine.Setup(start.transform.position, end.transform.position, data.buildColor.color);
+            productLine.transform.SetParent(hexMap.productHolder, true);
+
+            productHalfLines.Add(new CheckProductHalfLine(start, end, data.drawColor));
+            productHalfLines.Add(new CheckProductHalfLine(end, start, data.drawColor));
+        }
+    }
+
+    private void OperatorUISystem_OnSwitchToMainScene()
+    {
+        current.brushDatas.Clear();
+        current.connectorDatas.Clear();
+        current.controllerDatas.Clear();
+
+        for (int i = 0; i < controllers.Count; i++)
+        {
+            current.controllerDatas.Add(controllers[i].controllerData);
+            controllers[i].OnSwitchToMainScene();
+        }
+        for (int i = 0; i < brushes.Count; i++)
+        {
+            current.brushDatas.Add(brushes[i].brushData);
+            brushes[i].OnSwitchToMainScene();
+        }
+        for (int i = 0; i < connectors.Count; i++)
+        {
+            current.connectorDatas.Add(connectors[i].connectorData);
+            connectors[i].OnSwitchToMainScene();
+        }
+        controllers.Clear();
+        brushes.Clear();
+        connectors.Clear();
+        current = null;
+    }
+
+    private void OnDestroyController(Controller controller)
     {
         controllers.Remove(controller);
         controller.OnFinishCommand -= OnReaderFinishCommand;
         controller.OnWarning -= OnWarning;
     }
 
-    private void BuildSystem_OnCreateNewController(Controller controller)
+    public void OnCreateNewController(Controller controller)
     {
         controllers.Add(controller);
         controller.OnFinishCommand += OnReaderFinishCommand;
@@ -135,29 +214,86 @@ public class ProcessSystem : MonoBehaviour
         TooltipSystem.Instance.ShowWarning(position, warningType);
     }
 
-    private void BuildSystem_OnDestoryBrush(Brush brush)
+    public void OnDestroyBrush(Brush brush)
     {
         brushes.Remove(brush);
         brush.OnWarning -= OnWarning;
+        switch (brush.brushType)
+        {
+            case BrushType.Coloring:
+                brush.GetComponent<ColorBrush>().OnColoringCell -= OnColoringCellColoring;
+                break;
+            case BrushType.Line:
+                brush.GetComponent<LineBrush>().OnDrawingLine -= OnLineBrushDrawingLine;
+                break;
+        }
     }
 
-    private void BuildSystem_OnCreateNewBrush(Brush brush)
+    public void OnCreateNewBrush(Brush brush)
     {
         brushes.Add(brush);
         brush.OnWarning += OnWarning;
+        switch (brush.brushType)
+        {
+            case BrushType.Coloring:
+                brush.GetComponent<ColorBrush>().OnColoringCell += OnColoringCellColoring;
+                break;
+            case BrushType.Line:
+                brush.GetComponent<LineBrush>().OnDrawingLine += OnLineBrushDrawingLine;
+                break;
+        }
     }
 
-    private void BuildSystem_OnDestoryConnector(Connector connector)
+    private void OnLineBrushDrawingLine(HexCell from_, HexCell to_, ColorSO colorSO_)
+    {
+        for (int i = 0; i < productHalfLines.Count; i++)
+        {
+            if(productHalfLines[i].from == from_ && productHalfLines[i].to == to_ && productHalfLines[i].colorSO == colorSO_)
+            {
+                CheckProductHalfLine ft = new CheckProductHalfLine(from_, to_, colorSO_);
+                CheckProductHalfLine tf = new CheckProductHalfLine(to_, from_, colorSO_);
+                productHalfLines.Remove(ft);
+                productHalfLines.Remove(tf);
+                finishedHalfLines.Add(ft);
+                finishedHalfLines.Add(ft);
+                break;
+            }
+        }
+    }
+
+    private void OnColoringCellColoring(HexCell coloringCell_, ColorSO colorSO_)
+    {
+        for (int i = 0; i < productColorCells.Count; i++)
+        {
+            if(productColorCells[i].cell == coloringCell_ && productColorCells[i].colorSO == colorSO_)
+            {
+                CheckProductColorCell pc = new CheckProductColorCell(coloringCell_, colorSO_);
+                finishedColorCells.Add(pc);
+                productColorCells.Remove(pc);
+                for (int j = 0; j < finishedHalfLines.Count; j++)
+                {
+                    if(finishedHalfLines[j].from == coloringCell_)
+                    {
+                        productHalfLines.Add(finishedHalfLines[j]);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    public void BuildSystem_OnDestoryConnector(Connector connector)
     {
         connectors.Remove(connector);
         connector.OnWarning -= OnWarning;
     }
 
-    private void BuildSystem_OnCreateNewConnector(Connector connector)
+    public void OnCreateNewConnector(Connector connector)
     {
         connectors.Add(connector);
         connector.OnWarning += OnWarning;
     }
+
     void ControllerCWRotate(ICommandReader reader) => reader.ControllerCWRotate();
     void ControllerCCWRotate(ICommandReader reader) => reader.ControllerCCWRotate();
     void Split(ICommandReader reader) => reader.Split();
@@ -173,6 +309,18 @@ public class ProcessSystem : MonoBehaviour
     public void OnReaderFinishCommand()
     {
         currentNum++;
+        //
+        if (CheckFinish())
+        {
+            print("WIN");
+            return;
+        }
+        //
+
+
+
+
+
         if (processState != ProcessState.WARNING)
         {
             if (targetNum == currentNum)
@@ -213,7 +361,7 @@ public class ProcessSystem : MonoBehaviour
             for (int i = 0; i < controllers.Count; i++)
             {
                 ICommandReader readerObj = controllers[i].GetComponent<ICommandReader>();
-                CommandSO cmd = uiSystem.GetEachReaderCommandSO(commandLineIndex, readerObj);
+                CommandSO cmd = operatorUISystem.GetEachReaderCommandSO(commandLineIndex, readerObj);
                 if (cmd != null)
                 {
                     commandDictionary[cmd].Invoke(readerObj);
@@ -290,7 +438,7 @@ public class ProcessSystem : MonoBehaviour
         //play btn
         if (isPlayCommand)
         {
-            commandLineMaxIndex = uiSystem.GetCommandLineMaxIndex();
+            commandLineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
             switch (processType)
             {
                 case ProcessType.EDIT:
@@ -323,7 +471,7 @@ public class ProcessSystem : MonoBehaviour
             case ProcessType.EDIT:
                 processType = ProcessType.STEP;
                 Record();
-                commandLineMaxIndex = uiSystem.GetCommandLineMaxIndex();
+                commandLineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
                 processState = ProcessState.RUNNING;
                 RunOnce();
                 break;
@@ -357,9 +505,71 @@ public class ProcessSystem : MonoBehaviour
         currentNum = targetNum = 0;
         // read all infos
         Read();
-
+        for (int i = 0; i < finishedColorCells.Count; i++)
+        {
+            productColorCells.Add(finishedColorCells[i]);
+        }
+        finishedColorCells.Clear();
+        for (int i = 0; i < finishedHalfLines.Count; i++)
+        {
+            productHalfLines.Add(finishedHalfLines[i]);
+        }
+        finishedHalfLines.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NOTSTART;
         TooltipSystem.Instance.HideWarning();
+    }
+
+    public bool CheckFinish()
+    {
+        if(productHalfLines.Count == 0 && productColorCells.Count == 0)
+        {
+            OnPlayerWin?.Invoke();
+            return true;
+        }
+
+        return false;
+    }
+
+    public struct CheckProductHalfLine
+    {
+        public HexCell from;
+        public HexCell to;
+        public ColorSO colorSO;
+        public CheckProductHalfLine(HexCell from_, HexCell to_, ColorSO colorSO_)
+        {
+            from = from_;
+            to = to_;
+            colorSO = colorSO_;
+        }
+        public static bool operator ==(CheckProductHalfLine a, CheckProductHalfLine b)
+        {
+            return (a.from == b.from && a.to == b.to) || (a.to == b.from && a.from == b.to);
+        }
+
+        public static bool operator !=(CheckProductHalfLine a, CheckProductHalfLine b)
+        {
+            return !(a == b);
+        }
+    }
+
+    public struct CheckProductColorCell
+    {
+        public HexCell cell;
+        public ColorSO colorSO;
+        public CheckProductColorCell(HexCell cell_, ColorSO colorSO_)
+        {
+            cell = cell_;
+            colorSO = colorSO_;
+        }
+        public static bool operator ==(CheckProductColorCell a, CheckProductColorCell b)
+        {
+            return a.cell == b.cell && a.colorSO == b.colorSO;
+        }
+
+        public static bool operator !=(CheckProductColorCell a, CheckProductColorCell b)
+        {
+            return !(a == b);
+        }
     }
 }

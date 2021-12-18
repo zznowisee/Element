@@ -2,7 +2,7 @@ Shader "Unlit/Line"
 {
     Properties
     {
-        _Color("_Color", Color) = (1,1,1,1)
+        _Color("Color", Color) = (1,1,1,1)
         _Width("_Width", Range(0.0, 1.0)) = 1.0
     }
     SubShader
@@ -49,7 +49,7 @@ Shader "Unlit/Line"
                 float sqrDst = centre.y * centre.y;
                 float delta = fwidth(sqrt(sqrDst));
                 float a = 1 - smoothstep(_Width - delta, _Width + delta, sqrDst);
-                return fixed4(_Color.xyz,a);
+                return fixed4(_Color.xyz,a * _Color.a);
             }
             ENDCG
         }

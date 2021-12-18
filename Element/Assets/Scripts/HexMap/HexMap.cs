@@ -1,22 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class HexMap : MonoBehaviour
 {
     public int width = 6;
     public int height = 6;
-    public int cycleNum = 3;
+
     [Range(0f,1f)] public float cellScaler = .9f;
     public HexCell pfCell;
 
     HexCell[] cells;
-    Canvas gridHolder;
+    public Dictionary<Vector2Int, HexCell> coordCellDictionary;
+    public Vector2Int centerCellCoord = new Vector2Int(11, 14);
+    [SerializeField] ProductLine pfProductLine;
+    [SerializeField] ProductCell pfProductCell;
+    public Transform productHolder;
 
+    [SerializeField] OperatorUISystem operatorUISystem;
     void Awake()
     {
         Init();
+    }
+
+    void Start()
+    {
+        operatorUISystem.OnSwitchToMainScene += OnSwitchToMainScene;
+    }
+
+    private void OnSwitchToMainScene()
+    {
+        for (int i = 0; i < productHolder.childCount; i++)
+        {
+            Destroy(productHolder.GetChild(i).gameObject);
+        }
     }
 
     void OnValidate()
@@ -33,35 +50,29 @@ public class HexMap : MonoBehaviour
 
     public void Init()
     {
+        coordCellDictionary = new Dictionary<Vector2Int, HexCell>();
         cells = new HexCell[width * height];
-        gridHolder = GetComponentInChildren<Canvas>();
+        transform.position = new Vector3(300, 0);
 
         string mapHolderName = "MapHolder";
-        string textHolderName = "TextHolder";
-        if (gridHolder.transform.Find(mapHolderName))
+        if (transform.Find(mapHolderName))
         {
-            DestroyImmediate(gridHolder.transform.Find(mapHolderName).gameObject);
-        }
-        if (gridHolder.transform.Find(textHolderName))
-        {
-            DestroyImmediate(gridHolder.transform.Find(textHolderName).gameObject);
+            DestroyImmediate(transform.Find(mapHolderName).gameObject);
         }
         Transform mapHolder = new GameObject(mapHolderName).transform;
-        Transform textHolder = new GameObject(textHolderName).transform;
-        mapHolder.parent = gridHolder.transform;
-        textHolder.parent = gridHolder.transform;
+        mapHolder.parent = transform;
 
-        Vector3 originPosition = new Vector3(-width / 2 * HexMatrix.innerRadius * 2f, -height / 2 * HexMatrix.outerRadius * 1.5f);
+        Vector3 originPosition = new Vector3(-width / 2 * HexMatrix.innerRadius * 2f, -height / 2 * HexMatrix.outerRadius * 1.5f) + new Vector3(300, 0);
         for (int y = 0, i = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
-                CreateCell(originPosition, x, y, i++, mapHolder, textHolder);
+                CreateCell(originPosition, x, y, i++, mapHolder);
             }
         }
     }
 
-    void CreateCell(Vector3 originPosition, int x, int y, int i, Transform parent, Transform textHolder)
+    void CreateCell(Vector3 originPosition, int x, int y, int i, Transform parent)
     {
         Vector3 position = Vector3.zero;
         position.x = (x + y * 0.5f - y / 2) * HexMatrix.innerRadius * 2f;
@@ -70,8 +81,9 @@ public class HexMap : MonoBehaviour
 
         HexCell cell = cells[i] = Instantiate(pfCell);
         cell.transform.localScale *= cellScaler;
-        cell.Setup(position, parent, HexCoordinates.SetCoordinates(x, y));
-
+        HexCoordinates coord = HexCoordinates.SetCoordinates(x, y);
+        cell.Setup(i, position, parent, coord);
+        coordCellDictionary[new Vector2Int(coord.X, coord.Y)] = cell;
         if(x > 0)
         {
             cell.SetNeighbor(Direction.W, cells[i - 1]);
@@ -95,5 +107,10 @@ public class HexMap : MonoBehaviour
                 }
             }
         }
+    }
+
+    public HexCell GetCellFromIndex(int index)
+    {
+        return cells[index];
     }
 }

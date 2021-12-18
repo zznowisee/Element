@@ -4,7 +4,7 @@ Shader "Unlit/Circle"
     {
         _innerRadius("_innerRadius", Range(0.0, 0.5)) = 0
         _outterRadius("_outterRadius", Range(0.5, 1.0)) = 0.5
-        _Color("_Color", Color) = (1,1,1,1)
+        _Color("Color", Color) = (1,1,1,1)
     }
     SubShader
     {

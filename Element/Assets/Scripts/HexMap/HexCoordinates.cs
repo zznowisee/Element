@@ -18,8 +18,8 @@ public struct HexCoordinates
 
     public static HexCoordinates SetCoordinates(int x_, int y_)
     {
-        //return new HexCoordinates(x_ - y_ / 2, y_);
-        return new HexCoordinates(x_ , y_);
+        return new HexCoordinates(x_ - y_ / 2, y_);
+        //return new HexCoordinates(x_ , y_);
     }
 
     public override string ToString()
@@ -30,5 +30,15 @@ public struct HexCoordinates
     public string LabelString()
     {
         return $"{X}\n{Y}\n{Z}";
+    }
+
+    public static bool operator ==(HexCoordinates c1, HexCoordinates c2)
+    {
+        return c1.X == c2.X && c1.Y == c2.Y;
+    }
+
+    public static bool operator !=(HexCoordinates c1, HexCoordinates c2)
+    {
+        return !(c1 == c2);
     }
 }

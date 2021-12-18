@@ -40,9 +40,9 @@ public class GridMap : MonoBehaviour
         position += originPosition;
 
         HexCell cell = Instantiate(pfCell);
-        cell.order = i;
+        cell.index = i;
         cell.transform.localScale *= cellScaler;
-        cell.Setup(position, parent, HexCoordinates.SetCoordinates(x, y));
+        cell.Setup(i, position, parent, HexCoordinates.SetCoordinates(x, y));
 
     }
 }

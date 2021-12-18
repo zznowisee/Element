@@ -9,21 +9,23 @@ public class HexCell : MonoBehaviour
     public HexCoordinates hexCoordinates;
     public HexCell[] neighbors;
     [SerializeField] TextMeshPro indexText;
-
+    [SerializeField] MeshRenderer meshRenderer;
+    [SerializeField] Material defaultMat;
+    [SerializeField] Material highlightMat;
     public bool beColoring = false;
-    public int order;
-    Track track;
+    public int index;
+
     public Brush brush;
     public Connector connector;
     public Controller controller;
     public ICommandReciever reciever;
     public Transform patternLineHolder;
-    public void Setup(Vector3 position, Transform parent, HexCoordinates coordinates)
+    public void Setup(int index, Vector3 position, Transform parent, HexCoordinates coordinates)
     {
         neighbors = new HexCell[6];
         hexMesh = GetComponentInChildren<HexCellMesh>();
-        hexMesh.Init();
-
+        hexMesh.Init(Color.white, true);
+        this.index = index;
         transform.position = position;
         transform.parent = parent;
         hexCoordinates = coordinates;
@@ -33,7 +35,6 @@ public class HexCell : MonoBehaviour
         if (debug)
         {
             indexText.text = $"{hexCoordinates.X}\n{hexCoordinates.Y}\n{hexCoordinates.Z}";
-            //indexText.text = order.ToString();
         }
         else
         {
@@ -59,13 +60,6 @@ public class HexCell : MonoBehaviour
         return neighbors[(int)direction];
     }
 
-    public Direction GetTwoNeighborsMoveDirection(HexCell from, HexCell to)
-    {
-        Direction fromDir = GetHexDirection(from);
-        Direction toDir = GetHexDirection(to);
-        return fromDir.MoveDirection(toDir);
-    }
-
     public void SetNeighbor(Direction direction, HexCell cell)
     {
         neighbors[(int)direction] = cell;
@@ -89,16 +83,6 @@ public class HexCell : MonoBehaviour
         return brush == null && connector == null && controller == null;
     }
 
-    public void SetTrack(Track track_)
-    {
-        track = track_;
-    }
-
-    public void ClearTrack()
-    {
-        track = null;
-    }
-
     public bool CanInitNewBrush()
     {
         return brush == null;
@@ -107,14 +91,24 @@ public class HexCell : MonoBehaviour
     public void PaintingWithColor(Color col, int sortingOrder)
     {
         beColoring = true;
-        hexMesh.Coloring(col);
+        Coloring(col);
         hexMesh.GetComponent<MeshRenderer>().sortingOrder = sortingOrder;
         ProcessSystem.Instance.recordCells.Add(this);
     }
+    void Coloring(Color col)
+    {
+        meshRenderer.material = highlightMat;
+        meshRenderer.material.color = col;
+    }
 
+    void ResetColor()
+    {
+        meshRenderer.material = defaultMat;
+        meshRenderer.material.color = Color.white;
+    }
     public void ResetCell()
     {
-        hexMesh.ResetColor();
+        ResetColor();
         for (int i = 0; i < patternLineHolder.childCount; i++)
         {
             Destroy(patternLineHolder.GetChild(i).gameObject);

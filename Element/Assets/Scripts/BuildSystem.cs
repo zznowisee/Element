@@ -5,6 +5,11 @@ using System;
 
 public class BuildSystem : MonoBehaviour
 {
+    [SerializeField] HexMap operatorSystem;
+    [SerializeField] ProcessSystem processSystem;
+    [SerializeField] OperatorUISystem operatorUISystem;
+    [SerializeField] MainUISystem mainUISystem;
+
     public event Action<Brush> OnCreateNewBrush;
     public event Action<Brush> OnDestoryBrush;
 
@@ -16,26 +21,93 @@ public class BuildSystem : MonoBehaviour
 
     public static BuildSystem Instance { get; private set; }
 
-    [SerializeField] Track pfTrack;
     [SerializeField] ColorBrush pfColorBrush;
     [SerializeField] LineBrush pfLineBrush;
     [SerializeField] ColorPicker pfColorPicker;
-    [SerializeField] Connector pfConnecter;
+    [SerializeField] Connector pfConnector;
     [SerializeField] Controller pfController;
  
-    HexCell currentCell;
-    Track currentTrack;
     Brush currentBrush;
     ColorPicker currentColorPicker;
     Connector currentConnector;
     Controller currentController;
-    ControlPoint currentControlPoint;
-    List<int> commandReadersIndices;
+    int[] commandReadersIndices;
 
     void Awake()
     {
         Instance = this;
-        commandReadersIndices = new List<int>();
+        commandReadersIndices = new int[15];
+    }
+
+    void Start()
+    {
+        mainUISystem.OnSwitchToOperatorScene += MainUISystem_OnSwitchToOperatorScene;
+        operatorUISystem.OnSwitchToMainScene += OperatorUISystem_OnSwitchToMainScene;
+    }
+
+    private void OperatorUISystem_OnSwitchToMainScene()
+    {
+        commandReadersIndices = new int[15];
+        currentBrush = null;
+        currentColorPicker = null;
+        currentConnector = null;
+        currentController = null;
+    }
+
+    private void MainUISystem_OnSwitchToOperatorScene(LevelDataSO levelData_, OperatorDataSO operatorData_)
+    {
+        List<BrushData> brushDatas = operatorData_.brushDatas;
+        List<ConnectorData> connectorDatas = operatorData_.connectorDatas;
+        List<ControllerData> controllerDatas = operatorData_.controllerDatas;
+        for (int i = 0; i < brushDatas.Count; i++)
+        {
+            int index = brushDatas[i].cellIndex;
+            ColorSO colorSO = brushDatas[i].colorSO;
+            HexCell cell = operatorSystem.GetCellFromIndex(index);
+            switch (brushDatas[i].type)
+            {
+                case BrushType.Coloring:
+                    ColorBrush colorBrush = Instantiate(pfColorBrush);
+                    colorBrush.Setup(cell, colorSO, BrushType.Coloring);
+                    colorBrush.brushData = brushDatas[i];
+                    processSystem.OnCreateNewBrush(colorBrush);
+                    break;
+                case BrushType.Line:
+                    LineBrush lineBrush = Instantiate(pfLineBrush);
+                    lineBrush.Setup(cell, colorSO, BrushType.Line);
+                    lineBrush.brushData = brushDatas[i];
+                    processSystem.OnCreateNewBrush(lineBrush);
+                    break;
+            }
+        }
+
+        for (int i = 0; i < connectorDatas.Count; i++)
+        {
+            int index = connectorDatas[i].cellIndex;
+            HexCell cell = operatorSystem.GetCellFromIndex(index);
+            Connector connector = Instantiate(pfConnector);
+            connector.Setup(cell);
+            connector.connectorData = connectorDatas[i];
+            processSystem.OnCreateNewConnector(connector);
+        }
+
+        for (int i = 0; i < controllerDatas.Count; i++)
+        {
+            int cellIndex = controllerDatas[i].cellIndex;
+            int consoleIndex = controllerDatas[i].consoleIndex;
+
+            HexCell cell = operatorSystem.GetCellFromIndex(cellIndex);
+            Controller controller = Instantiate(pfController);
+            controller.direction = controllerDatas[i].direction;
+            controller.SetIndex(consoleIndex);
+            controller.Setup(cell);
+            controller.controllerData = controllerDatas[i];
+            // index
+            operatorUISystem.InitConsole(operatorData_.consoleDatas[i].commandSOs, controller, operatorData_.consoleDatas[i]);
+            processSystem.OnCreateNewController(controller);
+
+            commandReadersIndices[consoleIndex - 1] = consoleIndex; 
+        }
     }
 
     void Update()
@@ -46,34 +118,10 @@ public class BuildSystem : MonoBehaviour
         }
 
         HandleMouseDrag();
-        HandleControlPoint();
         HandleControllerBuilding();
         HandleBrushBuilding();
         HandleConnectorBuilding();
         HandleColorPickerBuilding();
-        HandleTrackBuilding();
-    }
-
-    void HandleControlPoint()
-    {
-        if(Input.GetMouseButtonDown(0) && !InputHelper.IsMouseOverUIObject())
-        {
-            ControlPoint controlPoint = InputHelper.GetControlPointUnderPosition2D();
-            if(controlPoint != null)
-            {
-                currentControlPoint = controlPoint;
-            }
-        }
-
-        if (currentControlPoint != null)
-        {
-            if (Input.GetMouseButtonUp(0))
-            {
-                currentControlPoint = null;
-                return;
-            }
-            currentControlPoint.controlBody.RotateInEditMode();
-        }
     }
 
     void HandleMouseDrag()
@@ -87,22 +135,6 @@ public class BuildSystem : MonoBehaviour
                 return;
             }
         }
-    }
-
-    int GetIndexFromIndicesList()
-    {
-        for (int i = 0; i < commandReadersIndices.Count; i++)
-        {
-            if (i != commandReadersIndices[i])
-            {
-                commandReadersIndices.Insert(i, i);
-                return i;
-            }
-        }
-
-        int index = commandReadersIndices.Count;
-        commandReadersIndices.Add(index);
-        return index;
     }
 
     void HandleColorPickerBuilding()
@@ -131,40 +163,6 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
-    void HandleTrackBuilding()
-    {
-        if(currentTrack != null)
-        {
-            if (Input.GetMouseButtonUp(0))
-            {
-                if (InputHelper.IsMouseOverUIObject())
-                {
-                    Destroy(currentTrack.gameObject);
-                    currentTrack = null;
-                    return;
-                }
-
-                HexCell cell = InputHelper.GetHexCellUnderPosition3D();
-                if(cell != null)
-                {
-/*                    if (cell.IsEmpty())
-                    {
-                        cell.SetTrack(currentTrack);
-                        currentTrack.Setup(cell);
-                        currentTrack = null;
-                        return;
-                    }*/
-                }
-
-                Destroy(currentTrack.gameObject);
-                currentTrack = null;
-                return;
-            }
-
-            currentTrack.transform.position = InputHelper.MouseWorldPositionIn2D;
-        }
-    }
-
     void HandleBrushBuilding()
     {
         if (currentBrush != null)
@@ -173,6 +171,8 @@ public class BuildSystem : MonoBehaviour
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
+                    currentBrush.brushBtn.AddBackBrush();
+
                     OnDestoryBrush?.Invoke(currentBrush);
                     Destroy(currentBrush.gameObject);
                 }
@@ -182,7 +182,7 @@ public class BuildSystem : MonoBehaviour
                 {
                     if (cell.CanInitNewBrush())
                     {
-                        currentBrush.Setup(cell);
+                        currentBrush.Setup(cell, currentBrush.colorSO, BrushType.Coloring);
                         currentBrush = null;
                         return;
                     }
@@ -211,14 +211,7 @@ public class BuildSystem : MonoBehaviour
                 {
                     if (cell.CanInitNewBrush())
                     {
-                        if (!currentConnector.HasBeenSetup)
-                        {
-                            currentConnector.Setup(cell);
-                        }
-                        else
-                        {
-                            currentConnector.EnterNewCell(cell);
-                        }
+                        currentConnector.Setup(cell);
                         currentConnector = null;
                         return;
                     }
@@ -246,7 +239,7 @@ public class BuildSystem : MonoBehaviour
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
-                    commandReadersIndices.Remove(currentController.index);
+                    commandReadersIndices[currentController.index - 1] = 0;
                     OnDestoryController?.Invoke(currentController);
                     Destroy(currentController.gameObject);
                 }
@@ -268,15 +261,6 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
-    public void CreateNewTrack()
-    {
-        if (!ProcessSystem.Instance.CanOperate())
-        {
-            return;
-        }
-        currentTrack = Instantiate(pfTrack);
-    }
-
     public void CreateNewController()
     {
         if (!ProcessSystem.Instance.CanOperate())
@@ -284,28 +268,29 @@ public class BuildSystem : MonoBehaviour
             return;
         }
         currentController = Instantiate(pfController);
-        int index = GetIndexFromIndicesList();
+        int index = InputHelper.GetIndexFromIndicesArray(commandReadersIndices);
         currentController.SetIndex(index);
         OnCreateNewController?.Invoke(currentController);
     }
 
-    public void CreateNewLineBrush()
+    public void CreateNewBrush(BrushBtn brushBtn_)
     {
         if (!ProcessSystem.Instance.CanOperate())
         {
             return;
         }
-        currentBrush = Instantiate(pfLineBrush);
-        OnCreateNewBrush?.Invoke(currentBrush);
-    }
+        switch (brushBtn_.brushType)
+        {
+            case BrushType.Coloring:
+                currentBrush = Instantiate(pfColorBrush);
+                currentBrush.SpawnFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
+                break;
+            case BrushType.Line:
+                currentBrush = Instantiate(pfLineBrush);
+                currentBrush.SpawnFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
+                break;
+        }
 
-    public void CreateNewColorBrush()
-    {
-        if (!ProcessSystem.Instance.CanOperate())
-        {
-            return;
-        }
-        currentBrush = Instantiate(pfColorBrush);
         OnCreateNewBrush?.Invoke(currentBrush);
     }
 
@@ -315,7 +300,7 @@ public class BuildSystem : MonoBehaviour
         {
             return;
         }
-        currentConnector = Instantiate(pfConnecter);
+        currentConnector = Instantiate(pfConnector);
         OnCreateNewConnector?.Invoke(currentConnector);
     }
 

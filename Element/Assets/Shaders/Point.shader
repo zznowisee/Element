@@ -3,7 +3,6 @@
 	Properties
 	{
 		_Color ("Color", Color) = (1,1,1,1)
-		_Alpha ("Alpha",Range(0.0,1.0)) = 1.0
 		_Radius("Radius", Range(0.0, 1.0)) = 0.95
 	}
 	SubShader
@@ -50,10 +49,9 @@
 					float2 centreOffset = (i.uv.xy - 0.5) * 2;
 					float sqrDst = dot(centreOffset, centreOffset);
 					float delta = fwidth(sqrt(sqrDst));
-					float alpha = 1 - smoothstep(_Radius - delta, _Radius + delta,sqrDst);
-					alpha *= _Alpha;
+					float alpha = 1 - smoothstep(_Radius - delta, _Radius + delta, sqrDst);
 
-					return float4(_Color.xyz, alpha);
+					return float4(_Color.xyz, alpha * _Color.a);
 			}
 			ENDCG
 		}

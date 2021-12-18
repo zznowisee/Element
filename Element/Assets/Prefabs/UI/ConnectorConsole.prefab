@@ -166,6 +166,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d67f9286f31a3d48bac6eacc6b7279f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  consoleData:
+    consoleIndex: 0
+    commandSOs: []
   indexText: {fileID: 2239115108518078406}
   commandReader: {fileID: 0}
   index: 0
@@ -174,7 +177,7 @@ MonoBehaviour:
   pfCodeSlot: {fileID: 4838164428390581485, guid: 25bb1f95f1171a74c8d86d2b04abcb58, type: 3}
   slots: []
   commands: []
-  slotNum: 39
+  slotNum: 45
 --- !u!114 &854865825874299009
 MonoBehaviour:
   m_ObjectHideFlags: 0

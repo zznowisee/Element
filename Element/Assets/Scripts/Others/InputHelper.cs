@@ -80,23 +80,6 @@ public static class InputHelper
         return null;
     }
 
-    public static ControlPoint GetControlPointUnderPosition2D()
-    {
-        RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
-        for (int i = 0; i < hits.Length; i++)
-        {
-            if (hits[i].collider)
-            {
-                ControlPoint controlPoint = hits[i].collider.GetComponent<ControlPoint>();
-                if (controlPoint != null)
-                {
-                    return controlPoint;
-                }
-            }
-        }
-        return null;
-    }
-
     public static Brush GetBrushUnderPosition2D()
     {
         RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
@@ -176,38 +159,17 @@ public static class InputHelper
         else return Direction.NW;
     }
 
-    public static Vector3 GetDirectionFromAngleInHex(float angle)
+    public static int GetIndexFromIndicesArray(int[] indices)
     {
-        if (angle < 0f) angle += 360f;
-        if (angle <= 60f && angle > 0) return new Vector3(Mathf.Sin(Mathf.PI / 6f), Mathf.Cos(Mathf.PI / 6f));
-        else if (angle > 60f && angle <= 120f) return Vector3.right;
-        else if (angle > 120f && angle <= 180f) return new Vector3(Mathf.Sin(Mathf.PI / 6f), -Mathf.Cos(Mathf.PI / 6f));
-        else if (angle > 180f && angle <= 240f) return new Vector3(-Mathf.Sin(Mathf.PI / 6f), -Mathf.Cos(Mathf.PI / 6f));
-        else if (angle > 240f & angle <= 300f) return Vector3.left;
-        else return new Vector3(-Mathf.Sin(Mathf.PI / 6f), Mathf.Cos(Mathf.PI / 6f));
-    }
-
-    public static Vector3 GetWireEndPositionFromMouse(Vector3 startPosition, Vector3 dir)
-    {
-        Vector3 mousePos = MouseWorldPositionIn2D - (Vector2)startPosition;
-        if(dir.y == 0)
+        for (int i = 0; i < indices.Length; i++)
         {
-            return new Vector3(mousePos.x, 0f) + startPosition;
+            if (indices[i] == 0)
+            {
+                indices[i] = i + 1;
+                return i + 1;
+            }
         }
-        else
-        {
-            float k = -dir.x / dir.y;
-            float b = mousePos.y - k * mousePos.x;
-            float x = b / ((dir.y / dir.x) - k);
-            float y = k * x + b;
-            return new Vector3(x, y) + startPosition;
-        }
-    }
 
-    public static float GetAngleFromMousePositionIn2D(Vector3 startPos)
-    {
-        Vector3 dir = ((Vector3)MouseWorldPositionIn2D - startPos).normalized;
-        float angle = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
-        return angle;
+        return 0;
     }
 }
