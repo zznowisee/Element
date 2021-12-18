@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using System;
+using System.Collections;
+using UnityEngine;
 public enum BrushType
 {
     Coloring,
@@ -15,7 +14,6 @@ public class Brush : MonoBehaviour, IMouseDrag
     [HideInInspector] public BrushBtn brushBtn;
     [HideInInspector] public HexCell cell;
     [HideInInspector] public HexCell recorderCell;
-    [HideInInspector] public ColorSO colorSO;
     public bool putdown;
     public LineRenderer connectLine;
     [SerializeField] protected LineRenderer pfConnectLine;
@@ -38,39 +36,41 @@ public class Brush : MonoBehaviour, IMouseDrag
         Destroy(gameObject);
     }
 
-    public void SpawnFromBtn(ColorSO colorSO_, BrushType brushType_, BrushBtn brushBtn_)
+    public void SetupFromBtn(ColorSO colorSO_, BrushType brushType_, BrushBtn brushBtn_)
     {
-        colorSO = colorSO_;
+        brushData.colorSO = colorSO_;
+        brushData.type = brushType_;
         brushType = brushType_;
-        meshRenderer.material.color = colorSO.color;
+
+        meshRenderer.material.color = brushData.colorSO.drawColor;
+
         brushBtn = brushBtn_;
+        brushData.type = brushType_;
+        brushBtn.brushDatas.Add(brushData);
     }
 
-    public void Setup(HexCell cell_, ColorSO colorSO_, BrushType type_)
+    public void SetupFromData(HexCell cell_, BrushData data_, BrushBtn brushBtn_)
+    {
+        brushData = data_;
+        brushBtn = brushBtn_;
+
+        cell = cell_;
+        cell.brush = this;
+        transform.position = cell.transform.position;
+
+        meshRenderer.material.color = brushData.colorSO.drawColor;
+        brushData.cellIndex = cell.index;
+    }
+
+    public void SetupCell(HexCell cell_)
     {
         cell = cell_;
         cell.brush = this;
         transform.position = cell.transform.position;
 
-        colorSO = colorSO_;
-        brushType = type_;
-
-        meshRenderer.material.color = colorSO.color;
+        meshRenderer.material.color = brushData.colorSO.drawColor;
 
         brushData.cellIndex = cell.index;
-        brushData.colorSO = colorSO_;
-    }
-
-    public void SetColorSO(ColorSO color_)
-    {
-        colorSO = color_;
-        brushData.colorSO = color_;
-        meshRenderer.material.color = colorSO.color;
-    }
-
-    public void ClearColorSO()
-    {
-        colorSO = null;
     }
 
     public void Record()
@@ -80,7 +80,7 @@ public class Brush : MonoBehaviour, IMouseDrag
 
     public void ClearCurrentInfo()
     {
-        if(connector != null)
+        if (connector != null)
         {
             connector.OnMoveActionStart -= Connector_OnMoveActionStart;
             connector.OnRotateActionStart -= Connector_OnRotateActionStart;
@@ -88,7 +88,7 @@ public class Brush : MonoBehaviour, IMouseDrag
             connector = null;
         }
 
-        if(connectLine != null)
+        if (connectLine != null)
         {
             Destroy(connectLine.gameObject);
             connectLine = null;

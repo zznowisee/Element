@@ -18,32 +18,24 @@ MonoBehaviour:
     lines: []
     cells:
     - coord: {x: -1, y: 1}
-      buildColor: {fileID: 11400000, guid: fe90306d8b79f2d47b01ead401f308e3, type: 2}
-      drawColor: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+      color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     - coord: {x: 0, y: 1}
-      buildColor: {fileID: 11400000, guid: 560196df065831c4e972eeca8dcc9de3, type: 2}
-      drawColor: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
+      color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     - coord: {x: -1, y: 0}
-      buildColor: {fileID: 11400000, guid: 560196df065831c4e972eeca8dcc9de3, type: 2}
-      drawColor: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
+      color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     - coord: {x: 0, y: 0}
-      buildColor: {fileID: 11400000, guid: fe90306d8b79f2d47b01ead401f308e3, type: 2}
-      drawColor: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+      color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     - coord: {x: 1, y: 0}
-      buildColor: {fileID: 11400000, guid: fe90306d8b79f2d47b01ead401f308e3, type: 2}
-      drawColor: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+      color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     - coord: {x: 0, y: -1}
-      buildColor: {fileID: 11400000, guid: fe90306d8b79f2d47b01ead401f308e3, type: 2}
-      drawColor: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+      color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     - coord: {x: 1, y: -1}
-      buildColor: {fileID: 11400000, guid: 560196df065831c4e972eeca8dcc9de3, type: 2}
-      drawColor: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
-  levelTools:
-    brushDatas:
-    - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
-      type: 0
-      number: 1
-    - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
-      type: 0
-      number: 1
+      color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
+  brushBtnDatas:
+  - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
+    type: 0
+    number: 1
+  - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+    type: 0
+    number: 1
   operatorDataList: []

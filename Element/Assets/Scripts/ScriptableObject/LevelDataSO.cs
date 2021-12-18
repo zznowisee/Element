@@ -8,7 +8,7 @@ public class LevelDataSO : ScriptableObject
     public LevelType levelType;
     public ProductData productData;
 
-    public List<BrushBtnData> brushBtnDatas;
+    public List<BrushBtnDataInit> brushBtnDatas;
     public List<OperatorDataSO> operatorDataList;
 }
 

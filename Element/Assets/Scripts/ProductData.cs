@@ -13,8 +13,7 @@ public class ProductData
 public class CellData
 {
     public Vector2Int coord;
-    public ColorSO buildColor;
-    public ColorSO drawColor;
+    public ColorSO color;
 }
 
 [System.Serializable]
@@ -22,12 +21,11 @@ public class LineData
 {
     public Vector2Int pointA;
     public Vector2Int pointB;
-    public ColorSO buildColor;
-    public ColorSO drawColor;
+    public ColorSO color;
 }
 
 [System.Serializable]
-public class BrushBtnData
+public class BrushBtnDataInit
 {
     public ColorSO colorSO;
     public BrushType type;

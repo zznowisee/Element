@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Yellow
   m_EditorClassIdentifier: 
   name: Yellow
-  color: {r: 1, g: 0.80392164, b: 0.45882356, a: 1}
+  drawColor: {r: 0.98039216, g: 0.7882353, b: 0.003921569, a: 1}
+  initColor: {r: 0.43529412, g: 0.34901962, b: 0.09019608, a: 1}

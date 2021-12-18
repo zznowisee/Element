@@ -11,6 +11,6 @@ public class ColorPicker : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
 
         color = color_;
-        meshRenderer.material.color = color.color;
+        meshRenderer.material.color = color.drawColor;
     }
 }

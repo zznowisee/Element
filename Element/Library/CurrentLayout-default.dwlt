@@ -19,9 +19,9 @@ MonoBehaviour:
     width: 1920
     height: 997
   m_ShowMode: 4
-  m_Title: Inspector
+  m_Title: Console
   m_RootView: {fileID: 2}
-  m_MinSize: {x: 875, y: 542}
+  m_MinSize: {x: 875, y: 521}
   m_MaxSize: {x: 10000, y: 10000}
   m_Maximized: 1
 --- !u!114 &2
@@ -46,7 +46,7 @@ MonoBehaviour:
     y: 0
     width: 1920
     height: 997
-  m_MinSize: {x: 875, y: 542}
+  m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
   m_UseTopView: 1
   m_TopViewHeight: 30
@@ -117,10 +117,10 @@ MonoBehaviour:
     y: 30
     width: 1920
     height: 947
-  m_MinSize: {x: 708, y: 492}
-  m_MaxSize: {x: 18003, y: 14042}
+  m_MinSize: {x: 708, y: 471}
+  m_MaxSize: {x: 18003, y: 14021}
   vertical: 0
-  controlID: 394
+  controlID: 14133
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -142,10 +142,10 @@ MonoBehaviour:
     y: 0
     width: 231
     height: 947
-  m_MinSize: {x: 231, y: 492}
-  m_MaxSize: {x: 10001, y: 14042}
+  m_MinSize: {x: 231, y: 471}
+  m_MaxSize: {x: 10001, y: 14021}
   vertical: 1
-  controlID: 435
+  controlID: 14221
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -165,8 +165,8 @@ MonoBehaviour:
     y: 0
     width: 231
     height: 424
-  m_MinSize: {x: 201, y: 221}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -222,7 +222,7 @@ MonoBehaviour:
   m_MinSize: {x: 202, y: 342}
   m_MaxSize: {x: 4002, y: 8042}
   vertical: 1
-  controlID: 468
+  controlID: 14259
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -241,7 +241,7 @@ MonoBehaviour:
     x: 0
     y: 0
     width: 1346
-    height: 710
+    height: 723
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 13}
@@ -266,9 +266,9 @@ MonoBehaviour:
   m_Position:
     serializedVersion: 2
     x: 0
-    y: 710
+    y: 723
     width: 1346
-    height: 237
+    height: 224
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 17}
@@ -298,8 +298,8 @@ MonoBehaviour:
     y: 0
     width: 343
     height: 947
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 276, y: 71}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 21}
   m_Panes:
   - {fileID: 21}
@@ -331,7 +331,7 @@ MonoBehaviour:
     x: 231
     y: 73
     width: 1344
-    height: 689
+    height: 702
   m_ViewDataDictionary: {fileID: 0}
   m_SerializedViewNames:
   - UnityEditor.DeviceSimulation.SimulatorWindow
@@ -341,7 +341,7 @@ MonoBehaviour:
   m_ShowGizmos: 0
   m_TargetDisplay: 0
   m_ClearColor: {r: 0, g: 0, b: 0, a: 0}
-  m_TargetSize: {x: 1188, y: 668}
+  m_TargetSize: {x: 1211, y: 681}
   m_TextureFilterMode: 0
   m_TextureHideFlags: 61
   m_RenderIMGUI: 1
@@ -356,10 +356,10 @@ MonoBehaviour:
     m_VRangeLocked: 0
     hZoomLockedByDefault: 0
     vZoomLockedByDefault: 0
-    m_HBaseRangeMin: -594
-    m_HBaseRangeMax: 594
-    m_VBaseRangeMin: -334
-    m_VBaseRangeMax: 334
+    m_HBaseRangeMin: -605.5
+    m_HBaseRangeMax: 605.5
+    m_VBaseRangeMin: -340.5
+    m_VBaseRangeMax: 340.5
     m_HAllowExceedBaseRangeMin: 1
     m_HAllowExceedBaseRangeMax: 1
     m_VAllowExceedBaseRangeMin: 1
@@ -378,9 +378,9 @@ MonoBehaviour:
       x: 0
       y: 21
       width: 1344
-      height: 668
+      height: 681
     m_Scale: {x: 1, y: 1}
-    m_Translation: {x: 672, y: 334}
+    m_Translation: {x: 672, y: 340.5}
     m_MarginLeft: 0
     m_MarginRight: 0
     m_MarginTop: 0
@@ -388,12 +388,12 @@ MonoBehaviour:
     m_LastShownAreaInsideMargins:
       serializedVersion: 2
       x: -672
-      y: -334
+      y: -340.5
       width: 1344
-      height: 668
+      height: 681
     m_MinimalGUI: 1
   m_defaultScale: 1
-  m_LastWindowPixelSize: {x: 1344, y: 689}
+  m_LastWindowPixelSize: {x: 1344, y: 702}
   m_ClearInEditMode: 1
   m_NoCameraWarning: 1
   m_LowResolutionForAspectRatios: 01000000000000000000
@@ -427,9 +427,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 1c9dfeff
+      m_SelectedIDs: a4090000
       m_LastClickedID: 0
-      m_ExpandedIDs: 42fbffff
+      m_ExpandedIDs: 146beeff3c6beeff42fbffff366700009c670000827900004ea60000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -491,7 +491,7 @@ MonoBehaviour:
     m_SkipHidden: 1
     m_SearchArea: 1
     m_Folders:
-    - Assets/LevelDatas
+    - Assets/Scripts/Device
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 0
@@ -505,7 +505,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: f4330000
     m_LastClickedID: 13300
-    m_ExpandedIDs: ffffffff00000000c0cb0000c2cb0000c4cb0000c6cb0000c8cb0000cacb0000cccb0000cecb0000d0cb0000d2cb0000d4cb0000d6cb0000d8cb0000dacb0000
+    m_ExpandedIDs: ffffffff00000000c0cb0000c4cb0000c6cb0000c8cb0000cacb0000cccb0000cecb0000d0cb0000d2cb0000d4cb0000d6cb0000d8cb0000dacb0000dccb0000eacb0000f6cb0000aadc0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -530,10 +530,10 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 0}
+    scrollPos: {x: 0, y: 60}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: ffffffff00000000c0cb0000c2cb0000c4cb0000c6cb0000c8cb0000cacb0000cccb0000cecb0000d0cb0000d2cb0000d4cb0000d6cb0000d8cb0000dacb0000e6cb0000f4cb0000
+    m_ExpandedIDs: ffffffff00000000c0cb0000c4cb0000c6cb0000c8cb0000cacb0000cccb0000cecb0000d0cb0000d2cb0000d4cb0000dacb0000dccb0000eacb0000f0cb0000f6cb0000aadc0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -726,9 +726,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 231
-    y: 783
+    y: 796
     width: 1344
-    height: 216
+    height: 203
   m_ViewDataDictionary: {fileID: 0}
 --- !u!114 &18
 MonoBehaviour:
@@ -757,7 +757,7 @@ MonoBehaviour:
   m_ViewDataDictionary: {fileID: 0}
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: 39754
+  m_LastSelectedObjectID: 46750
 --- !u!114 &19
 MonoBehaviour:
   m_ObjectHideFlags: 52

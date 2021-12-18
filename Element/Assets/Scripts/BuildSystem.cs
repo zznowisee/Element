@@ -56,30 +56,8 @@ public class BuildSystem : MonoBehaviour
 
     private void MainUISystem_OnSwitchToOperatorScene(LevelDataSO levelData_, OperatorDataSO operatorData_)
     {
-        List<BrushData> brushDatas = operatorData_.brushDatas;
         List<ConnectorData> connectorDatas = operatorData_.connectorDatas;
         List<ControllerData> controllerDatas = operatorData_.controllerDatas;
-        for (int i = 0; i < brushDatas.Count; i++)
-        {
-            int index = brushDatas[i].cellIndex;
-            ColorSO colorSO = brushDatas[i].colorSO;
-            HexCell cell = operatorSystem.GetCellFromIndex(index);
-            switch (brushDatas[i].type)
-            {
-                case BrushType.Coloring:
-                    ColorBrush colorBrush = Instantiate(pfColorBrush);
-                    colorBrush.Setup(cell, colorSO, BrushType.Coloring);
-                    colorBrush.brushData = brushDatas[i];
-                    processSystem.OnCreateNewBrush(colorBrush);
-                    break;
-                case BrushType.Line:
-                    LineBrush lineBrush = Instantiate(pfLineBrush);
-                    lineBrush.Setup(cell, colorSO, BrushType.Line);
-                    lineBrush.brushData = brushDatas[i];
-                    processSystem.OnCreateNewBrush(lineBrush);
-                    break;
-            }
-        }
 
         for (int i = 0; i < connectorDatas.Count; i++)
         {
@@ -110,6 +88,26 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
+    public void InitBrushFromData(BrushData brushData_, BrushBtn brushBtn_)
+    {
+        int index = brushData_.cellIndex;
+        HexCell cell = operatorSystem.GetCellFromIndex(index);
+
+        switch (brushData_.type)
+        {
+            case BrushType.Coloring:
+                ColorBrush colorBrush = Instantiate(pfColorBrush);
+                colorBrush.SetupFromData(cell, brushData_, brushBtn_);
+                processSystem.OnCreateNewBrush(colorBrush);
+                break;
+            case BrushType.Line:
+                LineBrush lineBrush = Instantiate(pfLineBrush);
+                lineBrush.SetupFromData(cell, brushData_, brushBtn_);
+                processSystem.OnCreateNewBrush(lineBrush);
+                break;
+        }
+    }
+
     void Update()
     {
         if (!ProcessSystem.Instance.CanOperate())
@@ -121,7 +119,6 @@ public class BuildSystem : MonoBehaviour
         HandleControllerBuilding();
         HandleBrushBuilding();
         HandleConnectorBuilding();
-        HandleColorPickerBuilding();
     }
 
     void HandleMouseDrag()
@@ -137,32 +134,33 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
-    void HandleColorPickerBuilding()
-    {
-        if (currentColorPicker != null)
+    #region Color Picker
+    /*    void HandleColorPickerBuilding()
         {
-            if (Input.GetMouseButtonUp(0))
+            if (currentColorPicker != null)
             {
-                Brush brush = InputHelper.GetBrushUnderPosition2D();
-                if (brush != null)
+                if (Input.GetMouseButtonUp(0))
                 {
-                    brush.SetColorSO(currentColorPicker.color);
-                    Destroy(currentColorPicker.gameObject);
-                    currentColorPicker = null;
-                    return;
+                    Brush brush = InputHelper.GetBrushUnderPosition2D();
+                    if (brush != null)
+                    {
+                        brush.SetColorSO(currentColorPicker.color);
+                        Destroy(currentColorPicker.gameObject);
+                        currentColorPicker = null;
+                        return;
+                    }
+                    else
+                    {
+                        Destroy(currentColorPicker.gameObject);
+                        currentColorPicker = null;
+                        return;
+                    }
                 }
-                else
-                {
-                    Destroy(currentColorPicker.gameObject);
-                    currentColorPicker = null;
-                    return;
-                }
+
+                currentColorPicker.transform.position = InputHelper.MouseWorldPositionIn2D;
             }
-
-            currentColorPicker.transform.position = InputHelper.MouseWorldPositionIn2D;
-        }
-    }
-
+        }*/
+    #endregion
     void HandleBrushBuilding()
     {
         if (currentBrush != null)
@@ -171,7 +169,7 @@ public class BuildSystem : MonoBehaviour
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
-                    currentBrush.brushBtn.AddBackBrush();
+                    currentBrush.brushBtn.OnDestroyBrush(currentBrush.brushData);
 
                     OnDestoryBrush?.Invoke(currentBrush);
                     Destroy(currentBrush.gameObject);
@@ -182,7 +180,7 @@ public class BuildSystem : MonoBehaviour
                 {
                     if (cell.CanInitNewBrush())
                     {
-                        currentBrush.Setup(cell, currentBrush.colorSO, BrushType.Coloring);
+                        currentBrush.SetupCell(cell);
                         currentBrush = null;
                         return;
                     }
@@ -283,11 +281,11 @@ public class BuildSystem : MonoBehaviour
         {
             case BrushType.Coloring:
                 currentBrush = Instantiate(pfColorBrush);
-                currentBrush.SpawnFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
+                currentBrush.SetupFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
                 break;
             case BrushType.Line:
                 currentBrush = Instantiate(pfLineBrush);
-                currentBrush.SpawnFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
+                currentBrush.SetupFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
                 break;
         }
 

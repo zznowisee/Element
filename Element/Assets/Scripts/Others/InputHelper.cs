@@ -45,23 +45,6 @@ public static class InputHelper
 
         return null;
     }
-    
-    public static TrackControlPoint GetTrackControlPointUnderPosition2D()
-    {
-        RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
-        for (int i = 0; i < hits.Length; i++)
-        {
-            if (hits[i].collider)
-            {
-                TrackControlPoint controlPoint = hits[i].collider.GetComponent<TrackControlPoint>();
-                if (controlPoint != null)
-                {
-                    return controlPoint;
-                }
-            }
-        }
-        return null;
-    }
 
     public static IMouseDrag GetIMouseDragUnderPosition2D()
     {
@@ -124,6 +107,7 @@ public static class InputHelper
         }
         return KeyCode.Escape;
     }
+
     public static bool IsTheseKeysDown(params KeyCode[] keyCodes)
     {
         for (int i = 0; i < keyCodes.Length; i++)

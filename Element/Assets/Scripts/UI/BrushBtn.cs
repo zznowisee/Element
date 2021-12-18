@@ -1,11 +1,13 @@
 using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 
 public class BrushBtn : MonoBehaviour, IPointerDownHandler
 {
-    public BrushBtnData brushBtnData;
+    public BrushBtnDataSolution brushBtnDataSolution;
+    public List<BrushData> brushDatas;
     [SerializeField] Image colorImage;
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] TextMeshProUGUI numberText;
@@ -13,19 +15,21 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
     public BrushType brushType;
     public ColorSO colorSO;
     int number;
-    public void Setup(BrushBtnData brushBtnData_)
+    public void Setup(BrushBtnDataSolution brushBtnDataSolution_)
     {
-        brushBtnData = brushBtnData_;
-        colorSO = brushBtnData_.colorSO;
-        brushType = brushBtnData_.type;
-        number = brushBtnData_.number;
-        if(number == 0)
+        brushBtnDataSolution = brushBtnDataSolution_;
+        colorSO = brushBtnDataSolution.colorSO;
+        brushType = brushBtnDataSolution.type;
+        number = brushBtnDataSolution.number;
+        brushDatas = brushBtnDataSolution.brushDatas;
+
+        if (number == 0)
         {
             canvasGroup.alpha = 0.01f;
             canvasGroup.blocksRaycasts = false;
         }
         numberText.text = number <= 1 ? "" : $"x{number}";
-        colorImage.color = colorSO.color;
+        colorImage.color = colorSO.drawColor;
         switch (brushType)
         {
             case BrushType.Coloring:
@@ -40,7 +44,7 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
     public void OnPointerDown(PointerEventData eventData)
     {
         BuildSystem.Instance.CreateNewBrush(this);
-        brushBtnData.number--;
+        brushBtnDataSolution.number--;
         number--;
         numberText.text = number <= 1 ? "" : $"x{number}";
         if (number == 0)
@@ -50,15 +54,17 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    public void AddBackBrush()
+    public void OnDestroyBrush(BrushData brushData_)
     {
-        if(number == 0)
+        if (number == 0)
         {
             canvasGroup.alpha = 1f;
             canvasGroup.blocksRaycasts = true;
         }
-        brushBtnData.number++;
+        brushBtnDataSolution.number++;
         number++;
         numberText.text = number <= 1 ? "" : $"x{number}";
+
+        brushBtnDataSolution.brushDatas.Remove(brushData_);
     }
 }

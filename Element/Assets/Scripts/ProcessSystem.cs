@@ -130,9 +130,9 @@ public class ProcessSystem : MonoBehaviour
             Vector2Int coord = data.coord + hexMap.centerCellCoord;
             HexCell cell = hexMap.coordCellDictionary[coord];
             ProductCell productCell = Instantiate(pfProductCell, hexMap.productHolder);
-            productCell.Setup(cell.transform.position, data.buildColor.color);
+            productCell.Setup(cell.transform.position, data.color.initColor);
 
-            productColorCells.Add(new CheckProductColorCell(cell, data.drawColor));
+            productColorCells.Add(new CheckProductColorCell(cell, data.color));
         }
         for (int i = 0; i < levelData_.productData.lines.Length; i++)
         {
@@ -143,17 +143,16 @@ public class ProcessSystem : MonoBehaviour
             HexCell end = hexMap.coordCellDictionary[bCoord];
 
             ProductLine productLine = Instantiate(pfProductLine);
-            productLine.Setup(start.transform.position, end.transform.position, data.buildColor.color);
+            productLine.Setup(start.transform.position, end.transform.position, data.color.initColor);
             productLine.transform.SetParent(hexMap.productHolder, true);
 
-            productHalfLines.Add(new CheckProductHalfLine(start, end, data.drawColor));
-            productHalfLines.Add(new CheckProductHalfLine(end, start, data.drawColor));
+            productHalfLines.Add(new CheckProductHalfLine(start, end, data.color));
+            productHalfLines.Add(new CheckProductHalfLine(end, start, data.color));
         }
     }
 
     private void OperatorUISystem_OnSwitchToMainScene()
     {
-        current.brushDatas.Clear();
         current.connectorDatas.Clear();
         current.controllerDatas.Clear();
 
@@ -164,7 +163,6 @@ public class ProcessSystem : MonoBehaviour
         }
         for (int i = 0; i < brushes.Count; i++)
         {
-            current.brushDatas.Add(brushes[i].brushData);
             brushes[i].OnSwitchToMainScene();
         }
         for (int i = 0; i < connectors.Count; i++)

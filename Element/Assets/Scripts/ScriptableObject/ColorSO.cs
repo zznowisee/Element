@@ -4,5 +4,6 @@ using UnityEngine;
 public class ColorSO : ScriptableObject
 {
     public new string name;
-    public Color color;
+    public Color drawColor;
+    public Color initColor;
 }

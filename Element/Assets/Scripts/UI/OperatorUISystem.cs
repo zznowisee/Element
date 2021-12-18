@@ -116,7 +116,6 @@ public class OperatorUISystem : MonoBehaviour
         BuildSystem.Instance.OnDestoryController += BuildSystem_OnDestoryController;
         ProcessSystem.Instance.OnReadNextCommandLine += ProcessSystem_OnEnterNextCycle;
         ProcessSystem.Instance.OnFinishAllCommandsOrWarning += ProcessSystem_OnFinishAllCommands;
-        mainUISystem.OnSwitchToOperatorScene += OnSwitchToOperatorScene;
     }
 
     public void OnSwitchToOperatorScene(LevelDataSO levelDataSO_, OperatorDataSO operatorDataSO_)
@@ -124,34 +123,38 @@ public class OperatorUISystem : MonoBehaviour
         levelData = levelDataSO_;
         if (!operatorDataSO_.hasInitialized)
         {
+            print("Init");
             for (int i = 0; i < levelData.brushBtnDatas.Count; i++)
             {
-                BrushBtnData brushBtnDataInit = levelData.brushBtnDatas[i];
-                BrushBtnData cloneData = new BrushBtnData() { type = brushBtnDataInit.type, colorSO = brushBtnDataInit.colorSO, number = brushBtnDataInit.number };
-
+                BrushBtnDataInit brushBtnDataInit = levelData.brushBtnDatas[i];
+                BrushBtnDataSolution data = new BrushBtnDataSolution(brushBtnDataInit);
+                
                 BrushBtn brushBtn = Instantiate(pfBrushBtn, brushesPanel);
-                brushBtn.Setup(cloneData);
-                operatorDataSO_.brushBtnDatas.Add(cloneData);
+                brushBtn.Setup(data);
+                operatorDataSO_.brushBtnDataSolutions.Add(data);
             }
             operatorDataSO_.hasInitialized = true;
         }
         else
         {
-            for (int i = 0; i < operatorDataSO_.brushBtnDatas.Count; i++)
+            for (int i = 0; i < operatorDataSO_.brushBtnDataSolutions.Count; i++)
             {
-                BrushBtnData brushBtnData = operatorDataSO_.brushBtnDatas[i];
+                BrushBtnDataSolution brushBtnDataSolution = operatorDataSO_.brushBtnDataSolutions[i];
                 BrushBtn brushBtn = Instantiate(pfBrushBtn, brushesPanel);
+                brushBtn.Setup(brushBtnDataSolution);
+
+                for (int j = 0; j < brushBtnDataSolution.brushDatas.Count; j++)
+                {
+                    BuildSystem.Instance.InitBrushFromData(brushBtnDataSolution.brushDatas[j], brushBtn);
+                }
             }
         }
     }
 
     void SwitchToMainScene()
     {
-        OperatorDataSO data = ProcessSystem.Instance.current;
-        data.consoleDatas.Clear();
         foreach(CommandConsole console in commandReaderConsoleDictionary.Values)
         {
-            data.consoleDatas.Add(console.consoleData);
             Destroy(console.gameObject);
         }
 

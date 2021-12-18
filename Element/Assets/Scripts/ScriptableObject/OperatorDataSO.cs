@@ -7,20 +7,16 @@ public class OperatorDataSO : ScriptableObject
     public bool hasInitialized;
     public int solutionIndex;
     public LevelDataSO level;
-    public List<BrushData> brushDatas;
     public List<ConnectorData> connectorDatas;
     public List<ControllerData> controllerDatas;
     public List<ConsoleData> consoleDatas;
-    public List<BrushBtnData> brushBtnDatas;
-    public List<BrushBtnBrushData> brushBtnBrushDatas;
+    public List<BrushBtnDataSolution> brushBtnDataSolutions;
     public void Setup()
     {
-        brushDatas = new List<BrushData>();
         connectorDatas = new List<ConnectorData>();
         controllerDatas = new List<ControllerData>();
         consoleDatas = new List<ConsoleData>();
-        brushBtnDatas = new List<BrushBtnData>();
-        brushBtnBrushDatas = new List<BrushBtnBrushData>();
+        brushBtnDataSolutions = new List<BrushBtnDataSolution>();
     }
 }
 
@@ -42,6 +38,7 @@ public class ControllerData
     public int cellIndex;
     public int consoleIndex;
     public Direction direction;
+    public ConsoleData consoleData;
 }
 [System.Serializable]
 public class ConsoleData
@@ -50,8 +47,20 @@ public class ConsoleData
     public CommandSO[] commandSOs;
 }
 [System.Serializable]
-public class BrushBtnBrushData
+public class BrushBtnDataSolution
 {
-    public BrushBtnData brushBtnData;
-    public BrushData brushData;
+    //brush btn info :
+    public ColorSO colorSO;
+    public BrushType type;
+    public int number;
+    //brush info :
+    public List<BrushData> brushDatas;
+
+    public BrushBtnDataSolution(BrushBtnDataInit initData)
+    {
+        brushDatas = new List<BrushData>();
+        colorSO = initData.colorSO;
+        type = initData.type;
+        number = initData.number;
+    }
 }
