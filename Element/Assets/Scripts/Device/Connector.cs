@@ -188,6 +188,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
 
     public void RunConnect()
     {
+        print("Run Connect");
         OnSleepActionStart?.Invoke();
 
         for (int i = 0; i < cell.neighbors.Length; i++)

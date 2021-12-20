@@ -6,6 +6,8 @@ using UnityEngine;
 public class OperatorDataSO : ScriptableObject
 {
     public bool hasInitialized;
+    public bool hasFinished;
+    public bool finishSolution;
     public int solutionIndex;
     public LevelDataSO level;
     public List<ConnectorData> connectorDatas;
@@ -49,8 +51,9 @@ public class ControllerData
 public class ConsoleData
 {
     public int consoleIndex;
-    public CommandSO[] commandSOs;
+    public CommandSO[] commandDatas;
 }
+
 [System.Serializable]
 public class BrushBtnDataSolution
 {

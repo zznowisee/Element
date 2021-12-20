@@ -14,17 +14,20 @@ public class OperatorUISystem : MonoBehaviour
     public static OperatorUISystem Instance { get; private set; }
 
     [SerializeField] MainUISystem mainUISystem;
-
     [SerializeField] Color btnDisable;
     [SerializeField] Color btnEnable;
     [SerializeField] Transform consolePanel;
     [SerializeField] Transform commandPanel;
     [SerializeField] Transform brushesPanel;
+    [SerializeField] Transform finishPanel;
 
     [SerializeField] Button stepBtn;
     [SerializeField] Button playPauseBtn;
     [SerializeField] Button stopBtn;
     [SerializeField] Button quitBtn;
+    [SerializeField] Button continueBtn;
+    [SerializeField] Button exitBtn;
+
     [SerializeField] TextMeshProUGUI cycleNumText;
     [SerializeField] BrushBtn pfBrushBtn;
     [SerializeField] CommandBtn pfCommandBtn;
@@ -108,7 +111,47 @@ public class OperatorUISystem : MonoBehaviour
 
         quitBtn.onClick.AddListener(() =>
         {
+            if (!ProcessSystem.Instance.CanOperate())
+            {
+                foreach (CommandConsole console in commandReaderConsoleDictionary.Values)
+                {
+                    if (ProcessSystem.Instance.commandLineIndex > 0)
+                    {
+                        console.slots[ProcessSystem.Instance.commandLineIndex - 1].SetNormal();
+                    }
+                }
+                cycleNumText.text = "0";
+                ProcessSystem.Instance.Stop();
+                DisableStopBtn();
+                playPauseBtn.gameObject.SetActive(true);
+
+                if (finished)
+                {
+                    finished = false;
+                    playPauseBtn.GetComponent<Image>().color = btnEnable;
+                    stepBtn.GetComponent<Image>().color = btnEnable;
+                    playPauseBtn.enabled = true;
+                    stepBtn.enabled = true;
+                }
+            }
+
             SwitchToMainScene();
+        });
+
+        continueBtn.onClick.AddListener(() =>
+        {
+            finishPanel.gameObject.SetActive(false);
+            SWitchToPlayBtn();
+            ProcessSystem.Instance.OnFinishedContinueEdit();
+        });
+
+        exitBtn.onClick.AddListener(() =>
+        {
+            finishPanel.gameObject.SetActive(false);
+            ProcessSystem.Instance.OnFinishedExit();
+            SwitchToMainScene();
+            DisableStopBtn();
+            SWitchToPlayBtn();
         });
     }
 
@@ -118,6 +161,12 @@ public class OperatorUISystem : MonoBehaviour
         BuildSystem.Instance.OnDestoryController += BuildSystem_OnDestoryController;
         ProcessSystem.Instance.OnReadNextCommandLine += ProcessSystem_OnEnterNextCycle;
         ProcessSystem.Instance.OnFinishAllCommandsOrWarning += ProcessSystem_OnFinishAllCommands;
+        ProcessSystem.Instance.OnPlayerFinishedLevel += ProcessSystem_OnPlayerFinishedLevel;
+    }
+
+    private void ProcessSystem_OnPlayerFinishedLevel()
+    {
+        finishPanel.gameObject.SetActive(true);
     }
 
     public void OnSwitchToOperatorScene(LevelDataSO levelDataSO_, OperatorDataSO operatorDataSO_)
@@ -167,7 +216,7 @@ public class OperatorUISystem : MonoBehaviour
         }
 
         commandReaderConsoleDictionary.Clear();
-
+        operatorData.hasFinished = false;
         EditorUtility.SetDirty(operatorData);
         EditorUtility.SetDirty(levelData);
         AssetDatabase.SaveAssets();
@@ -260,17 +309,17 @@ public class OperatorUISystem : MonoBehaviour
     public void InitConsole(Controller controller, ConsoleData consoleData)
     {
         CommandConsole console = Instantiate(pfCommandConsole, consolePanel);
-        console.transform.SetSiblingIndex(console.index);
+        console.transform.SetSiblingIndex(console.index - 1);
 
         console.Setup(controller, consoleData);
         commandReaderConsoleDictionary[controller] = console;
         console.consoleData = consoleData;
 
-        for (int i = 0; i < consoleData.commandSOs.Length; i++)
+        for (int i = 0; i < consoleData.commandDatas.Length; i++)
         {
-            if (consoleData.commandSOs[i] == null) continue;
+            if (consoleData.commandDatas[i] == null) continue;
             Command command = Instantiate(pfCommand, transform);
-            command.Setup(consoleData.commandSOs[i]);
+            command.Setup(consoleData.commandDatas[i]);
             command.DroppedOnSlot(console.slots[i]);
         }
     }

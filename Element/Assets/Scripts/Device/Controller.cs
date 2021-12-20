@@ -22,8 +22,10 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
 
     public event Action OnMouseDragBegin;
     public event Action OnMouseDragEnd;
+
     public event Action OnFinishCommand;
     public event Action OnFinishSecondLevelCommand;
+
     public event Action<Vector3, WarningType> OnWarning;
 
     //recorder:
@@ -31,8 +33,8 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     Quaternion recorderSpriteRotation;
 
     List<ICommandReciever> recievers;
-    [HideInInspector] public int connectorCommandCounter;
-    [HideInInspector] public int recievedMovingCommandNum = 0;
+    int connectorCommandCounter;
+    int recievedMovingCommandNum = 0;
 
     void Awake()
     {
@@ -111,15 +113,15 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         controllerData.direction = direction;
     }
 
-    private void OnConnectorFinishCommand()
+    private void OnRecieverFinishedCommand()
     {
-        print("OnConnectorFinishCommand");
+        print("Reciever Finished Command");
         connectorCommandCounter++;
         if (connectorCommandCounter == recievers.Count)
         {
             for (int i = 0; i < recievers.Count; i++)
             {
-                recievers[i].OnFinishSecondLevelCommand -= OnConnectorFinishCommand;
+                recievers[i].OnFinishSecondLevelCommand -= OnRecieverFinishedCommand;
             }
             connectorCommandCounter = 0;
             recievers.Clear();
@@ -146,9 +148,13 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
                 ICommandReciever reciever = next.GetICommandReciever();
                 if (reciever != null)
                 {
+                    print("Reciever Not null");
+                    recievers.Add(reciever);
+                    reciever.OnFinishSecondLevelCommand += OnRecieverFinishedCommand;
                     switch (commandType)
                     {
                         case CommandType.Connect:
+                            print("Connect recieve");
                             reciever.RunConnect();
                             break;
                         case CommandType.ConnectorCCR:
@@ -197,7 +203,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         cell.currentObject = null;
         for (int i = 0; i < recievers.Count; i++)
         {
-            recievers[i].OnFinishSecondLevelCommand -= OnConnectorFinishCommand;
+            recievers[i].OnFinishSecondLevelCommand -= OnRecieverFinishedCommand;
         }
         recievers.Clear();
         connectorCommandCounter = 0;
@@ -268,25 +274,12 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         }
 
         OnFinishSecondLevelCommand?.Invoke();
-        if(recievers.Count == 0)
-        {
-            recievedMovingCommandNum = 0;
-            connectorCommandCounter = 0;
-            OnFinishCommand?.Invoke();
-        }
     }
-
-    public void RunPutDownUp(bool coloring)
-    {
-        OnFinishCommand?.Invoke();
-    }
-
-    public void RunRotate(RotateDirection rotateDirection)
-    {
-        recievedMovingCommandNum++;
-        OnFinishCommand?.Invoke();
-    }
-
+    public void RunConnect() => OnFinishSecondLevelCommand?.Invoke();
+    public void RunSplit() => OnFinishSecondLevelCommand?.Invoke();
+    public void RunDelay() => OnFinishSecondLevelCommand?.Invoke();
+    public void RunPutDownUp(bool coloring) => OnFinishSecondLevelCommand?.Invoke();
+    public void RunRotate(RotateDirection rotateDirection) => OnFinishSecondLevelCommand?.Invoke();
     public void RunMove(Direction moveDirection)
     {
         recievedMovingCommandNum++;
@@ -294,10 +287,6 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     }
     public void ControllerCCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CounterClockwise));
     public void ControllerCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.Clockwise));
-    public void RunConnect() => OnFinishCommand?.Invoke();
-    public void RunSplit() => OnFinishCommand?.Invoke();
-    public void RunDelay() => OnFinishCommand?.Invoke();
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other != null)

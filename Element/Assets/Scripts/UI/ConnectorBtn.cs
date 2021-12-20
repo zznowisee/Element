@@ -7,9 +7,12 @@ public class ConnectorBtn : MonoBehaviour, IPointerDownHandler
 {
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (ProcessSystem.Instance.CanOperate())
+        if(eventData.button == PointerEventData.InputButton.Left)
         {
-            BuildSystem.Instance.CreateNewConnecter();
+            if (ProcessSystem.Instance.CanOperate())
+            {
+                BuildSystem.Instance.CreateNewConnecter();
+            }
         }
     }
 }

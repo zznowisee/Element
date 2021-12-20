@@ -47,5 +47,5 @@ MonoBehaviour:
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     type: 1
-    number: 1
+    number: 2
   operatorDataList: []

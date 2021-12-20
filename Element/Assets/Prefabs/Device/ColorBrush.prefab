@@ -410,7 +410,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 2.3
+  m_Radius: 1.8
 --- !u!114 &7972061484336491982
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -427,11 +427,9 @@ MonoBehaviour:
     type: 0
     cellIndex: 0
     colorSO: {fileID: 0}
-  brushType: 0
   brushBtn: {fileID: 0}
   cell: {fileID: 0}
   recorderCell: {fileID: 0}
-  colorSO: {fileID: 11400000, guid: 825c28c28e404e948b9219a6ad976ebe, type: 2}
   putdown: 0
   connectLine: {fileID: 0}
   pfConnectLine: {fileID: 8311449999290214604, guid: f0baecea667b645498911d47e9c22c33, type: 3}

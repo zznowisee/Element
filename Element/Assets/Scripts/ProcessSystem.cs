@@ -29,8 +29,7 @@ public class ProcessSystem : MonoBehaviour
 
     public event Action<int> OnReadNextCommandLine;
     public event Action OnFinishAllCommandsOrWarning;
-    public event Action OnSwitchToMainScene;
-    public event Action OnPlayerWin;
+    public event Action OnPlayerFinishedLevel;
     public static ProcessSystem Instance { get; private set; }
 
     [Header("Command SO")]
@@ -112,7 +111,7 @@ public class ProcessSystem : MonoBehaviour
         BuildSystem.Instance.OnCreateNewBrush += OnCreateNewBrush;
         BuildSystem.Instance.OnDestoryBrush += OnDestroyBrush;
         BuildSystem.Instance.OnCreateNewConnector += OnCreateNewConnector;
-        BuildSystem.Instance.OnDestoryConnector += BuildSystem_OnDestoryConnector;
+        BuildSystem.Instance.OnDestoryConnector += OnDestoryConnector;
         BuildSystem.Instance.OnCreateNewController += OnCreateNewController;
         BuildSystem.Instance.OnDestoryController += OnDestroyController;
 
@@ -151,6 +150,35 @@ public class ProcessSystem : MonoBehaviour
         }
     }
 
+    public void OnFinishedContinueEdit()
+    {
+        operatorData.hasFinished = true;
+    }
+
+    public void OnFinishedExit()
+    {
+        commandLineIndex = currentNum = targetNum = 0;
+        for (int i = 0; i < finishedColorCells.Count; i++)
+        {
+            productColorCells.Add(finishedColorCells[i]);
+        }
+        finishedColorCells.Clear();
+        for (int i = 0; i < finishedHalfLines.Count; i++)
+        {
+            productHalfLines.Add(finishedHalfLines[i]);
+        }
+        finishedHalfLines.Clear();
+        processType = ProcessType.EDIT;
+        processState = ProcessState.NOTSTART;
+        TooltipSystem.Instance.HideWarning();
+        for (int i = 0; i < recordCells.Count; i++)
+        {
+            recordCells[i].ResetCell();
+        }
+
+        recordCells.Clear();
+    }
+
     private void OperatorUISystem_OnSwitchToMainScene()
     {
         operatorData.connectorDatas.Clear();
@@ -170,6 +198,10 @@ public class ProcessSystem : MonoBehaviour
             operatorData.connectorDatas.Add(connectors[i].connectorData);
             connectors[i].OnSwitchToMainScene();
         }
+        productColorCells.Clear();
+        productHalfLines.Clear();
+        finishedColorCells.Clear();
+        finishedHalfLines.Clear();
         controllers.Clear();
         brushes.Clear();
         connectors.Clear();
@@ -187,6 +219,7 @@ public class ProcessSystem : MonoBehaviour
     public void OnCreateNewController(Controller controller)
     {
         controllers.Add(controller);
+        operatorData.controllerDatas.Add(controller.controllerData);
         controller.OnFinishCommand += OnReaderFinishCommand;
         controller.OnWarning += OnWarning;
     }
@@ -281,15 +314,30 @@ public class ProcessSystem : MonoBehaviour
         }
     }
 
-    public void BuildSystem_OnDestoryConnector(Connector connector)
+    public void OnCreateNewConnectorByData(Connector connector)
+    {
+        connectors.Add(connector);
+        connector.OnWarning += OnWarning;
+    }
+
+    public void OnCreateNewControllerByData(Controller controller)
+    {
+        controllers.Add(controller);
+        controller.OnWarning += OnWarning;
+        controller.OnFinishCommand += OnReaderFinishCommand;
+    }
+
+    public void OnDestoryConnector(Connector connector)
     {
         connectors.Remove(connector);
+        operatorData.connectorDatas.Remove(connector.connectorData);
         connector.OnWarning -= OnWarning;
     }
 
     public void OnCreateNewConnector(Connector connector)
     {
         connectors.Add(connector);
+        operatorData.connectorDatas.Add(connector.connectorData);
         connector.OnWarning += OnWarning;
     }
 
@@ -308,17 +356,12 @@ public class ProcessSystem : MonoBehaviour
     public void OnReaderFinishCommand()
     {
         currentNum++;
-        //
+
         if (CheckFinish())
         {
-            print("WIN");
-            return;
+            OnPlayerFinishedLevel?.Invoke();
+            processType = ProcessType.PAUSE;
         }
-        //
-
-
-
-
 
         if (processState != ProcessState.WARNING)
         {
@@ -402,20 +445,10 @@ public class ProcessSystem : MonoBehaviour
         {
             connectors[i].ClearCurrentInfo();
         }
-        for (int i = 0; i < connectors.Count; i++)
-        {
-            connectors[i].ReadPreviousInfo();
-        }
-
         for (int i = 0; i < brushes.Count; i++)
         {
             brushes[i].ClearCurrentInfo();
         }
-        for (int i = 0; i < brushes.Count; i++)
-        {
-            brushes[i].ReadPreviousInfo();
-        }
-
         for (int i = 0; i < controllers.Count; i++)
         {
             controllers[i].ClearCurrentInfo();
@@ -423,6 +456,14 @@ public class ProcessSystem : MonoBehaviour
         for (int i = 0; i < controllers.Count; i++)
         {
             controllers[i].ReadPreviousInfo();
+        }
+        for (int i = 0; i < connectors.Count; i++)
+        {
+            connectors[i].ReadPreviousInfo();
+        }
+        for (int i = 0; i < brushes.Count; i++)
+        {
+            brushes[i].ReadPreviousInfo();
         }
 
         for (int i = 0; i < recordCells.Count; i++)
@@ -521,13 +562,7 @@ public class ProcessSystem : MonoBehaviour
 
     public bool CheckFinish()
     {
-        if(productHalfLines.Count == 0 && productColorCells.Count == 0)
-        {
-            OnPlayerWin?.Invoke();
-            return true;
-        }
-
-        return false;
+        return productHalfLines.Count == 0 && productColorCells.Count == 0 && !operatorData.hasFinished;
     }
 
     public struct CheckProductHalfLine

@@ -156,7 +156,7 @@ public class Brush : MonoBehaviour, IMouseDrag
         OnFinishThirdLevelCommand?.Invoke();
     }
 
-    public void OnDisable()
+    public void OnDestroyByPlayer()
     {
         brushBtn.OnDestroyBrush(brushData);
     }

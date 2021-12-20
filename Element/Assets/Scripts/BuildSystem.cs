@@ -13,7 +13,6 @@ public class BuildSystem : MonoBehaviour
 
     public event Action<Brush> OnCreateNewBrush;
     public event Action<Brush> OnDestoryBrush;
-
     public event Action<Connector> OnCreateNewConnector;
     public event Action<Connector> OnDestoryConnector;
 
@@ -67,7 +66,7 @@ public class BuildSystem : MonoBehaviour
             Connector connector = Instantiate(pfConnector);
             connector.Setup(cell);
             connector.connectorData = connectorDatas[i];
-            processSystem.OnCreateNewConnector(connector);
+            processSystem.OnCreateNewConnectorByData(connector);
         }
 
         for (int i = 0; i < controllerDatas.Count; i++)
@@ -80,8 +79,7 @@ public class BuildSystem : MonoBehaviour
             controller.Setup(cell, controllerDatas[i]);
             // index
             operatorUISystem.InitConsole(controller, controllerDatas[i].consoleData);
-            processSystem.OnCreateNewController(controller);
-
+            processSystem.OnCreateNewControllerByData(controller);
             commandReadersIndices[consoleIndex - 1] = consoleIndex; 
         }
     }
@@ -176,6 +174,7 @@ public class BuildSystem : MonoBehaviour
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
+                    currentBrush.OnDestroyByPlayer();
                     OnDestoryBrush?.Invoke(currentBrush);
                     Destroy(currentBrush.gameObject);
                 }
@@ -192,6 +191,7 @@ public class BuildSystem : MonoBehaviour
                         }
                         else
                         {
+                            currentBrush.OnDestroyByPlayer();
                             OnDestoryBrush?.Invoke(currentBrush);
                             Destroy(currentBrush.gameObject);
                         }
@@ -289,7 +289,6 @@ public class BuildSystem : MonoBehaviour
     {
         currentController = Instantiate(pfController);
         currentController.SetIndex(InputHelper.GetIndexFromIndicesArray(commandReadersIndices));
-        operatorData.controllerDatas.Add(currentController.controllerData);
         OnCreateNewController?.Invoke(currentController);
     }
 
