@@ -10,7 +10,6 @@ public class Brush : MonoBehaviour, IMouseDrag
 {
 
     public BrushData brushData;
-    public BrushType brushType;
     [HideInInspector] public BrushBtn brushBtn;
     [HideInInspector] public HexCell cell;
     [HideInInspector] public HexCell recorderCell;
@@ -25,51 +24,41 @@ public class Brush : MonoBehaviour, IMouseDrag
 
     public void StartDragging()
     {
-        cell.brush = null;
+        cell.currentObject = null;
         cell = null;
         BuildSystem.Instance.SetCurrentTrackingBrush(this);
     }
 
     public void OnSwitchToMainScene()
     {
-        cell.brush = null;
+        cell.currentObject = null;
         Destroy(gameObject);
     }
 
-    public void SetupFromBtn(ColorSO colorSO_, BrushType brushType_, BrushBtn brushBtn_)
+    public void SetupFromBtn(BrushBtn brushBtn_)
     {
-        brushData.colorSO = colorSO_;
-        brushData.type = brushType_;
-        brushType = brushType_;
+        brushBtn = brushBtn_;
+        brushData.colorSO = brushBtn.colorSO;
+        brushData.type = brushBtn.brushType;
+        brushBtn.brushDatas.Add(brushData);
 
         meshRenderer.material.color = brushData.colorSO.drawColor;
-
-        brushBtn = brushBtn_;
-        brushData.type = brushType_;
-        brushBtn.brushDatas.Add(brushData);
     }
 
     public void SetupFromData(HexCell cell_, BrushData data_, BrushBtn brushBtn_)
     {
         brushData = data_;
         brushBtn = brushBtn_;
-
-        cell = cell_;
-        cell.brush = this;
-        transform.position = cell.transform.position;
+        Setup(cell_);
 
         meshRenderer.material.color = brushData.colorSO.drawColor;
-        brushData.cellIndex = cell.index;
     }
 
-    public void SetupCell(HexCell cell_)
+    public void Setup(HexCell cell_)
     {
         cell = cell_;
-        cell.brush = this;
+        cell.currentObject = gameObject;
         transform.position = cell.transform.position;
-
-        meshRenderer.material.color = brushData.colorSO.drawColor;
-
         brushData.cellIndex = cell.index;
     }
 
@@ -94,13 +83,13 @@ public class Brush : MonoBehaviour, IMouseDrag
             connectLine = null;
         }
 
-        cell.brush = null;
+        cell.currentObject = null;
     }
 
     public void ReadPreviousInfo()
     {
         cell = recorderCell;
-        cell.brush = this;
+        cell.currentObject = gameObject;
 
         recorderCell = null;
         transform.position = cell.transform.position;
@@ -128,17 +117,17 @@ public class Brush : MonoBehaviour, IMouseDrag
         }
     }
 
-    public void Connector_OnRotateActionStart(Connector connector, int rotateIndex)
+    public void Connector_OnRotateActionStart(Connector connector, RotateDirection rotateDirection)
     {
-        switch (rotateIndex)
+        switch (rotateDirection)
         {
             //ccw
-            case -1:
+            case RotateDirection.CounterClockwise:
                 //from connector to this 's cell direction
                 StartCoroutine(MoveToTarget(connector, connector.cell.PreviousCell(cell), OnFinishThirdLevelCommand));
                 break;
             //cw
-            case 1:
+            case RotateDirection.Clockwise:
                 StartCoroutine(MoveToTarget(connector, connector.cell.NextCell(cell), OnFinishThirdLevelCommand));
                 break;
         }
@@ -165,5 +154,10 @@ public class Brush : MonoBehaviour, IMouseDrag
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
         OnFinishThirdLevelCommand?.Invoke();
+    }
+
+    public void OnDisable()
+    {
+        brushBtn.OnDestroyBrush(brushData);
     }
 }

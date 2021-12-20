@@ -4,10 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using UnityEditor;
 
 public class OperatorUISystem : MonoBehaviour
 {
     public LevelDataSO levelData;
+    public OperatorDataSO operatorData;
     public event Action OnSwitchToMainScene;
     public static OperatorUISystem Instance { get; private set; }
 
@@ -121,6 +123,7 @@ public class OperatorUISystem : MonoBehaviour
     public void OnSwitchToOperatorScene(LevelDataSO levelDataSO_, OperatorDataSO operatorDataSO_)
     {
         levelData = levelDataSO_;
+        operatorData = operatorDataSO_;
         if (!operatorDataSO_.hasInitialized)
         {
             print("Init");
@@ -165,6 +168,9 @@ public class OperatorUISystem : MonoBehaviour
 
         commandReaderConsoleDictionary.Clear();
 
+        EditorUtility.SetDirty(operatorData);
+        EditorUtility.SetDirty(levelData);
+        AssetDatabase.SaveAssets();
         levelData = null;
         OnSwitchToMainScene?.Invoke();
         gameObject.SetActive(false);
@@ -251,20 +257,21 @@ public class OperatorUISystem : MonoBehaviour
         commandReaderConsoleDictionary[controller] = console;
     }
 
-    public void InitConsole(CommandSO[] commandSOs, Controller controller, ConsoleData consoleData)
+    public void InitConsole(Controller controller, ConsoleData consoleData)
     {
         CommandConsole console = Instantiate(pfCommandConsole, consolePanel);
-        console.Setup(controller);
         console.transform.SetSiblingIndex(console.index);
+
+        console.Setup(controller, consoleData);
         commandReaderConsoleDictionary[controller] = console;
         console.consoleData = consoleData;
-        for (int i = 0; i < commandSOs.Length; i++)
+
+        for (int i = 0; i < consoleData.commandSOs.Length; i++)
         {
-            if (commandSOs[i] == null) continue;
+            if (consoleData.commandSOs[i] == null) continue;
             Command command = Instantiate(pfCommand, transform);
-            CommandSlot slot = console.slots[i];
-            command.Setup(commandSOs[i]);
-            command.DroppedOnSlot(slot);
+            command.Setup(consoleData.commandSOs[i]);
+            command.DroppedOnSlot(console.slots[i]);
         }
     }
 

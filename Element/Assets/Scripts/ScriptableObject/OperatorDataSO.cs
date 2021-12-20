@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[CreateAssetMenu()]
 public class OperatorDataSO : ScriptableObject
 {
     public bool hasInitialized;
@@ -9,13 +10,11 @@ public class OperatorDataSO : ScriptableObject
     public LevelDataSO level;
     public List<ConnectorData> connectorDatas;
     public List<ControllerData> controllerDatas;
-    public List<ConsoleData> consoleDatas;
     public List<BrushBtnDataSolution> brushBtnDataSolutions;
     public void Setup()
     {
         connectorDatas = new List<ConnectorData>();
         controllerDatas = new List<ControllerData>();
-        consoleDatas = new List<ConsoleData>();
         brushBtnDataSolutions = new List<BrushBtnDataSolution>();
     }
 }
@@ -26,6 +25,12 @@ public class BrushData
     public BrushType type;
     public int cellIndex;
     public ColorSO colorSO;
+    public BrushData (BrushData brushData_)
+    {
+        type = brushData_.type;
+        cellIndex = brushData_.cellIndex;
+        colorSO = brushData_.colorSO;
+    }
 }
 [System.Serializable]
 public class ConnectorData

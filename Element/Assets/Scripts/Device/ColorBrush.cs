@@ -10,7 +10,7 @@ public class ColorBrush : Brush
     public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
     {
         yield return null;
-        cell.brush = null;
+        cell.currentObject = null;
         float percent = 0f;
         Vector3 startPosition = transform.position;
         Vector3 endPosition = target.transform.position;
@@ -24,7 +24,7 @@ public class ColorBrush : Brush
         }
 
         cell = target;
-        cell.brush = this;
+        cell.currentObject = gameObject;
         TryPainiting();
 
         callback?.Invoke();

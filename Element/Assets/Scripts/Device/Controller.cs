@@ -4,6 +4,12 @@ using UnityEngine;
 using System;
 using TMPro;
 
+public enum RotateDirection
+{
+    Clockwise,
+    CounterClockwise
+}
+
 public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandReciever
 {
     public Direction direction;
@@ -37,8 +43,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
 
     public void OnSwitchToMainScene()
     {
-        cell.controller = null;
-        cell.reciever = null;
+        cell.currentObject = null;
         Destroy(gameObject);
     }
 
@@ -47,27 +52,28 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         predictionLine.SetPositions(new Vector3[]
         {
             Vector3.zero,
-            (cell.GetNeighbor(direction).transform.position - cell.transform.position).normalized * predictionLineLength
+            Vector3.up * predictionLineLength
         });
     }
 
+    public void Setup(HexCell cell, ControllerData controllerData_)
+    {
+        controllerData = controllerData_;
+        direction = controllerData.direction;
+        SetIndex(controllerData.consoleIndex);
+        Setup(cell);
+    }
     public void Setup(HexCell cell_)
     {
         cell = cell_;
-        cell.controller = this;
-        cell.reciever = this;
+        cell.currentObject = gameObject;
 
         transform.position = cell.transform.position;
 
         predictionLine.gameObject.SetActive(true);
         UpdatePredictionLine();
-        SetSpriteRotation();
-        controllerData.cellIndex = cell.index;
-    }
-
-    void SetSpriteRotation()
-    {
         sprite.transform.rotation = Quaternion.Euler(Vector3.forward * -(int)direction * 60f - Vector3.forward * 30f);
+        controllerData.cellIndex = cell.index;
     }
 
     public void SetIndex(int index_)
@@ -81,24 +87,23 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     public void StartDragging()
     {
         predictionLine.gameObject.SetActive(false);
-        cell.controller = null;
-        cell.reciever = null;
+        cell.currentObject = null;
 
         BuildSystem.Instance.SetCurrentTrackingController(this);
         OnMouseDragBegin?.Invoke();
     }
 
-    public void Rotate(int rotateIndex)
+    public void Rotate(RotateDirection rotateDirection)
     {
-        switch (rotateIndex)
+        switch (rotateDirection)
         {
             //ccw
-            case -1:
+            case RotateDirection.CounterClockwise:
                 direction = direction.Previous();
                 sprite.transform.rotation = Quaternion.Euler(sprite.transform.eulerAngles + Vector3.forward * 60f);
                 break;
             //cw
-            case 1:
+            case RotateDirection.Clockwise:
                 direction = direction.Next();
                 sprite.transform.rotation = Quaternion.Euler(sprite.transform.eulerAngles - Vector3.forward * 60f);
                 break;
@@ -106,95 +111,11 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         controllerData.direction = direction;
     }
 
-    void TrackNewReciever(ICommandReciever reciever)
-    {
-        recievers.Add(reciever);
-        reciever.OnFinishSecondLevelCommand += OnConnectorFinishCommand;
-    }
-
-    public void Putdown()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunPutDownUp(true);
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
-
-    public void Putup()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunPutDownUp(false);
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
-
-    public void ConnectorCWRotate()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunRotate(1);
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if(recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
-
     private void OnConnectorFinishCommand()
     {
         print("OnConnectorFinishCommand");
         connectorCommandCounter++;
-        if(connectorCommandCounter == recievers.Count)
+        if (connectorCommandCounter == recievers.Count)
         {
             for (int i = 0; i < recievers.Count; i++)
             {
@@ -205,18 +126,56 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             OnFinishCommand?.Invoke();
         }
     }
-
-    public void ConnectorCCWRotate()
+    public void RunCommand(CommandType commandType)
     {
+        switch (commandType)
+        {
+            case CommandType.ControllerCCR:
+                ControllerCCWRotate();
+                return;
+            case CommandType.ControllerCR:
+                ControllerCWRotate();
+                return;
+        }
+
         HexCell next = cell.GetNeighbor(direction);
         for (int i = 0; i < 25; i++)
         {
             if (next != null)
             {
-                if (next.reciever != null)
+                ICommandReciever reciever = next.GetICommandReciever();
+                if (reciever != null)
                 {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunRotate(-1);
+                    switch (commandType)
+                    {
+                        case CommandType.Connect:
+                            reciever.RunConnect();
+                            break;
+                        case CommandType.ConnectorCCR:
+                            reciever.RunRotate(RotateDirection.CounterClockwise);
+                            break;
+                        case CommandType.ConnectorCR:
+                            reciever.RunRotate(RotateDirection.Clockwise);
+                            break;
+                        case CommandType.Delay:
+                            reciever.RunDelay();
+                            break;
+                        case CommandType.Pull:
+                            reciever.RunMove(direction.Opposite());
+                            break;
+                        case CommandType.Push:
+                            reciever.RunMove(direction);
+                            break;
+                        case CommandType.PutDown:
+                            reciever.RunPutDownUp(true);
+                            break;
+                        case CommandType.PutUp:
+                            reciever.RunPutDownUp(false);
+                            break;
+                        case CommandType.Split:
+                            reciever.RunSplit();
+                            break;
+                    }
                 }
                 next = next.GetNeighbor(direction);
             }
@@ -232,140 +191,10 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         }
     }
 
-    public void Connect()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunConnect();
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
-
-    public void Split()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunSplit();
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
-
-    public void Delay()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunDelay();
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
-
-    public void Push()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunMove(direction);
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
-
-    public void Pull()
-    {
-        HexCell next = cell.GetNeighbor(direction);
-        for (int i = 0; i < 25; i++)
-        {
-            if (next != null)
-            {
-                if (next.reciever != null)
-                {
-                    TrackNewReciever(next.reciever);
-                    next.reciever.RunMove(direction.Opposite());
-                }
-                next = next.GetNeighbor(direction);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (recievers.Count == 0)
-        {
-            StartCoroutine(Sleep());
-        }
-    }
 
     public override void ClearCurrentInfo()
     {
-        cell.controller = null;
-        cell.reciever = null;
+        cell.currentObject = null;
         for (int i = 0; i < recievers.Count; i++)
         {
             recievers[i].OnFinishSecondLevelCommand -= OnConnectorFinishCommand;
@@ -379,8 +208,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     {
         cell = recordCell;
 
-        cell.controller = this;
-        cell.reciever = this;
+        cell.currentObject = gameObject;
         direction = recorderDirection;
         UpdatePredictionLine();
         recordCell = null;
@@ -415,8 +243,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         }
 
         HexCell target = cell.GetNeighbor(direction);
-        cell.controller = null;
-        cell.reciever = null;
+        cell.currentObject = null;
 
         float percent = 0f;
         Vector3 startPosition = transform.position;
@@ -432,8 +259,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         if (!target.beColoring)
         {
             cell = target;
-            cell.controller = this;
-            cell.reciever = this;
+            cell.currentObject = gameObject;
             recievedMovingCommandNum = 0;
         }
         else
@@ -450,28 +276,12 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         }
     }
 
-    public void ControllerCCWRotate()
-    {
-        direction = direction.Previous();
-        sprite.transform.rotation = Quaternion.Euler(sprite.transform.eulerAngles + Vector3.forward * 60f);
-        UpdatePredictionLine();
-        StartCoroutine(Sleep());
-    }
-
-    public void ControllerCWRotate()
-    {
-        direction = direction.Next();
-        sprite.transform.rotation = Quaternion.Euler(sprite.transform.eulerAngles - Vector3.forward * 60f);
-        UpdatePredictionLine();
-        StartCoroutine(Sleep());
-    }
-
     public void RunPutDownUp(bool coloring)
     {
         OnFinishCommand?.Invoke();
     }
 
-    public void RunRotate(int rotateDirection)
+    public void RunRotate(RotateDirection rotateDirection)
     {
         recievedMovingCommandNum++;
         OnFinishCommand?.Invoke();
@@ -482,21 +292,11 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         recievedMovingCommandNum++;
         StartCoroutine(MoveToTarget(moveDirection));
     }
-
-    public void RunConnect()
-    {
-        OnFinishCommand?.Invoke();
-    }
-
-    public void RunSplit()
-    {
-        OnFinishCommand?.Invoke();
-    }
-
-    public void RunDelay()
-    {
-        OnFinishCommand?.Invoke();
-    }
+    public void ControllerCCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CounterClockwise));
+    public void ControllerCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.Clockwise));
+    public void RunConnect() => OnFinishCommand?.Invoke();
+    public void RunSplit() => OnFinishCommand?.Invoke();
+    public void RunDelay() => OnFinishCommand?.Invoke();
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -508,5 +308,34 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
                 OnWarning?.Invoke(transform.position, WarningType.Collision);
             }
         }
+    }
+
+    IEnumerator RotateToTarget(RotateDirection rotateDirection)
+    {
+        Quaternion start = sprite.transform.rotation;
+        Quaternion end = start;
+        float percent = 0f;
+        switch (rotateDirection)
+        {
+            case RotateDirection.Clockwise:
+                end = Quaternion.Euler(sprite.transform.eulerAngles - Vector3.forward * 60f);
+                direction = direction.Next();
+                break;
+            case RotateDirection.CounterClockwise:
+                end = Quaternion.Euler(sprite.transform.eulerAngles + Vector3.forward * 60f);
+                direction = direction.Previous();
+                break;
+        }
+
+        while(percent < 1f)
+        {
+            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
+            percent = Mathf.Clamp01(percent);
+            sprite.transform.rotation = Quaternion.Lerp(start, end, percent);
+            yield return null;
+        }
+        connectorCommandCounter = 0;
+        recievedMovingCommandNum = 0;
+        OnFinishCommand?.Invoke();
     }
 }

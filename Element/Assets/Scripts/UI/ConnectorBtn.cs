@@ -7,6 +7,9 @@ public class ConnectorBtn : MonoBehaviour, IPointerDownHandler
 {
     public void OnPointerDown(PointerEventData eventData)
     {
-        BuildSystem.Instance.CreateNewConnecter();
+        if (ProcessSystem.Instance.CanOperate())
+        {
+            BuildSystem.Instance.CreateNewConnecter();
+        }
     }
 }

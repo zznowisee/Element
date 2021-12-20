@@ -14,11 +14,7 @@ public class HexCell : MonoBehaviour
     [SerializeField] Material highlightMat;
     public bool beColoring = false;
     public int index;
-
-    public Brush brush;
-    public Connector connector;
-    public Controller controller;
-    public ICommandReciever reciever;
+    public GameObject currentObject;
     public Transform patternLineHolder;
     public void Setup(int index, Vector3 position, Transform parent, HexCoordinates coordinates)
     {
@@ -40,6 +36,15 @@ public class HexCell : MonoBehaviour
         {
             indexText.text = "";
         }
+    }
+
+    public ICommandReciever GetICommandReciever()
+    {
+        if(currentObject != null)
+        {
+            return currentObject.GetComponent<ICommandReciever>();
+        }
+        return null;
     }
 
     public Direction GetHexDirection(HexCell cell)
@@ -77,16 +82,8 @@ public class HexCell : MonoBehaviour
         Direction direction = GetHexDirection(cell);
         return neighbors[(int)direction.Next()];
     }
-    
-    public bool IsEmpty()
-    {
-        return brush == null && connector == null && controller == null;
-    }
 
-    public bool CanInitNewBrush()
-    {
-        return brush == null;
-    }
+    public bool IsEmpty() => currentObject == null;
 
     public void PaintingWithColor(Color col, int sortingOrder)
     {

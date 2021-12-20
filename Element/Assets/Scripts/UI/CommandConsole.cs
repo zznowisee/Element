@@ -10,7 +10,7 @@ public class CommandConsole : MonoBehaviour
     public ConsoleData consoleData;
 
     [SerializeField] TextMeshProUGUI indexText;
-    [SerializeField] CommandRunner commandReader;
+    [SerializeField] Controller controller;
     [HideInInspector] public int index;
 
     [SerializeField] Color codeSlotNormalCol;
@@ -19,12 +19,13 @@ public class CommandConsole : MonoBehaviour
     [HideInInspector] public CommandSlot[] slots;
     public CommandSO[] commands;
     public int slotNum = 40;
-    public void Setup(CommandRunner connecter_)
+
+    public void Setup(Controller controller_)
     {
-        commandReader = connecter_;
+        controller = controller_;
         slots = new CommandSlot[slotNum];
         commands = new CommandSO[slotNum];
-        index = commandReader.index;
+        index = controller.index;
         indexText.text = index.ToString();
         gameObject.name = $"Connecter{index}_Console";
 
@@ -35,6 +36,26 @@ public class CommandConsole : MonoBehaviour
             slots[i].gameObject.name = $"CodeSlot_{ i }";
         }
         consoleData.commandSOs = new CommandSO[40];
+        consoleData.consoleIndex = index;
+        controller.controllerData.consoleData = consoleData;
+    }
+
+    public void Setup(Controller controller_, ConsoleData consoleData_)
+    {
+        controller = controller_;
+        slots = new CommandSlot[slotNum];
+        commands = new CommandSO[slotNum];
+        index = controller.index;
+        indexText.text = index.ToString();
+        gameObject.name = $"Connecter{index}_Console";
+
+        for (int i = 0; i < slotNum; i++)
+        {
+            slots[i] = Instantiate(pfCodeSlot, transform);
+            slots[i].Setup(codeSlotNormalCol, codeSlotHighlightCol, i, this);
+            slots[i].gameObject.name = $"CodeSlot_{ i }";
+        }
+        consoleData = consoleData_;
     }
 
     public CommandSO GetCommandSOFromLineIndex(int lineIndex)

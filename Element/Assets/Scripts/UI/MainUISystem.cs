@@ -95,14 +95,14 @@ public class MainUISystem : MonoBehaviour
                     break;
             }
 
-            LevelSelectBtn selectBtn = Instantiate(pfLevelSelectBtn, levelSelectParent);
-            selectBtn.gameObject.name = $"{levelData.name}SelectBtn";
-            SolutionSystem levelSolution = Instantiate(pfLevelSolution, levelPageParent);
-            levelSolution.gameObject.name = $"{levelData.name}SolutionBtnPanel";
+            LevelSelectBtn levelSelectBtn = Instantiate(pfLevelSelectBtn, levelSelectParent);
+            levelSelectBtn.gameObject.name = $"{levelData.name}SelectBtn";
+            SolutionSystem solution = Instantiate(pfLevelSolution, levelPageParent);
+            solution.gameObject.name = $"{levelData.name}SolutionBtnPanel";
 
-            selectBtn.Setup(page, levelData, levelSolution, levelSelectParent.gameObject);
-            levelSolution.Setup(page, levelData, levelSelectParent.gameObject);
-            levelSolution.gameObject.SetActive(false);
+            levelSelectBtn.Setup(page, levelData, solution, levelSelectParent.gameObject);
+            solution.Setup(page, levelData, levelSelectParent.gameObject);
+            solution.gameObject.SetActive(false);
         }
 
         tutorialLevelPage.gameObject.SetActive(true);

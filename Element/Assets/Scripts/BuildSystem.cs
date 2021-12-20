@@ -5,6 +5,7 @@ using System;
 
 public class BuildSystem : MonoBehaviour
 {
+    public OperatorDataSO operatorData;
     [SerializeField] HexMap operatorSystem;
     [SerializeField] ProcessSystem processSystem;
     [SerializeField] OperatorUISystem operatorUISystem;
@@ -28,7 +29,6 @@ public class BuildSystem : MonoBehaviour
     [SerializeField] Controller pfController;
  
     Brush currentBrush;
-    ColorPicker currentColorPicker;
     Connector currentConnector;
     Controller currentController;
     int[] commandReadersIndices;
@@ -47,15 +47,16 @@ public class BuildSystem : MonoBehaviour
 
     private void OperatorUISystem_OnSwitchToMainScene()
     {
+        operatorData = null;
         commandReadersIndices = new int[15];
         currentBrush = null;
-        currentColorPicker = null;
         currentConnector = null;
         currentController = null;
     }
 
     private void MainUISystem_OnSwitchToOperatorScene(LevelDataSO levelData_, OperatorDataSO operatorData_)
     {
+        operatorData = operatorData_;
         List<ConnectorData> connectorDatas = operatorData_.connectorDatas;
         List<ControllerData> controllerDatas = operatorData_.controllerDatas;
 
@@ -76,12 +77,9 @@ public class BuildSystem : MonoBehaviour
 
             HexCell cell = operatorSystem.GetCellFromIndex(cellIndex);
             Controller controller = Instantiate(pfController);
-            controller.direction = controllerDatas[i].direction;
-            controller.SetIndex(consoleIndex);
-            controller.Setup(cell);
-            controller.controllerData = controllerDatas[i];
+            controller.Setup(cell, controllerDatas[i]);
             // index
-            operatorUISystem.InitConsole(operatorData_.consoleDatas[i].commandSOs, controller, operatorData_.consoleDatas[i]);
+            operatorUISystem.InitConsole(controller, controllerDatas[i].consoleData);
             processSystem.OnCreateNewController(controller);
 
             commandReadersIndices[consoleIndex - 1] = consoleIndex; 
@@ -159,7 +157,16 @@ public class BuildSystem : MonoBehaviour
 
                 currentColorPicker.transform.position = InputHelper.MouseWorldPositionIn2D;
             }
-        }*/
+        }
+    /*    public void CreateColorPicker(ColorSO color_)
+    {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            return;
+        }
+        currentColorPicker = Instantiate(pfColorPicker);
+        currentColorPicker.Setup(color_);
+    }*/
     #endregion
     void HandleBrushBuilding()
     {
@@ -169,20 +176,25 @@ public class BuildSystem : MonoBehaviour
             {
                 if (InputHelper.IsMouseOverUIObject())
                 {
-                    currentBrush.brushBtn.OnDestroyBrush(currentBrush.brushData);
-
                     OnDestoryBrush?.Invoke(currentBrush);
                     Destroy(currentBrush.gameObject);
                 }
-
-                HexCell cell = InputHelper.GetHexCellUnderPosition3D();
-                if (cell != null)
+                else
                 {
-                    if (cell.CanInitNewBrush())
+                    HexCell cell = InputHelper.GetHexCellUnderPosition3D();
+                    if (cell != null)
                     {
-                        currentBrush.SetupCell(cell);
-                        currentBrush = null;
-                        return;
+                        if (cell.IsEmpty())
+                        {
+                            currentBrush.Setup(cell);
+                            currentBrush = null;
+                            return;
+                        }
+                        else
+                        {
+                            OnDestoryBrush?.Invoke(currentBrush);
+                            Destroy(currentBrush.gameObject);
+                        }
                     }
                 }
             }
@@ -203,15 +215,22 @@ public class BuildSystem : MonoBehaviour
                     OnDestoryConnector?.Invoke(currentConnector);
                     Destroy(currentConnector.gameObject);
                 }
-
-                HexCell cell = InputHelper.GetHexCellUnderPosition3D();
-                if (cell != null)
+                else
                 {
-                    if (cell.CanInitNewBrush())
+                    HexCell cell = InputHelper.GetHexCellUnderPosition3D();
+                    if (cell != null)
                     {
-                        currentConnector.Setup(cell);
-                        currentConnector = null;
-                        return;
+                        if (cell.IsEmpty())
+                        {
+                            currentConnector.Setup(cell);
+                            currentConnector = null;
+                            return;
+                        }
+                        else
+                        {
+                            OnDestoryConnector?.Invoke(currentConnector);
+                            Destroy(currentConnector.gameObject);
+                        }
                     }
                 }
             }
@@ -227,11 +246,11 @@ public class BuildSystem : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                currentController.Rotate(-1);
+                currentController.Rotate(RotateDirection.CounterClockwise);
             }
             else if (Input.GetKeyDown(KeyCode.E))
             {
-                currentController.Rotate(1);
+                currentController.Rotate(RotateDirection.Clockwise);
             }
             else if (Input.GetMouseButtonUp(0))
             {
@@ -240,16 +259,23 @@ public class BuildSystem : MonoBehaviour
                     commandReadersIndices[currentController.index - 1] = 0;
                     OnDestoryController?.Invoke(currentController);
                     Destroy(currentController.gameObject);
-                }
-
-                HexCell cell = InputHelper.GetHexCellUnderPosition3D();
-                if (cell != null)
+                }else
                 {
-                    if (cell.CanInitNewBrush())
+                    HexCell cell = InputHelper.GetHexCellUnderPosition3D();
+                    if (cell != null)
                     {
-                        currentController.Setup(cell);
-                        currentController = null;
-                        return;
+                        if (cell.IsEmpty())
+                        {
+                            currentController.Setup(cell);
+                            currentController = null;
+                            return;
+                        }
+                        else
+                        {
+                            commandReadersIndices[currentController.index - 1] = 0;
+                            OnDestoryController?.Invoke(currentController);
+                            Destroy(currentController.gameObject);
+                        }
                     }
                 }
             }
@@ -261,31 +287,23 @@ public class BuildSystem : MonoBehaviour
 
     public void CreateNewController()
     {
-        if (!ProcessSystem.Instance.CanOperate())
-        {
-            return;
-        }
         currentController = Instantiate(pfController);
-        int index = InputHelper.GetIndexFromIndicesArray(commandReadersIndices);
-        currentController.SetIndex(index);
+        currentController.SetIndex(InputHelper.GetIndexFromIndicesArray(commandReadersIndices));
+        operatorData.controllerDatas.Add(currentController.controllerData);
         OnCreateNewController?.Invoke(currentController);
     }
 
     public void CreateNewBrush(BrushBtn brushBtn_)
     {
-        if (!ProcessSystem.Instance.CanOperate())
-        {
-            return;
-        }
         switch (brushBtn_.brushType)
         {
             case BrushType.Coloring:
                 currentBrush = Instantiate(pfColorBrush);
-                currentBrush.SetupFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
+                currentBrush.SetupFromBtn(brushBtn_);
                 break;
             case BrushType.Line:
                 currentBrush = Instantiate(pfLineBrush);
-                currentBrush.SetupFromBtn(brushBtn_.colorSO, brushBtn_.brushType, brushBtn_);
+                currentBrush.SetupFromBtn(brushBtn_);
                 break;
         }
 
@@ -294,36 +312,11 @@ public class BuildSystem : MonoBehaviour
 
     public void CreateNewConnecter()
     {
-        if (!ProcessSystem.Instance.CanOperate())
-        {
-            return;
-        }
         currentConnector = Instantiate(pfConnector);
         OnCreateNewConnector?.Invoke(currentConnector);
     }
 
-    public void CreateColorPicker(ColorSO color_)
-    {
-        if (!ProcessSystem.Instance.CanOperate())
-        {
-            return;
-        }
-        currentColorPicker = Instantiate(pfColorPicker);
-        currentColorPicker.Setup(color_);
-    }
-
-    public void SetCurrentTrackingBrush(Brush brush)
-    {
-        currentBrush = brush;
-    }
-
-    public void SetCurrentTrackingConnector(Connector connector)
-    {
-        currentConnector = connector;
-    }
-
-    public void SetCurrentTrackingController(Controller controller)
-    {
-        currentController = controller;
-    }
+    public void SetCurrentTrackingBrush(Brush brush) => currentBrush = brush;
+    public void SetCurrentTrackingConnector(Connector connector) => currentConnector = connector;
+    public void SetCurrentTrackingController(Controller controller) => currentController = controller;
 }

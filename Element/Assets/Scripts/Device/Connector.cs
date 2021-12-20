@@ -14,7 +14,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     [SerializeField] GameObject spriteObj;
 
     public event Action<Connector, Direction> OnMoveActionStart;
-    public event Action<Connector, int> OnRotateActionStart;
+    public event Action<Connector, RotateDirection> OnRotateActionStart;
     public event Action OnSleepActionStart;
     public event Action OnFinishSecondLevelCommand;
     public event Action<Vector3, WarningType> OnWarning;
@@ -35,23 +35,20 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     public void Setup(HexCell cell_)
     {
         cell = cell_;
-        cell.connector = this;
-        cell.reciever = this;
+        cell.currentObject = gameObject;
         transform.position = cell.transform.position;
         connectorData.cellIndex = cell.index;
     }
 
     public void OnSwitchToMainScene()
     {
-        cell.connector = null;
-        cell.reciever = null;
+        cell.currentObject = null;
         Destroy(gameObject);
     }
 
     public void StartDragging()
     {
-        cell.connector = null;
-        cell.reciever = null;
+        cell.currentObject = null;
         cell = null;
         BuildSystem.Instance.SetCurrentTrackingConnector(this);
     }
@@ -64,7 +61,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         OnFinishSecondLevelCommand?.Invoke();
     }
 
-    IEnumerator RotateToTarget(int rotateIndex)
+    IEnumerator RotateToTarget(RotateDirection rotateDirection)
     {
         yield return null;
         if(recievedMovingCommandNum > 1)
@@ -74,10 +71,10 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         }
         else
         {
-            OnRotateActionStart?.Invoke(this, rotateIndex);
+            OnRotateActionStart?.Invoke(this, rotateDirection);
         }
 
-        float rotateAngle = rotateIndex == 1 ? -60f : 60f;
+        float rotateAngle = rotateDirection == RotateDirection.Clockwise ? -60f : 60f;
         float percent = 0f;
         Quaternion start = spriteObj.transform.rotation;
         Quaternion end = Quaternion.Euler(spriteObj.transform.eulerAngles + rotateAngle * Vector3.forward);
@@ -112,8 +109,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         }
 
         HexCell target = cell.GetNeighbor(direction);
-        cell.connector = null;
-        cell.reciever = null;
+        cell.currentObject = null;
 
         float percent = 0f;
         Vector3 startPosition = transform.position;
@@ -129,8 +125,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         if (!target.beColoring)
         {
             cell = target;
-            cell.connector = this;
-            cell.reciever = this;
+            cell.currentObject = gameObject;
         }
         else
         {
@@ -155,15 +150,13 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     {
         recievedMovingCommandNum = 0;
         brushFinishCounter = 0;
-        cell.connector = null;
-        cell.reciever = null;
+        cell.currentObject = null;
     }
 
     public void ReadPreviousInfo()
     {
         cell = recorderCell;
-        cell.connector = this;
-        cell.reciever = this;
+        cell.currentObject = gameObject;
         recorderCell = null;
 
         for (int i = 0; i < brushes.Count; i++)
@@ -201,14 +194,17 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         {
             if(cell.neighbors[i] != null)
             {
-                if(cell.neighbors[i].brush != null)
+                if(cell.neighbors[i].currentObject != null)
                 {
-                    Brush newBrush = cell.neighbors[i].brush;
-                    if (!brushes.Contains(newBrush))
+                    Brush newBrush = cell.neighbors[i].currentObject.GetComponent<Brush>();
+                    if(newBrush != null)
                     {
-                        brushes.Add(newBrush);
-                        newBrush.ConnectWithConnector(this);
-                        newBrush.OnFinishThirdLevelCommand += OnBrushFinishCommand;
+                        if (!brushes.Contains(newBrush))
+                        {
+                            brushes.Add(newBrush);
+                            newBrush.ConnectWithConnector(this);
+                            newBrush.OnFinishThirdLevelCommand += OnBrushFinishCommand;
+                        }
                     }
                 }
             }
@@ -248,7 +244,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         }
     }
 
-    public void RunRotate(int rotateDirection)
+    public void RunRotate(RotateDirection rotateDirection)
     {
         recievedMovingCommandNum++;
         StartCoroutine(RotateToTarget(rotateDirection));

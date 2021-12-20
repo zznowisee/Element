@@ -13,7 +13,7 @@ public class LineBrush : Brush
     public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
     {
         yield return null;
-        cell.brush = null;
+        cell.currentObject = null;
         if (CanPaint())
         {
             StartPainting();
@@ -37,7 +37,7 @@ public class LineBrush : Brush
         }
 
         cell = target;
-        cell.brush = this;
+        cell.currentObject = gameObject;
         FinishPainting();
         callback?.Invoke();
     }

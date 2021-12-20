@@ -5,6 +5,9 @@ public class ControllerBtn : MonoBehaviour, IPointerDownHandler
 {
     public void OnPointerDown(PointerEventData eventData)
     {
-        BuildSystem.Instance.CreateNewController();
+        if (ProcessSystem.Instance.CanOperate())
+        {
+            BuildSystem.Instance.CreateNewController();
+        }
     }
 }

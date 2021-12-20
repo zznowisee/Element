@@ -134,6 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b6a521a0c98cf46a0cc131d1da65e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelect: 0
 --- !u!1 &7645429788275219069
 GameObject:
   m_ObjectHideFlags: 0
@@ -268,6 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b6a521a0c98cf46a0cc131d1da65e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelect: 0
 --- !u!1 &7645429788316781608
 GameObject:
   m_ObjectHideFlags: 0
@@ -423,6 +425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b6a521a0c98cf46a0cc131d1da65e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelect: 0
 --- !u!1 &7645429788732935622
 GameObject:
   m_ObjectHideFlags: 0
@@ -825,6 +828,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b6a521a0c98cf46a0cc131d1da65e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeSelect: 0
 --- !u!1 &7645429789424773939
 GameObject:
   m_ObjectHideFlags: 0
@@ -1163,7 +1167,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cf1b1ea4cf6c1441baea4ce67f08929, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SolutionOpenDeleteBtnPanel: {fileID: 7645429789442920949}
+  page: {fileID: 0}
+  levelDataSO: {fileID: 0}
+  operatorDataSO: {fileID: 0}
+  solutionOpenDeleteBtnPanel: {fileID: 7645429789442920949}
   deleteBtn: {fileID: 7645429788275219071}
   openBtn: {fileID: 7645429789405823830}
   backBtn: {fileID: 7645429788316781611}
