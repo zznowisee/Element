@@ -18,10 +18,10 @@ public class ProcessSystem : MonoBehaviour
 
     public enum ProcessState
     {
-        RUNNING,
-        WAITING,
-        NOTSTART,
-        WARNING
+        Running,
+        Waiting,
+        NotStart,
+        Warning
     }
 
     [SerializeField] ProcessType processType;
@@ -98,7 +98,7 @@ public class ProcessSystem : MonoBehaviour
         commandDictionary[controllerCCWSO] = SelfCCR;
 
         processType = ProcessType.EDIT;
-        processState = ProcessState.NOTSTART;
+        processState = ProcessState.NotStart;
     }
 
     public bool CanOperate()
@@ -169,7 +169,7 @@ public class ProcessSystem : MonoBehaviour
         }
         finishedHalfLines.Clear();
         processType = ProcessType.EDIT;
-        processState = ProcessState.NOTSTART;
+        processState = ProcessState.NotStart;
         TooltipSystem.Instance.HideWarning();
         for (int i = 0; i < recordCells.Count; i++)
         {
@@ -241,7 +241,7 @@ public class ProcessSystem : MonoBehaviour
         }
 
         OnFinishAllCommandsOrWarning?.Invoke();
-        processState = ProcessState.WARNING;
+        processState = ProcessState.Warning;
         processType = ProcessType.PAUSE;
         TooltipSystem.Instance.ShowWarning(position, warningType);
     }
@@ -363,7 +363,7 @@ public class ProcessSystem : MonoBehaviour
             processType = ProcessType.PAUSE;
         }
 
-        if (processState != ProcessState.WARNING)
+        if (processState != ProcessState.Warning)
         {
             if (targetNum == currentNum)
             {
@@ -373,13 +373,11 @@ public class ProcessSystem : MonoBehaviour
                         StartCoroutine(Spacing(commandSpacingTime));
                         break;
                     case ProcessType.STEP:
-                        print("PAUSE");
                         processType = ProcessType.PAUSE;
-                        processState = ProcessState.WAITING;
+                        processState = ProcessState.Waiting;
                         break;
                     case ProcessType.PAUSE:
-                        print("PAUSE");
-                        processState = ProcessState.WAITING;
+                        processState = ProcessState.Waiting;
                         break;
                 }
             }
@@ -388,14 +386,17 @@ public class ProcessSystem : MonoBehaviour
 
     IEnumerator Spacing(float spacingTime)
     {
+        processState = ProcessState.Waiting;
         yield return new WaitForSeconds(spacingTime);
         RunOnce();
     }
 
     void RunOnce()
     {
+        if (processState == ProcessState.Running) return;
         if (commandLineIndex <= commandLineMaxIndex)
         {
+            processState = ProcessState.Running;
             OnReadNextCommandLine?.Invoke(commandLineIndex);
             targetNum = controllers.Count;
             currentNum = 0;
@@ -485,15 +486,13 @@ public class ProcessSystem : MonoBehaviour
                     Record();
                     RunOnce();
                     processType = ProcessType.PLAY;
-                    processState = ProcessState.RUNNING;
                     break;
                 case ProcessType.PAUSE:
-                    processType = ProcessType.PLAY;
-                    processState = ProcessState.RUNNING;
                     RunOnce();
+                    processType = ProcessType.PLAY;
                     break;
                 case ProcessType.STEP:
-                    processType = ProcessType.STEP;
+                    processType = ProcessType.PLAY;
                     break;
             }
         }
@@ -509,16 +508,15 @@ public class ProcessSystem : MonoBehaviour
         switch (processType)
         {
             case ProcessType.EDIT:
-                processType = ProcessType.STEP;
-                Record();
                 commandLineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
-                processState = ProcessState.RUNNING;
+                Record();
                 RunOnce();
+                processType = ProcessType.STEP;
                 break;
             case ProcessType.PAUSE:
-                processType = ProcessType.STEP;
-                processState = ProcessState.RUNNING;
+                commandLineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
                 RunOnce();
+                processType = ProcessType.STEP;
                 break;
             case ProcessType.PLAY:
                 processType = ProcessType.STEP;
@@ -556,7 +554,7 @@ public class ProcessSystem : MonoBehaviour
         }
         finishedHalfLines.Clear();
         processType = ProcessType.EDIT;
-        processState = ProcessState.NOTSTART;
+        processState = ProcessState.NotStart;
         TooltipSystem.Instance.HideWarning();
     }
 

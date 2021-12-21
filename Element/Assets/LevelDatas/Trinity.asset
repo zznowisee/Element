@@ -39,4 +39,4 @@ MonoBehaviour:
     type: 0
     number: 1
   operatorDataList:
-  - {fileID: 11400000, guid: f3296ce9d6026a945923a6ef6680891f, type: 2}
+  - {fileID: 11400000, guid: 01147bf2bb949034a9ae64c41b067460, type: 2}

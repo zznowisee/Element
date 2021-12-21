@@ -12,19 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fc1145bbc6620547b7cbd9f8f569db9, type: 3}
   m_Name: Trinity_s1
   m_EditorClassIdentifier: 
-  hasInitialized: 1
+  hasInitialized: 0
   hasFinished: 0
   finishSolution: 0
   solutionIndex: 1
   level: {fileID: 11400000, guid: 18858fdd5bcf046419653bcab1c86e17, type: 2}
   connectorDatas: []
   controllerDatas: []
-  brushBtnDataSolutions:
-  - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
-    type: 0
-    number: 1
-    brushDatas: []
-  - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
-    type: 0
-    number: 1
-    brushDatas: []
+  brushBtnDataSolutions: []
