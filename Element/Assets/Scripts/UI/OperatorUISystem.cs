@@ -113,26 +113,10 @@ public class OperatorUISystem : MonoBehaviour
         {
             if (!ProcessSystem.Instance.CanOperate())
             {
-                foreach (CommandConsole console in commandReaderConsoleDictionary.Values)
-                {
-                    if (ProcessSystem.Instance.commandLineIndex > 0)
-                    {
-                        console.slots[ProcessSystem.Instance.commandLineIndex - 1].SetNormal();
-                    }
-                }
                 cycleNumText.text = "0";
                 ProcessSystem.Instance.Stop();
                 DisableStopBtn();
                 playPauseBtn.gameObject.SetActive(true);
-
-                if (finished)
-                {
-                    finished = false;
-                    playPauseBtn.GetComponent<Image>().color = btnEnable;
-                    stepBtn.GetComponent<Image>().color = btnEnable;
-                    playPauseBtn.enabled = true;
-                    stepBtn.enabled = true;
-                }
             }
 
             SwitchToMainScene();

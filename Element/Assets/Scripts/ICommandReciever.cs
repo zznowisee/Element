@@ -2,11 +2,10 @@ using System;
 
 public interface ICommandReciever
 {
-    public event Action OnFinishSecondLevelCommand;
-    void RunPutDownUp(bool coloring);
-    void RunRotate(RotateDirection rotateDirection);
-    void RunMove(Direction moveDirection);
-    void RunConnect();
-    void RunSplit();
-    void RunDelay();
+    void RunPutDownUp(Action callback, bool coloring);
+    void RunRotate(Action callback, RotateDirection rotateDirection);
+    void RunMove(Action callback, Direction moveDirection);
+    void RunConnect(Action callback);
+    void RunSplit(Action callback);
+    void RunDelay(Action callback);
 }

@@ -19,7 +19,6 @@ public class Brush : MonoBehaviour, IMouseDrag
     [SerializeField] MeshRenderer meshRenderer;
     [SerializeField] GameObject putDownSprite;
     public Connector connector;
-    public event Action OnFinishThirdLevelCommand;
     public virtual event Action<Vector3, WarningType> OnWarning;
 
     public void StartDragging()
@@ -73,7 +72,6 @@ public class Brush : MonoBehaviour, IMouseDrag
         {
             connector.OnMoveActionStart -= Connector_OnMoveActionStart;
             connector.OnRotateActionStart -= Connector_OnRotateActionStart;
-            connector.OnSleepActionStart -= Connector_OnSleepActionStart;
             connector = null;
         }
 
@@ -97,12 +95,7 @@ public class Brush : MonoBehaviour, IMouseDrag
         putdown = false;
     }
 
-    public virtual void ConnectWithConnector(Connector connector_) { }
-
-    public void Connector_OnSleepActionStart()
-    {
-        StartCoroutine(Sleep());
-    }
+    public virtual void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_) { }
 
     public void SplitWithConnector(Connector connector_)
     {
@@ -110,50 +103,49 @@ public class Brush : MonoBehaviour, IMouseDrag
         {
             connector_.OnMoveActionStart -= Connector_OnMoveActionStart;
             connector_.OnRotateActionStart -= Connector_OnRotateActionStart;
-            connector_.OnSleepActionStart -= Connector_OnSleepActionStart;
             Destroy(connectLine.gameObject);
             connectLine = null;
             connector = null;
         }
     }
 
-    public void Connector_OnRotateActionStart(Connector connector, RotateDirection rotateDirection)
+    public void Connector_OnRotateActionStart(Action callback, Action<Action> secondLevelCallback, Connector connector, RotateDirection rotateDirection)
     {
         switch (rotateDirection)
         {
             //ccw
             case RotateDirection.CounterClockwise:
                 //from connector to this 's cell direction
-                StartCoroutine(MoveToTarget(connector, connector.cell.PreviousCell(cell), OnFinishThirdLevelCommand));
+                StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.PreviousCell(cell)));
                 break;
             //cw
             case RotateDirection.Clockwise:
-                StartCoroutine(MoveToTarget(connector, connector.cell.NextCell(cell), OnFinishThirdLevelCommand));
+                StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.NextCell(cell)));
                 break;
         }
     }
 
-    public virtual void PutDownUp(bool putdown_)
+    public virtual void PutDownUp(Action callback, Action<Action> secondLevelCallback, bool putdown_)
     {
         putdown = putdown_;
         putDownSprite.SetActive(putdown);
-        StartCoroutine(Sleep());
+        StartCoroutine(Sleep(callback, secondLevelCallback));
     }
 
-    public void Connector_OnMoveActionStart(Connector connector, Direction direction)
+    public void Connector_OnMoveActionStart(Action callback, Action<Action> secondLevelCallback, Connector connector, Direction direction)
     {
-        StartCoroutine(MoveToTarget(connector, cell.GetNeighbor(direction), OnFinishThirdLevelCommand));
+        StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, cell.GetNeighbor(direction)));
     }
 
-    public virtual IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
+    public virtual IEnumerator MoveToTarget(Action callback, Action<Action> secondLevelCallback, Connector connector, HexCell target)
     {
         return null;
     }
 
-    public IEnumerator Sleep()
+    public IEnumerator Sleep(Action callback, Action<Action> secondLevelCallback)
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
-        OnFinishThirdLevelCommand?.Invoke();
+        secondLevelCallback?.Invoke(callback);
     }
 
     public void OnDestroyByPlayer()

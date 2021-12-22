@@ -7,7 +7,7 @@ public class ColorBrush : Brush
 {
     public override event Action<Vector3, WarningType> OnWarning;
     public event Action<HexCell, ColorSO> OnColoringCell;
-    public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
+    public override IEnumerator MoveToTarget(Action callback, Action<Action> secondLevelCallback, Connector connector, HexCell target)
     {
         yield return null;
         cell.currentObject = null;
@@ -27,7 +27,7 @@ public class ColorBrush : Brush
         cell.currentObject = gameObject;
         TryPainiting();
 
-        callback?.Invoke();
+        secondLevelCallback?.Invoke(callback);
     }
 
     void TryPainiting()
@@ -39,13 +39,13 @@ public class ColorBrush : Brush
         }
     }
 
-    public override void PutDownUp(bool coloring_)
+    public override void PutDownUp(Action callback, Action<Action> secondLevelCallback, bool coloring_)
     {
-        base.PutDownUp(coloring_);
+        base.PutDownUp(callback, secondLevelCallback, coloring_);
         TryPainiting();
     }
 
-    IEnumerator ConnectConnector(Connector connector_)
+    IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
         yield return null;
         if (connector == null)
@@ -53,12 +53,11 @@ public class ColorBrush : Brush
             connector = connector_;
             connector_.OnMoveActionStart += Connector_OnMoveActionStart;
             connector_.OnRotateActionStart += Connector_OnRotateActionStart;
-            connector_.OnSleepActionStart += Connector_OnSleepActionStart;
 
             connectLine = Instantiate(pfConnectLine, transform);
             connectLine.SetPosition(0, cell.transform.position - transform.position);
             connectLine.SetPosition(1, connector_.transform.position - transform.position);
-            StartCoroutine(Sleep());
+            StartCoroutine(Sleep(callback, secondLevelCallback));
         }
         else
         {
@@ -69,9 +68,9 @@ public class ColorBrush : Brush
         }
     }
 
-    public override void ConnectWithConnector(Connector connector_)
+    public override void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
-        StartCoroutine(ConnectConnector(connector_));
+        StartCoroutine(ConnectConnector(callback, secondLevelCallback, connector_));
     }
 
     private void OnTriggerEnter2D(Collider2D other)

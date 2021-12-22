@@ -47,6 +47,7 @@ public class ProcessSystem : MonoBehaviour
 
     Dictionary<CommandSO, Action<ICommandReader>> commandDictionary;
 
+    public List<Controller> checkList;
     public List<Controller> controllers;
     public List<Connector> connectors;
     public List<Brush> brushes;
@@ -58,7 +59,6 @@ public class ProcessSystem : MonoBehaviour
     int targetNum = 0;
     int currentNum;
     [HideInInspector] public int commandLineIndex = 0;
-    [HideInInspector] public int commandLineMaxIndex = 0;
 
     [SerializeField] OperatorUISystem operatorUISystem;
     [SerializeField] MainUISystem mainUISystem;
@@ -353,14 +353,17 @@ public class ProcessSystem : MonoBehaviour
     void Push(ICommandReader reader) => reader.RunCommand(CommandType.Push);
     void Pull(ICommandReader reader) => reader.RunCommand(CommandType.Pull);
 
-    public void OnReaderFinishCommand()
+    public void OnReaderFinishCommand(Controller controller_)
     {
         currentNum++;
+
+        checkList.Remove(controller_);
 
         if (CheckFinish())
         {
             OnPlayerFinishedLevel?.Invoke();
             processType = ProcessType.PAUSE;
+            processState = ProcessState.Waiting;
         }
 
         if (processState != ProcessState.Warning)
@@ -393,8 +396,9 @@ public class ProcessSystem : MonoBehaviour
 
     void RunOnce()
     {
-        if (processState == ProcessState.Running) return;
-        if (commandLineIndex <= commandLineMaxIndex)
+        int lineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
+        controllers.ForEach(controller => checkList.Add(controller));
+        if (commandLineIndex <= lineMaxIndex)
         {
             processState = ProcessState.Running;
             OnReadNextCommandLine?.Invoke(commandLineIndex);
@@ -416,7 +420,7 @@ public class ProcessSystem : MonoBehaviour
             }
 
             commandLineIndex++;
-            if(commandLineIndex > commandLineMaxIndex)
+            if(commandLineIndex > lineMaxIndex)
             {
                 processType = ProcessType.PAUSE;
                 OnFinishAllCommandsOrWarning?.Invoke();
@@ -479,7 +483,6 @@ public class ProcessSystem : MonoBehaviour
         //play btn
         if (isPlayCommand)
         {
-            commandLineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
             switch (processType)
             {
                 case ProcessType.EDIT:
@@ -508,13 +511,11 @@ public class ProcessSystem : MonoBehaviour
         switch (processType)
         {
             case ProcessType.EDIT:
-                commandLineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
                 Record();
                 RunOnce();
                 processType = ProcessType.STEP;
                 break;
             case ProcessType.PAUSE:
-                commandLineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
                 RunOnce();
                 processType = ProcessType.STEP;
                 break;

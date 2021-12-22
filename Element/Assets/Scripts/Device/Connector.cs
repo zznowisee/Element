@@ -13,15 +13,15 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     [SerializeField] float radius = 5f;
     [SerializeField] GameObject spriteObj;
 
-    public event Action<Connector, Direction> OnMoveActionStart;
-    public event Action<Connector, RotateDirection> OnRotateActionStart;
-    public event Action OnSleepActionStart;
-    public event Action OnFinishSecondLevelCommand;
+    public event Action<Action, Action<Action>, Connector, Direction> OnMoveActionStart;
+    public event Action<Action, Action<Action>, Connector, RotateDirection> OnRotateActionStart;
+
+    public Action controllerCallback;
+
     public event Action<Vector3, WarningType> OnWarning;
 
-    public int brushFinishCounter = 0;
     public int recievedMovingCommandNum = 0;
-
+    public int targetNum = 0;
     //recorder:
     HexCell recorderCell;
     Quaternion recorderSpriteObjRotation;
@@ -53,25 +53,25 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         BuildSystem.Instance.SetCurrentTrackingConnector(this);
     }
 
-    IEnumerator Sleep()
+    IEnumerator Sleep(Action callback)
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
-        brushFinishCounter = 0;
         recievedMovingCommandNum = 0;
-        OnFinishSecondLevelCommand?.Invoke();
+        callback?.Invoke();
     }
 
-    IEnumerator RotateToTarget(RotateDirection rotateDirection)
+    IEnumerator RotateToTarget(Action callback, RotateDirection rotateDirection)
     {
         yield return null;
         if(recievedMovingCommandNum > 1)
         {
+            StopAllCoroutines();
             OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
         else
         {
-            OnRotateActionStart?.Invoke(this, rotateDirection);
+            OnRotateActionStart?.Invoke(callback, OnBrushFinishCommand, this, rotateDirection);
         }
 
         float rotateAngle = rotateDirection == RotateDirection.Clockwise ? -60f : 60f;
@@ -89,12 +89,11 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         if (brushes.Count == 0)
         {
             recievedMovingCommandNum = 0;
-            brushFinishCounter = 0;
-            OnFinishSecondLevelCommand?.Invoke();
+            callback?.Invoke();
         }
     }
 
-    IEnumerator MoveToTarget(Direction direction)
+    IEnumerator MoveToTarget(Action callback, Direction direction)
     {
         yield return null;
         if(recievedMovingCommandNum > 1)
@@ -105,7 +104,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         }
         else
         {
-            OnMoveActionStart?.Invoke(this, direction);
+            OnMoveActionStart?.Invoke(callback, OnBrushFinishCommand, this, direction);
         }
 
         HexCell target = cell.GetNeighbor(direction);
@@ -135,8 +134,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         if (brushes.Count == 0)
         {
             recievedMovingCommandNum = 0;
-            brushFinishCounter = 0;
-            OnFinishSecondLevelCommand?.Invoke();
+            callback?.Invoke();
         }
     }
 
@@ -149,7 +147,6 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
     public void ClearCurrentInfo()
     {
         recievedMovingCommandNum = 0;
-        brushFinishCounter = 0;
         cell.currentObject = null;
     }
 
@@ -159,38 +156,26 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         cell.currentObject = gameObject;
         recorderCell = null;
 
-        for (int i = 0; i < brushes.Count; i++)
-        {
-            if (brushes[i] != null)
-            {
-                brushes[i].OnFinishThirdLevelCommand -= OnBrushFinishCommand;
-                brushes[i] = null;
-                brushes.RemoveAt(i);
-                i--;
-            }
-        }
+        brushes.Clear();
         transform.position = cell.transform.position;
         spriteObj.transform.rotation = recorderSpriteObjRotation;
     }
 
-    public void RunPutDownUp(bool coloring)
+    public void RunPutDownUp(Action callback, bool coloring)
     {
         for (int i = 0; i < brushes.Count; i++)
         {
-            brushes[i].PutDownUp(coloring);
+            brushes[i].PutDownUp(callback, OnBrushFinishCommand, coloring);
         }
 
         if (brushes.Count == 0)
         {
-            StartCoroutine(Sleep());
+            StartCoroutine(Sleep(callback));
         }
     }
 
-    public void RunConnect()
+    public void RunConnect(Action callback)
     {
-        print("Run Connect");
-        OnSleepActionStart?.Invoke();
-
         for (int i = 0; i < cell.neighbors.Length; i++)
         {
             if(cell.neighbors[i] != null)
@@ -203,8 +188,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
                         if (!brushes.Contains(newBrush))
                         {
                             brushes.Add(newBrush);
-                            newBrush.ConnectWithConnector(this);
-                            newBrush.OnFinishThirdLevelCommand += OnBrushFinishCommand;
+                            newBrush.ConnectWithConnector(callback, OnBrushFinishCommand, this);
                         }
                     }
                 }
@@ -213,54 +197,51 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
 
         if(brushes.Count == 0)
         {
-            StartCoroutine(Sleep());
+            StartCoroutine(Sleep(callback));
         }
     }
 
-    public void RunSplit()
+    public void RunSplit(Action callback)
     {
         for (int i = 0; i < brushes.Count; i++)
         {
             if (brushes[i] != null)
             {
-                brushes[i].OnFinishThirdLevelCommand -= OnBrushFinishCommand;
                 brushes[i].SplitWithConnector(this);
-                brushes[i] = null;
                 brushes.RemoveAt(i);
                 i--;
             }
         }
 
-        StartCoroutine(Sleep());
+        StartCoroutine(Sleep(callback));
     }
 
-    private void OnBrushFinishCommand()
+    private void OnBrushFinishCommand(Action callback)
     {
-        brushFinishCounter++;
-        if(brushFinishCounter == brushes.Count)
+        targetNum++;
+        if (brushes.Count == targetNum)
         {
-            brushFinishCounter = 0;
             recievedMovingCommandNum = 0;
-            OnFinishSecondLevelCommand?.Invoke();
+            targetNum = 0;
+            callback?.Invoke();
         }
     }
 
-    public void RunRotate(RotateDirection rotateDirection)
+    public void RunRotate(Action callback, RotateDirection rotateDirection)
     {
         recievedMovingCommandNum++;
-        StartCoroutine(RotateToTarget(rotateDirection));
+        StartCoroutine(RotateToTarget(callback, rotateDirection));
     }
 
-    public void RunMove(Direction moveDirection)
+    public void RunMove(Action callback, Direction moveDirection)
     {
         recievedMovingCommandNum++;
-        StartCoroutine(MoveToTarget(moveDirection));
+        StartCoroutine(MoveToTarget(callback, moveDirection));
     }
 
-    public void RunDelay()
+    public void RunDelay(Action callback)
     {
-        OnSleepActionStart?.Invoke();
-        StartCoroutine(Sleep());
+        StartCoroutine(Sleep(callback));
     }
 
     private void OnTriggerEnter2D(Collider2D other)

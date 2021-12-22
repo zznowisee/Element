@@ -10,7 +10,7 @@ public class LineBrush : Brush
 
     public override event Action<Vector3, WarningType> OnWarning;
     public event Action<HexCell, HexCell, ColorSO> OnDrawingLine;
-    public override IEnumerator MoveToTarget(Connector connector, HexCell target, Action callback)
+    public override IEnumerator MoveToTarget(Action controllerCallback, Action<Action> connectorCallback, Connector connector, HexCell target)
     {
         yield return null;
         cell.currentObject = null;
@@ -39,7 +39,7 @@ public class LineBrush : Brush
         cell = target;
         cell.currentObject = gameObject;
         FinishPainting();
-        callback?.Invoke();
+        connectorCallback?.Invoke(controllerCallback);
     }
 
     void StartPainting()
@@ -56,6 +56,7 @@ public class LineBrush : Brush
 
             cell.beColoring = true;
             currentDrawingLine.endCell = cell;
+            cell.beColoring = true;
             ProcessSystem.Instance.recordCells.Add(cell);
 
             OnDrawingLine?.Invoke(currentDrawingLine.startCell, currentDrawingLine.endCell, brushData.colorSO);
@@ -69,12 +70,12 @@ public class LineBrush : Brush
         return putdown;
     }
 
-    public override void ConnectWithConnector(Connector connector_)
+    public override void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
-        StartCoroutine(ConnectConnector(connector_));
+        StartCoroutine(ConnectConnector(callback, secondLevelCallback, connector_));
     }
 
-    IEnumerator ConnectConnector(Connector connector_)
+    IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
         yield return null;
         if (connector == null)
@@ -82,12 +83,11 @@ public class LineBrush : Brush
             connector = connector_;
             connector_.OnMoveActionStart += Connector_OnMoveActionStart;
             connector_.OnRotateActionStart += Connector_OnRotateActionStart;
-            connector_.OnSleepActionStart += Connector_OnSleepActionStart;
 
             connectLine = Instantiate(pfConnectLine, transform);
             connectLine.SetPosition(0, cell.transform.position - transform.position);
             connectLine.SetPosition(1, connector_.transform.position - transform.position);
-            StartCoroutine(Sleep());
+            StartCoroutine(Sleep(callback, secondLevelCallback));
         }
         else
         {

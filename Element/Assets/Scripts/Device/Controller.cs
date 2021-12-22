@@ -23,8 +23,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     public event Action OnMouseDragBegin;
     public event Action OnMouseDragEnd;
 
-    public event Action OnFinishCommand;
-    public event Action OnFinishSecondLevelCommand;
+    public event Action<Controller> OnFinishCommand;
 
     public event Action<Vector3, WarningType> OnWarning;
 
@@ -32,15 +31,13 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     Direction recorderDirection;
     Quaternion recorderSpriteRotation;
 
-    List<ICommandReciever> recievers;
-    int connectorCommandCounter;
-    int recievedMovingCommandNum = 0;
+    int checkNumber = 0;
 
+    int recievedMovingCommandNum = 0;
     void Awake()
     {
         predictionLine.gameObject.SetActive(false);
         sprite.transform.rotation = Quaternion.Euler(Vector3.forward * -30f);
-        recievers = new List<ICommandReciever>();
     }
 
     public void OnSwitchToMainScene()
@@ -115,17 +112,10 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
 
     private void OnRecieverFinishedCommand()
     {
-        print("Reciever Finished Command");
-        connectorCommandCounter++;
-        if (connectorCommandCounter == recievers.Count)
+        checkNumber--;
+        if (checkNumber == 0)
         {
-            for (int i = 0; i < recievers.Count; i++)
-            {
-                recievers[i].OnFinishSecondLevelCommand -= OnRecieverFinishedCommand;
-            }
-            connectorCommandCounter = 0;
-            recievers.Clear();
-            OnFinishCommand?.Invoke();
+            OnFinishCommand?.Invoke(this);
         }
     }
     public void RunCommand(CommandType commandType)
@@ -138,6 +128,9 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             case CommandType.ControllerCR:
                 ControllerCWRotate();
                 return;
+            case CommandType.Delay:
+                StartCoroutine(Sleep());
+                return;
         }
 
         HexCell next = cell.GetNeighbor(direction);
@@ -148,38 +141,32 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
                 ICommandReciever reciever = next.GetICommandReciever();
                 if (reciever != null)
                 {
-                    print("Reciever Not null");
-                    recievers.Add(reciever);
-                    reciever.OnFinishSecondLevelCommand += OnRecieverFinishedCommand;
+                    checkNumber++;
                     switch (commandType)
                     {
                         case CommandType.Connect:
-                            print("Connect recieve");
-                            reciever.RunConnect();
+                            reciever.RunConnect(OnRecieverFinishedCommand);
                             break;
                         case CommandType.ConnectorCCR:
-                            reciever.RunRotate(RotateDirection.CounterClockwise);
+                            reciever.RunRotate(OnRecieverFinishedCommand, RotateDirection.CounterClockwise);
                             break;
                         case CommandType.ConnectorCR:
-                            reciever.RunRotate(RotateDirection.Clockwise);
-                            break;
-                        case CommandType.Delay:
-                            reciever.RunDelay();
+                            reciever.RunRotate(OnRecieverFinishedCommand, RotateDirection.Clockwise);
                             break;
                         case CommandType.Pull:
-                            reciever.RunMove(direction.Opposite());
+                            reciever.RunMove(OnRecieverFinishedCommand, direction.Opposite());
                             break;
                         case CommandType.Push:
-                            reciever.RunMove(direction);
+                            reciever.RunMove(OnRecieverFinishedCommand, direction);
                             break;
                         case CommandType.PutDown:
-                            reciever.RunPutDownUp(true);
+                            reciever.RunPutDownUp(OnRecieverFinishedCommand, true);
                             break;
                         case CommandType.PutUp:
-                            reciever.RunPutDownUp(false);
+                            reciever.RunPutDownUp(OnRecieverFinishedCommand, false);
                             break;
                         case CommandType.Split:
-                            reciever.RunSplit();
+                            reciever.RunSplit(OnRecieverFinishedCommand);
                             break;
                     }
                 }
@@ -191,7 +178,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             }
         }
 
-        if (recievers.Count == 0)
+        if (checkNumber == 0)
         {
             StartCoroutine(Sleep());
         }
@@ -201,12 +188,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     public override void ClearCurrentInfo()
     {
         cell.currentObject = null;
-        for (int i = 0; i < recievers.Count; i++)
-        {
-            recievers[i].OnFinishSecondLevelCommand -= OnRecieverFinishedCommand;
-        }
-        recievers.Clear();
-        connectorCommandCounter = 0;
+        checkNumber = 0;
         recievedMovingCommandNum = 0;
     }
 
@@ -233,12 +215,11 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
     IEnumerator Sleep()
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
-        connectorCommandCounter = 0;
         recievedMovingCommandNum = 0;
-        OnFinishCommand?.Invoke();
+        OnFinishCommand?.Invoke(this);
     }
 
-    IEnumerator MoveToTarget(Direction direction)
+    IEnumerator MoveToTarget(Action callback, Direction direction)
     {
         yield return null;
         if (recievedMovingCommandNum > 1)
@@ -266,25 +247,16 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         {
             cell = target;
             cell.currentObject = gameObject;
-            recievedMovingCommandNum = 0;
         }
         else
         {
             OnWarning?.Invoke(transform.position, WarningType.EnteredColoredUnit);
         }
 
-        OnFinishSecondLevelCommand?.Invoke();
+        callback?.Invoke();
+        recievedMovingCommandNum = 0;
     }
-    public void RunConnect() => OnFinishSecondLevelCommand?.Invoke();
-    public void RunSplit() => OnFinishSecondLevelCommand?.Invoke();
-    public void RunDelay() => OnFinishSecondLevelCommand?.Invoke();
-    public void RunPutDownUp(bool coloring) => OnFinishSecondLevelCommand?.Invoke();
-    public void RunRotate(RotateDirection rotateDirection) => OnFinishSecondLevelCommand?.Invoke();
-    public void RunMove(Direction moveDirection)
-    {
-        recievedMovingCommandNum++;
-        StartCoroutine(MoveToTarget(moveDirection));
-    }
+
     public void ControllerCCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CounterClockwise));
     public void ControllerCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.Clockwise));
     private void OnTriggerEnter2D(Collider2D other)
@@ -323,8 +295,39 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
             sprite.transform.rotation = Quaternion.Lerp(start, end, percent);
             yield return null;
         }
-        connectorCommandCounter = 0;
+
         recievedMovingCommandNum = 0;
-        OnFinishCommand?.Invoke();
+        OnFinishCommand?.Invoke(this);
+    }
+
+    public void RunPutDownUp(Action callback, bool coloring)
+    {
+        callback?.Invoke();
+    }
+
+    public void RunRotate(Action callback, RotateDirection rotateDirection)
+    {
+        callback?.Invoke();
+    }
+
+    public void RunMove(Action callback, Direction moveDirection)
+    {
+        recievedMovingCommandNum++;
+        StartCoroutine(MoveToTarget(callback, moveDirection));
+    }
+
+    public void RunConnect(Action callback)
+    {
+        callback?.Invoke();
+    }
+
+    public void RunSplit(Action callback)
+    {
+        callback?.Invoke();
+    }
+
+    public void RunDelay(Action callback)
+    {
+        callback?.Invoke();
     }
 }
