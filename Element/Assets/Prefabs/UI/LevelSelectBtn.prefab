@@ -135,11 +135,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17809e9f82e32b246b156b7deb23e373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  page: {fileID: 0}
   text: {fileID: 4938758829233009759}
   levelSelectBtn: {fileID: 4938758829229378307}
   rectTransform: {fileID: 4938758829229378306}
   levelData: {fileID: 0}
-  levelSolution: {fileID: 0}
 --- !u!114 &9201576862273488467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b6a521a0c98cf46a0cc131d1da65e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: {fileID: 4938758829233009759}
+  pointerEnter: {r: 1, g: 0.19607843, b: 0.22745098, a: 1}
 --- !u!1 &4938758829233009753
 GameObject:
   m_ObjectHideFlags: 0

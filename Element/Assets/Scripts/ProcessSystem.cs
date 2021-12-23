@@ -29,7 +29,7 @@ public class ProcessSystem : MonoBehaviour
 
     public event Action<int> OnReadNextCommandLine;
     public event Action OnFinishAllCommandsOrWarning;
-    public event Action OnPlayerFinishedLevel;
+    public event Action OnLevelComplete;
     public static ProcessSystem Instance { get; private set; }
 
     [Header("Command SO")]
@@ -151,29 +151,18 @@ public class ProcessSystem : MonoBehaviour
         }
     }
 
-    public void OnFinishedContinueEdit()
-    {
-        operatorData.hasFinished = true;
-    }
-
     public void OnFinishedExit()
     {
         commandLineIndex = currentNum = targetNum = 0;
-        /*for (int i = 0; i < finishedColorCells.Count; i++)
-        {
-            productColorCells.Add(finishedColorCells[i]);
-        }*/
         productColorCells.Clear();
         finishedColorCells.Clear();
         productHalfLines.Clear();
-        /*for (int i = 0; i < finishedHalfLines.Count; i++)
-        {
-            productHalfLines.Add(finishedHalfLines[i]);
-        }*/
         finishedHalfLines.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
+
         TooltipSystem.Instance.HideWarning();
+
         for (int i = 0; i < recordCells.Count; i++)
         {
             recordCells[i].ResetCell();
@@ -364,7 +353,9 @@ public class ProcessSystem : MonoBehaviour
 
         if (CheckFinish())
         {
-            OnPlayerFinishedLevel?.Invoke();
+            operatorData.hasFinished = true;
+            operatorData.complete = true;
+            OnLevelComplete?.Invoke();
             processType = ProcessType.PAUSE;
             processState = ProcessState.Waiting;
         }

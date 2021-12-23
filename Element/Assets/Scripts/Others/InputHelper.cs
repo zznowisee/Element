@@ -47,14 +47,14 @@ public static class InputHelper
         return null;
     }
 
-    public static IMouseDrag GetIMouseDragUnderPosition2D()
+    public static IMouseAction GetIMouseDragUnderPosition2D()
     {
         RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider)
             {
-                IMouseDrag drag = hits[i].collider.GetComponent<IMouseDrag>();
+                IMouseAction drag = hits[i].collider.GetComponent<IMouseAction>();
                 if (drag != null)
                 {
                     return drag;

@@ -76,10 +76,10 @@
     <Compile Include="Assets\Scripts\HexMap\HexMap.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\OperatorDataSO.cs" />
     <Compile Include="Assets\Scripts\UI\SolutionSystem.cs" />
-    <Compile Include="Assets\Scripts\UI\HighlighButton.cs" />
+    <Compile Include="Assets\Scripts\UI\HighlighUnselectableBtn.cs" />
     <Compile Include="Assets\Scripts\Device\PatternLineMesh.cs" />
     <Compile Include="Assets\Scripts\ProductLineMesh.cs" />
-    <Compile Include="Assets\Scripts\UI\SolutionBtn.cs" />
+    <Compile Include="Assets\Scripts\UI\Solution.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\LevelDataSO.cs" />
     <Compile Include="Assets\Scripts\GameSystem.cs" />
     <Compile Include="Assets\Scripts\UI\TooltipUI.cs" />
@@ -102,7 +102,7 @@
     <Compile Include="Assets\Scripts\HexMap\GridMap.cs" />
     <Compile Include="Assets\Scripts\Device\Brush.cs" />
     <Compile Include="Assets\Scripts\TooltipSystem.cs" />
-    <Compile Include="Assets\Scripts\IMouseDrag.cs" />
+    <Compile Include="Assets\Scripts\IMouseAction.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexCoordinates.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexCellMesh.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\CommandSO.cs" />

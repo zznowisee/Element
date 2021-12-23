@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class Command : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public CommandSO commandSO { get; private set; }
     CommandSlot commandSlot;
@@ -16,11 +16,23 @@ public class Command : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
         draggingParent = FindObjectOfType<OperatorUISystem>().transform;
     }
 
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (InputHelper.IsTheseKeysHeld(KeyCode.Delete))
+        {
+            if(commandSlot != null)
+            {
+                commandSlot.ClearCommand();
+                Destroy(gameObject);
+            }
+        }
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
+        print("begin Drag");
         if (ProcessSystem.Instance.CanOperate())
         {
-            print("Dragging");
             canvasGroup.blocksRaycasts = false;
             transform.parent = draggingParent;
             commandSlot.ClearCommand();

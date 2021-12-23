@@ -28,6 +28,8 @@ public class MainUISystem : MonoBehaviour
     [SerializeField] Transform middleLevelSolutionPanel;
     [SerializeField] Transform highLevelSolutionPanel;
 
+    [HideInInspector] public Solution currentSolution;
+
     public List<LevelDataSO> levels;
     LevelPage[] levelPages;
     LevelPage current;
@@ -113,15 +115,25 @@ public class MainUISystem : MonoBehaviour
         OnSwitchToOperatorScene += operatorUISystem.OnSwitchToOperatorScene;
     }
 
-    public void SwitchToOperatorScene(LevelDataSO levelData, OperatorDataSO operatorData)
+    void Start()
+    {
+        ProcessSystem.Instance.OnLevelComplete += ProcessSystem_OnLevelComplete;    
+    }
+
+    private void ProcessSystem_OnLevelComplete()
+    {
+        currentSolution.SetComplete();
+    }
+
+    public void SwitchToOperatorScene(LevelDataSO levelData, Solution currentSolution_)
     {
         operatorUISystem.gameObject.SetActive(true);
         operatorUISystem.levelData = levelData;
 
-        OnSwitchToOperatorScene?.Invoke(levelData, operatorData);
+        OnSwitchToOperatorScene?.Invoke(levelData, currentSolution_.operatorData);
 
         Camera.main.transform.position = new Vector3(300f, 0f, -10f);
-
+        currentSolution = currentSolution_;
         gameObject.SetActive(false);
     }
 }

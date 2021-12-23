@@ -10,7 +10,7 @@ public enum RotateDirection
     CounterClockwise
 }
 
-public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandReciever
+public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandReciever
 {
     public Direction direction;
     public ControllerData controllerData;
@@ -83,7 +83,7 @@ public class Controller : CommandRunner, IMouseDrag, ICommandReader, ICommandRec
         controllerData.consoleIndex = index;
     }
 
-    public void StartDragging()
+    public void MouseAction_Drag()
     {
         predictionLine.gameObject.SetActive(false);
         cell.currentObject = null;

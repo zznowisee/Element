@@ -6,7 +6,7 @@ public enum BrushType
     Coloring,
     Line
 }
-public class Brush : MonoBehaviour, IMouseDrag
+public class Brush : MonoBehaviour, IMouseAction
 {
 
     public BrushData brushData;
@@ -21,7 +21,7 @@ public class Brush : MonoBehaviour, IMouseDrag
     public Connector connector;
     public virtual event Action<Vector3, WarningType> OnWarning;
 
-    public void StartDragging()
+    public void MouseAction_Drag()
     {
         cell.currentObject = null;
         cell = null;

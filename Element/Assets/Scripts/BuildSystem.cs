@@ -121,10 +121,10 @@ public class BuildSystem : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && !InputHelper.IsMouseOverUIObject())
         {
-            IMouseDrag mouseDrag = InputHelper.GetIMouseDragUnderPosition2D();
+            IMouseAction mouseDrag = InputHelper.GetIMouseDragUnderPosition2D();
             if (mouseDrag != null)
             {
-                mouseDrag.StartDragging();
+                mouseDrag.MouseAction_Drag();
                 return;
             }
         }

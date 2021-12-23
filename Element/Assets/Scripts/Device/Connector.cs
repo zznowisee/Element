@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using TMPro;
 
-public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
+public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
 {
     public ConnectorData connectorData;
 
@@ -46,7 +46,7 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
         Destroy(gameObject);
     }
 
-    public void StartDragging()
+    public void MouseAction_Drag()
     {
         cell.currentObject = null;
         cell = null;

@@ -19,7 +19,7 @@ public class OperatorUISystem : MonoBehaviour
     [SerializeField] Transform consolePanel;
     [SerializeField] Transform commandPanel;
     [SerializeField] Transform brushesPanel;
-    [SerializeField] Transform finishPanel;
+    [SerializeField] Transform completePanel;
 
     [SerializeField] Button stepBtn;
     [SerializeField] Button playPauseBtn;
@@ -111,36 +111,40 @@ public class OperatorUISystem : MonoBehaviour
 
         quitBtn.onClick.AddListener(() =>
         {
-            if (!ProcessSystem.Instance.CanOperate())
-            {
-                cycleNumText.text = "0";
-                ProcessSystem.Instance.Stop();
-                DisableStopBtn();
-                playPauseBtn.gameObject.SetActive(true);
-                finished = false;
-                playPauseBtn.GetComponent<Image>().color = btnEnable;
-                stepBtn.GetComponent<Image>().color = btnEnable;
-                playPauseBtn.enabled = true;
-                stepBtn.enabled = true;
-            }
-            SwitchToMainScene();
+            Quit();
         });
 
         continueBtn.onClick.AddListener(() =>
         {
-            finishPanel.gameObject.SetActive(false);
+            completePanel.gameObject.SetActive(false);
             SWitchToPlayBtn();
-            ProcessSystem.Instance.OnFinishedContinueEdit();
         });
 
         exitBtn.onClick.AddListener(() =>
         {
-            finishPanel.gameObject.SetActive(false);
+            completePanel.gameObject.SetActive(false);
             ProcessSystem.Instance.OnFinishedExit();
             SwitchToMainScene();
             DisableStopBtn();
             SWitchToPlayBtn();
         });
+    }
+
+    void Quit()
+    {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            cycleNumText.text = "0";
+            ProcessSystem.Instance.Stop();
+            DisableStopBtn();
+            playPauseBtn.gameObject.SetActive(true);
+            finished = false;
+            playPauseBtn.GetComponent<Image>().color = btnEnable;
+            stepBtn.GetComponent<Image>().color = btnEnable;
+            playPauseBtn.enabled = true;
+            stepBtn.enabled = true;
+        }
+        SwitchToMainScene();
     }
 
     void Start()
@@ -149,12 +153,54 @@ public class OperatorUISystem : MonoBehaviour
         BuildSystem.Instance.OnDestoryController += BuildSystem_OnDestoryController;
         ProcessSystem.Instance.OnReadNextCommandLine += ProcessSystem_OnEnterNextCycle;
         ProcessSystem.Instance.OnFinishAllCommandsOrWarning += ProcessSystem_OnFinishAllCommands;
-        ProcessSystem.Instance.OnPlayerFinishedLevel += ProcessSystem_OnPlayerFinishedLevel;
+        ProcessSystem.Instance.OnLevelComplete += ProcessSystem_OnPlayerFinishedLevel;
+    }
+
+    void Update()
+    {
+        trackingCommandSO = null;
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Quit();
+            return;
+        }
+
+        KeyCode key = InputHelper.HeldKeysInThese(keys);
+        if (keyCodeCommandSODictionary.ContainsKey(key))
+        {
+            trackingCommandSO = keyCodeCommandSODictionary[key];
+        }
+        else
+        {
+            commandGhost.gameObject.SetActive(false);
+        }
+
+        if (trackingCommandSO != null)
+        {
+            CommandSlot slot = InputHelper.GetCommandSlotUnderPosition2D();
+            if (slot != null)
+            {
+                commandGhost.Setup(trackingCommandSO);
+                commandGhost.transform.position = slot.transform.position;
+                commandGhost.gameObject.SetActive(true);
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Command command = Instantiate(pfCommand, transform);
+                    command.Setup(trackingCommandSO);
+                    command.DroppedOnSlot(slot);
+                }
+            }
+            else
+            {
+                commandGhost.gameObject.SetActive(false);
+            }
+        }
     }
 
     private void ProcessSystem_OnPlayerFinishedLevel()
     {
-        finishPanel.gameObject.SetActive(true);
+        completePanel.gameObject.SetActive(true);
     }
 
     public void OnSwitchToOperatorScene(LevelDataSO levelDataSO_, OperatorDataSO operatorDataSO_)
@@ -205,50 +251,15 @@ public class OperatorUISystem : MonoBehaviour
 
         commandReaderConsoleDictionary.Clear();
         operatorData.hasFinished = false;
-        EditorUtility.SetDirty(operatorData);
-        EditorUtility.SetDirty(levelData);
-        AssetDatabase.SaveAssets();
+
+        InputHelper.Save(operatorData, levelData);
+
         levelData = null;
+        operatorData = null;
         OnSwitchToMainScene?.Invoke();
         gameObject.SetActive(false);
         mainUISystem.gameObject.SetActive(true);
         Camera.main.transform.position = new Vector3(0, 0, -10f);
-    }
-
-    void Update()
-    {
-        trackingCommandSO = null;
-        KeyCode key = InputHelper.HeldKeysInThese(keys);
-        if (keyCodeCommandSODictionary.ContainsKey(key))
-        {
-            trackingCommandSO = keyCodeCommandSODictionary[key];
-        }
-        else
-        {
-            commandGhost.gameObject.SetActive(false);
-        }
-
-        if(trackingCommandSO != null)
-        {
-            CommandSlot slot = InputHelper.GetCommandSlotUnderPosition2D();
-            if(slot != null)
-            {
-                commandGhost.Setup(trackingCommandSO);
-                commandGhost.transform.position = slot.transform.position;
-                commandGhost.gameObject.SetActive(true);
-
-                if (Input.GetMouseButtonDown(0))
-                {
-                    Command command = Instantiate(pfCommand, transform);
-                    command.Setup(trackingCommandSO);
-                    command.DroppedOnSlot(slot);
-                }
-            }
-            else
-            {
-                commandGhost.gameObject.SetActive(false);
-            }
-        }
     }
 
     void SwitchToPauseBtn()

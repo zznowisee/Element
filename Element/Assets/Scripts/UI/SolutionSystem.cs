@@ -7,15 +7,11 @@ public class SolutionSystem : MonoBehaviour
     public LevelPage page;
     public LevelDataSO levelDataSO;
     public OperatorDataSO operatorDataSO;
-    SolutionBtn current;
-
-    [SerializeField] GameObject solutionOpenDeleteBtnPanel;
-    [SerializeField] Button deleteBtn;
-    [SerializeField] Button openBtn;
+    [HideInInspector] public Solution current;
     [SerializeField] Button backBtn;
     [SerializeField] Button createSolutionBtn;
 
-    [SerializeField] SolutionBtn pfLevelSolutionBtn;
+    [SerializeField] Solution pfSolution;
 
     int[] solutionIndices;
     GameObject levelSelectBtnPanel;
@@ -29,15 +25,15 @@ public class SolutionSystem : MonoBehaviour
         {
             OperatorDataSO operatorData = levelDataSO.operatorDataList[i];
             solutionIndices[operatorData.solutionIndex - 1] = operatorData.solutionIndex;
-            SolutionBtn solutionBtn = Instantiate(pfLevelSolutionBtn, transform);
-            solutionBtn.OnPressSolutionBtn += OnPressSolutionBtn;
-            solutionBtn.Setup(operatorData, operatorData.solutionIndex);
+            Solution solution = Instantiate(pfSolution, transform);
+            solution.OnPressSolutionBtn += OnPressSolutionBtn;
+            solution.OnPressDeleteBtn += OnPressDeleteBtn;
+            solution.Setup(operatorData);
         }
 
         backBtn.onClick.AddListener(() =>
         {
             page.current = null;
-            solutionOpenDeleteBtnPanel.SetActive(false);
             levelSelectBtnPanel_.SetActive(true);
             gameObject.SetActive(false);
         });
@@ -45,9 +41,9 @@ public class SolutionSystem : MonoBehaviour
         createSolutionBtn.onClick.AddListener(() =>
         {
             int solutionIndex = InputHelper.GetIndexFromIndicesArray(solutionIndices);
-            SolutionBtn solutionBtn = Instantiate(pfLevelSolutionBtn, transform);
-            solutionBtn.OnPressSolutionBtn += OnPressSolutionBtn;
-
+            Solution solution = Instantiate(pfSolution, transform);
+            solution.OnPressSolutionBtn += OnPressSolutionBtn;
+            solution.OnPressDeleteBtn += OnPressDeleteBtn;
             //create data instance
             OperatorDataSO operatorData = ScriptableObject.CreateInstance<OperatorDataSO>();
             string dataSavePath = $"Assets/OperatorDatas/{levelDataSO.name}_s{solutionIndex}.asset";
@@ -58,46 +54,31 @@ public class SolutionSystem : MonoBehaviour
             operatorData.solutionIndex = solutionIndex;
             operatorData.level = levelDataSO;
 
-            solutionBtn.Setup(operatorData, solutionIndex);
-
+            solution.Setup(operatorData);
             InputHelper.Save(operatorData, levelDataSO);
         });
 
-        deleteBtn.onClick.AddListener(() =>
-        {
-            OperatorDataSO data = current.operatorData;
-            solutionIndices[data.solutionIndex - 1] = 0;
-
-            string dataPath = $"Assets/OperatorDatas/{levelDataSO.name}_s{data.solutionIndex}.asset";
-            levelDataSO.operatorDataList.Remove(data);
-            AssetDatabase.DeleteAsset(dataPath);
-
-            Destroy(current.gameObject);
-            current = null;
-            solutionOpenDeleteBtnPanel.SetActive(false);
-
-            InputHelper.Save(levelDataSO);
-        });
-
-        openBtn.onClick.AddListener(() =>
-        {
-            MainUISystem.Instance.SwitchToOperatorScene(levelDataSO, current.operatorData);
-            solutionOpenDeleteBtnPanel.SetActive(false);
-            current = null;
-        });
-
-        solutionOpenDeleteBtnPanel.SetActive(false);
+        createSolutionBtn.transform.SetSiblingIndex(createSolutionBtn.transform.parent.childCount - 1);
     }
 
-    private void OnPressSolutionBtn(SolutionBtn solutionBtn_)
+    void OnPressDeleteBtn(OperatorDataSO data_)
     {
-        current = solutionBtn_;
-        solutionOpenDeleteBtnPanel.gameObject.SetActive(true);
+        print("Delete");
+        solutionIndices[data_.solutionIndex - 1] = 0;
+
+        string dataPath = $"Assets/OperatorDatas/{levelDataSO.name}_s{data_.solutionIndex}.asset";
+        levelDataSO.operatorDataList.Remove(data_);
+        AssetDatabase.DeleteAsset(dataPath);
+        InputHelper.Save(levelDataSO);
+    }
+
+    void OnPressSolutionBtn(Solution solution)
+    {
+        MainUISystem.Instance.SwitchToOperatorScene(levelDataSO, solution);
     }
 
     public void ResetPage()
     {
-        solutionOpenDeleteBtnPanel.SetActive(false);
         levelSelectBtnPanel.SetActive(true);
         gameObject.SetActive(false);
     }
