@@ -37,5 +37,11 @@ MonoBehaviour:
       color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     - coord: {x: -1, y: 0}
       color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
-  brushBtnDatas: []
+  brushBtnDatas:
+  - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
+    type: 0
+    number: 1
+  - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+    type: 1
+    number: 1
   operatorDataList: []

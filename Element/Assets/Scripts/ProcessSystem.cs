@@ -67,10 +67,11 @@ public class ProcessSystem : MonoBehaviour
     [SerializeField] ProductLine pfProductLine;
     [SerializeField] ProductCell pfProductCell;
 
-    List<CheckProductColorCell> productColorCells;
-    List<CheckProductHalfLine> productHalfLines;
-    List<CheckProductColorCell> finishedColorCells;
-    List<CheckProductHalfLine> finishedHalfLines;
+
+    [SerializeField] List<CheckProductColorCell> productColorCells;
+    [SerializeField] List<CheckProductHalfLine> productHalfLines;
+    [SerializeField] List<CheckProductColorCell> finishedColorCells;
+    [SerializeField] List<CheckProductHalfLine> finishedHalfLines;
     void Awake()
     {
         Instance = this;
@@ -158,15 +159,17 @@ public class ProcessSystem : MonoBehaviour
     public void OnFinishedExit()
     {
         commandLineIndex = currentNum = targetNum = 0;
-        for (int i = 0; i < finishedColorCells.Count; i++)
+        /*for (int i = 0; i < finishedColorCells.Count; i++)
         {
             productColorCells.Add(finishedColorCells[i]);
-        }
+        }*/
+        productColorCells.Clear();
         finishedColorCells.Clear();
-        for (int i = 0; i < finishedHalfLines.Count; i++)
+        productHalfLines.Clear();
+        /*for (int i = 0; i < finishedHalfLines.Count; i++)
         {
             productHalfLines.Add(finishedHalfLines[i]);
-        }
+        }*/
         finishedHalfLines.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
@@ -287,7 +290,7 @@ public class ProcessSystem : MonoBehaviour
                 productHalfLines.Remove(ft);
                 productHalfLines.Remove(tf);
                 finishedHalfLines.Add(ft);
-                finishedHalfLines.Add(ft);
+                finishedHalfLines.Add(tf);
                 break;
             }
         }
@@ -544,16 +547,11 @@ public class ProcessSystem : MonoBehaviour
         currentNum = targetNum = 0;
         // read all infos
         Read();
-        for (int i = 0; i < finishedColorCells.Count; i++)
-        {
-            productColorCells.Add(finishedColorCells[i]);
-        }
+        finishedColorCells.ForEach(colorCell => productColorCells.Add(colorCell));
+        finishedHalfLines.ForEach(halfLine => productHalfLines.Add(halfLine));
         finishedColorCells.Clear();
-        for (int i = 0; i < finishedHalfLines.Count; i++)
-        {
-            productHalfLines.Add(finishedHalfLines[i]);
-        }
         finishedHalfLines.Clear();
+
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
         TooltipSystem.Instance.HideWarning();
@@ -564,6 +562,7 @@ public class ProcessSystem : MonoBehaviour
         return productHalfLines.Count == 0 && productColorCells.Count == 0 && !operatorData.hasFinished;
     }
 
+    [Serializable]
     public struct CheckProductHalfLine
     {
         public HexCell from;
@@ -586,6 +585,7 @@ public class ProcessSystem : MonoBehaviour
         }
     }
 
+    [Serializable]
     public struct CheckProductColorCell
     {
         public HexCell cell;

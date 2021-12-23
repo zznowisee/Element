@@ -58,12 +58,17 @@ public class ColorBrush : Brush
             connectLine.SetPosition(0, cell.transform.position - transform.position);
             connectLine.SetPosition(1, connector_.transform.position - transform.position);
             StartCoroutine(Sleep(callback, secondLevelCallback));
+            print("Connect ColorBrush");
         }
         else
         {
             if (connector != connector_)
             {
                 OnWarning?.Invoke(transform.position, WarningType.BrushConnectedByTwoConnectors);
+            }
+            else
+            {
+                StartCoroutine(Sleep(callback, secondLevelCallback));
             }
         }
     }

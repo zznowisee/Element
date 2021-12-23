@@ -44,6 +44,7 @@ public class LineBrush : Brush
 
     void StartPainting()
     {
+        cell.beColoring = true;
         currentDrawingLine = Instantiate(pfPatternLine);
         currentDrawingLine.Setup(cell, brushData.colorSO.drawColor, ProcessSystem.Instance.commandLineIndex);
         ProcessSystem.Instance.recordCells.Add(cell);
@@ -56,7 +57,6 @@ public class LineBrush : Brush
 
             cell.beColoring = true;
             currentDrawingLine.endCell = cell;
-            cell.beColoring = true;
             ProcessSystem.Instance.recordCells.Add(cell);
 
             OnDrawingLine?.Invoke(currentDrawingLine.startCell, currentDrawingLine.endCell, brushData.colorSO);
@@ -94,6 +94,10 @@ public class LineBrush : Brush
             if (connector != connector_)
             {
                 OnWarning?.Invoke(transform.position, WarningType.BrushConnectedByTwoConnectors);
+            }
+            else
+            {
+                StartCoroutine(Sleep(callback, secondLevelCallback));
             }
         }
     }

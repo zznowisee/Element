@@ -117,8 +117,12 @@ public class OperatorUISystem : MonoBehaviour
                 ProcessSystem.Instance.Stop();
                 DisableStopBtn();
                 playPauseBtn.gameObject.SetActive(true);
+                finished = false;
+                playPauseBtn.GetComponent<Image>().color = btnEnable;
+                stepBtn.GetComponent<Image>().color = btnEnable;
+                playPauseBtn.enabled = true;
+                stepBtn.enabled = true;
             }
-
             SwitchToMainScene();
         });
 

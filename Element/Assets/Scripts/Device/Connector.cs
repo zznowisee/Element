@@ -188,8 +188,8 @@ public class Connector : MonoBehaviour, IMouseDrag, ICommandReciever
                         if (!brushes.Contains(newBrush))
                         {
                             brushes.Add(newBrush);
-                            newBrush.ConnectWithConnector(callback, OnBrushFinishCommand, this);
                         }
+                        newBrush.ConnectWithConnector(callback, OnBrushFinishCommand, this);
                     }
                 }
             }
