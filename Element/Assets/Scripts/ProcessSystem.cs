@@ -72,6 +72,8 @@ public class ProcessSystem : MonoBehaviour
     [SerializeField] List<CheckProductHalfLine> productHalfLines;
     [SerializeField] List<CheckProductColorCell> finishedColorCells;
     [SerializeField] List<CheckProductHalfLine> finishedHalfLines;
+
+    public bool solutionCompleted = false;
     void Awake()
     {
         Instance = this;
@@ -151,26 +153,6 @@ public class ProcessSystem : MonoBehaviour
         }
     }
 
-    public void OnFinishedExit()
-    {
-        commandLineIndex = currentNum = targetNum = 0;
-        productColorCells.Clear();
-        finishedColorCells.Clear();
-        productHalfLines.Clear();
-        finishedHalfLines.Clear();
-        processType = ProcessType.EDIT;
-        processState = ProcessState.NotStart;
-
-        TooltipSystem.Instance.HideWarning();
-
-        for (int i = 0; i < recordCells.Count; i++)
-        {
-            recordCells[i].ResetCell();
-        }
-
-        recordCells.Clear();
-    }
-
     private void OperatorUISystem_OnSwitchToMainScene()
     {
         operatorData.connectorDatas.Clear();
@@ -197,6 +179,7 @@ public class ProcessSystem : MonoBehaviour
         controllers.Clear();
         brushes.Clear();
         connectors.Clear();
+        solutionCompleted = false;
         operatorData = null;
     }
 
@@ -353,7 +336,12 @@ public class ProcessSystem : MonoBehaviour
 
         if (CheckFinish())
         {
-            operatorData.hasFinished = true;
+            if (commandLineIndex == operatorUISystem.GetCommandLineMaxIndex())
+            {
+                OnFinishAllCommandsOrWarning?.Invoke();
+            }
+
+            solutionCompleted = true;
             operatorData.complete = true;
             OnLevelComplete?.Invoke();
             processType = ProcessType.PAUSE;
@@ -548,9 +536,29 @@ public class ProcessSystem : MonoBehaviour
         TooltipSystem.Instance.HideWarning();
     }
 
+    public void OnFinishedExit()
+    {
+        commandLineIndex = currentNum = targetNum = 0;
+        productColorCells.Clear();
+        finishedColorCells.Clear();
+        productHalfLines.Clear();
+        finishedHalfLines.Clear();
+        processType = ProcessType.EDIT;
+        processState = ProcessState.NotStart;
+        solutionCompleted = false;
+        TooltipSystem.Instance.HideWarning();
+
+        for (int i = 0; i < recordCells.Count; i++)
+        {
+            recordCells[i].ResetCell();
+        }
+
+        recordCells.Clear();
+    }
+
     public bool CheckFinish()
     {
-        return productHalfLines.Count == 0 && productColorCells.Count == 0 && !operatorData.hasFinished;
+        return productHalfLines.Count == 0 && productColorCells.Count == 0 && !solutionCompleted;
     }
 
     [Serializable]

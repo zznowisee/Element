@@ -11,10 +11,3 @@ public class LevelDataSO : ScriptableObject
     public List<BrushBtnDataInit> brushBtnDatas;
     public List<OperatorDataSO> operatorDataList;
 }
-
-public enum LevelType
-{
-    Tutorials,
-    Middle,
-    High
-}

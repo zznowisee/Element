@@ -25,8 +25,8 @@ public class OperatorUISystem : MonoBehaviour
     [SerializeField] Button playPauseBtn;
     [SerializeField] Button stopBtn;
     [SerializeField] Button quitBtn;
-    [SerializeField] Button continueBtn;
-    [SerializeField] Button exitBtn;
+    [SerializeField] Button completeContinueBtn;
+    [SerializeField] Button completeExitBtn;
 
     [SerializeField] TextMeshProUGUI cycleNumText;
     [SerializeField] BrushBtn pfBrushBtn;
@@ -41,9 +41,8 @@ public class OperatorUISystem : MonoBehaviour
     KeyCode[] keys;
 
     CommandSO trackingCommandSO;
-
     bool isPlayBtn = true;
-    bool finished = false;
+
     private void Awake()
     {
         Instance = this;
@@ -64,25 +63,30 @@ public class OperatorUISystem : MonoBehaviour
             keyCodeCommandSODictionary[commandSO.key] = commandSO;
         }
 
+        // buttons
+
+        //step
         stepBtn.onClick.AddListener(() =>
         {
             ProcessSystem.Instance.Step();
             if (!isPlayBtn)
             {
-                SWitchToPlayBtn();
+                SwitchToPlayBtn();
             }
-            EnableStopBtn();
+            ButtonEnable(stopBtn);
         });
 
+        //play pause
         playPauseBtn.onClick.AddListener(() =>
         {
-            EnableStopBtn();
+            ButtonEnable(stopBtn);
             if (isPlayBtn) SwitchToPauseBtn();
-            else SWitchToPlayBtn();
+            else SwitchToPlayBtn();
 
             ProcessSystem.Instance.PlayPause(!isPlayBtn);
         });
 
+        //stop
         stopBtn.onClick.AddListener(() =>
         {
             foreach (CommandConsole console in commandReaderConsoleDictionary.Values)
@@ -94,57 +98,36 @@ public class OperatorUISystem : MonoBehaviour
             }
             cycleNumText.text = "0";
             ProcessSystem.Instance.Stop();
-            DisableStopBtn();
-            playPauseBtn.gameObject.SetActive(true);
 
-            if (finished)
+            ButtonDisable(stopBtn);
+            ButtonEnable(playPauseBtn);
+            ButtonEnable(stepBtn);
+            if (!isPlayBtn)
             {
-                finished = false;
-                playPauseBtn.GetComponent<Image>().color = btnEnable;
-                stepBtn.GetComponent<Image>().color = btnEnable;
-                playPauseBtn.enabled = true;
-                stepBtn.enabled = true;
+                SwitchToPlayBtn();
             }
         });
 
-        DisableStopBtn();
-
+        //quit
         quitBtn.onClick.AddListener(() =>
         {
             Quit();
         });
 
-        continueBtn.onClick.AddListener(() =>
+        //complete continue
+        completeContinueBtn.onClick.AddListener(() =>
         {
             completePanel.gameObject.SetActive(false);
-            SWitchToPlayBtn();
+            SwitchToPlayBtn();
         });
 
-        exitBtn.onClick.AddListener(() =>
+        //complete exit
+        completeExitBtn.onClick.AddListener(() =>
         {
             completePanel.gameObject.SetActive(false);
             ProcessSystem.Instance.OnFinishedExit();
             SwitchToMainScene();
-            DisableStopBtn();
-            SWitchToPlayBtn();
         });
-    }
-
-    void Quit()
-    {
-        if (!ProcessSystem.Instance.CanOperate())
-        {
-            cycleNumText.text = "0";
-            ProcessSystem.Instance.Stop();
-            DisableStopBtn();
-            playPauseBtn.gameObject.SetActive(true);
-            finished = false;
-            playPauseBtn.GetComponent<Image>().color = btnEnable;
-            stepBtn.GetComponent<Image>().color = btnEnable;
-            playPauseBtn.enabled = true;
-            stepBtn.enabled = true;
-        }
-        SwitchToMainScene();
     }
 
     void Start()
@@ -198,6 +181,28 @@ public class OperatorUISystem : MonoBehaviour
         }
     }
 
+    private void ProcessSystem_OnFinishAllCommands()
+    {
+        if (!isPlayBtn)
+        {
+            SwitchToPlayBtn();
+        }
+
+        ButtonDisable(playPauseBtn);
+        ButtonDisable(stepBtn);
+        ButtonEnable(stopBtn);
+    }
+
+    void Quit()
+    {
+        if (!ProcessSystem.Instance.CanOperate())
+        {
+            ProcessSystem.Instance.Stop();
+        }
+
+        SwitchToMainScene();
+    }
+
     private void ProcessSystem_OnPlayerFinishedLevel()
     {
         completePanel.gameObject.SetActive(true);
@@ -235,11 +240,20 @@ public class OperatorUISystem : MonoBehaviour
                 }
             }
         }
+
+        ButtonEnable(playPauseBtn);
+        ButtonEnable(stepBtn);
+        ButtonDisable(stopBtn);
+        if (!isPlayBtn)
+        {
+            SwitchToPlayBtn();
+        }
     }
 
     void SwitchToMainScene()
     {
-        foreach(CommandConsole console in commandReaderConsoleDictionary.Values)
+        cycleNumText.text = "0";
+        foreach (CommandConsole console in commandReaderConsoleDictionary.Values)
         {
             Destroy(console.gameObject);
         }
@@ -250,8 +264,7 @@ public class OperatorUISystem : MonoBehaviour
         }
 
         commandReaderConsoleDictionary.Clear();
-        operatorData.hasFinished = false;
-
+        //save datas
         InputHelper.Save(operatorData, levelData);
 
         levelData = null;
@@ -259,35 +272,32 @@ public class OperatorUISystem : MonoBehaviour
         OnSwitchToMainScene?.Invoke();
         gameObject.SetActive(false);
         mainUISystem.gameObject.SetActive(true);
+
         Camera.main.transform.position = new Vector3(0, 0, -10f);
     }
 
     void SwitchToPauseBtn()
     {
-        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PAUSE";
         isPlayBtn = false;
+        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PAUSE";
     }
 
-    void SWitchToPlayBtn()
+    void SwitchToPlayBtn()
     {
-        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PLAY";
         isPlayBtn = true;
+        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PLAY";
     }
 
-    void DisableStopBtn()
+    void ButtonEnable(Button btn)
     {
-        stopBtn.GetComponent<Image>().color = btnDisable;
-        stopBtn.enabled = false;
-        if (!isPlayBtn)
-        {
-            SWitchToPlayBtn();
-        }
+        btn.enabled = true;
+        btn.GetComponent<Image>().color = btnEnable;
     }
 
-    void EnableStopBtn()
+    void ButtonDisable(Button btn)
     {
-        stopBtn.GetComponent<Image>().color = btnEnable;
-        stopBtn.enabled = true;
+        btn.enabled = false;
+        btn.GetComponent<Image>().color = btnDisable;
     }
 
     private void BuildSystem_OnDestoryController(Controller controller)
@@ -321,19 +331,6 @@ public class OperatorUISystem : MonoBehaviour
             command.Setup(consoleData.commandDatas[i]);
             command.DroppedOnSlot(console.slots[i]);
         }
-    }
-
-    private void ProcessSystem_OnFinishAllCommands()
-    {
-        finished = true;
-        playPauseBtn.GetComponent<Image>().color = btnDisable;
-        if (!isPlayBtn)
-        {
-            SWitchToPlayBtn();
-        }
-        stepBtn.GetComponent<Image>().color = btnDisable;
-        playPauseBtn.enabled = false;
-        stepBtn.enabled = false;
     }
 
     private void ProcessSystem_OnEnterNextCycle(int commandLineIndex)

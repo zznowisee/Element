@@ -6,7 +6,6 @@ using UnityEngine;
 public class OperatorDataSO : ScriptableObject
 {
     public bool hasInitialized;
-    public bool hasFinished;
     public bool complete;
     public int solutionIndex;
     public LevelDataSO level;

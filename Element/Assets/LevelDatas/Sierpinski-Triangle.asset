@@ -48,4 +48,5 @@ MonoBehaviour:
   - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     type: 1
     number: 1
-  operatorDataList: []
+  operatorDataList:
+  - {fileID: 11400000, guid: aa65f35f365e1ce4aa8d4d36ca0f4a2e, type: 2}

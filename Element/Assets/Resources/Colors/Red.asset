@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Red
   drawColor: {r: 0.8666667, g: 0.003921569, b: 0, a: 1}
-  initColor: {r: 0.86666673, g: 0.003921569, b: 0, a: 1}
+  initColor: {r: 0.3882353, g: 0.16862746, b: 0.16862746, a: 1}
