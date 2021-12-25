@@ -30,7 +30,6 @@ public class Command : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, ID
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        print("begin Drag");
         if (ProcessSystem.Instance.CanOperate())
         {
             canvasGroup.blocksRaycasts = false;

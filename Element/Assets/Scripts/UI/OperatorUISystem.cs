@@ -206,6 +206,7 @@ public class OperatorUISystem : MonoBehaviour
     private void ProcessSystem_OnPlayerFinishedLevel()
     {
         completePanel.gameObject.SetActive(true);
+        levelData.completed = true;
     }
 
     public void OnSwitchToOperatorScene(LevelDataSO levelDataSO_, OperatorDataSO operatorDataSO_)
@@ -214,7 +215,6 @@ public class OperatorUISystem : MonoBehaviour
         operatorData = operatorDataSO_;
         if (!operatorDataSO_.hasInitialized)
         {
-            print("Init");
             for (int i = 0; i < levelData.brushBtnDatas.Count; i++)
             {
                 BrushBtnDataInit brushBtnDataInit = levelData.brushBtnDatas[i];

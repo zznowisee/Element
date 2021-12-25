@@ -129,7 +129,7 @@ public class Brush : MonoBehaviour, IMouseAction
     {
         putdown = putdown_;
         putDownSprite.SetActive(putdown);
-        StartCoroutine(Sleep(callback, secondLevelCallback));
+        secondLevelCallback?.Invoke(callback);
     }
 
     public void Connector_OnMoveActionStart(Action callback, Action<Action> secondLevelCallback, Connector connector, Direction direction)

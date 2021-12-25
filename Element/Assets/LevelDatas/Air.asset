@@ -44,9 +44,24 @@ MonoBehaviour:
       pointB: {x: 1, y: 0}
       color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     cells: []
+    lineArray:
+    - color: {fileID: 0}
+      pointA:
+        index: {x: 0, y: 0}
+      pointB:
+        index: {x: 0, y: 0}
+    - color: {fileID: 0}
+      pointA:
+        index: {x: 0, y: 0}
+      pointB:
+        index: {x: 0, y: 0}
+    cellArray:
+    - color: {fileID: 0}
+      point:
+        index: {x: 0, y: 0}
+  completed: 0
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     type: 1
     number: 1
-  operatorDataList:
-  - {fileID: 11400000, guid: c01d18db5aab5cc4881c688450c50542, type: 2}
+  operatorDataList: []

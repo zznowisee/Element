@@ -44,9 +44,11 @@ MonoBehaviour:
       pointB: {x: 1, y: -1}
       color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     cells: []
+    lineArray: []
+    cellArray: []
+  completed: 0
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     type: 1
     number: 2
-  operatorDataList:
-  - {fileID: 11400000, guid: 8e44ffec5d68ca44cabf48a0f233c432, type: 2}
+  operatorDataList: []

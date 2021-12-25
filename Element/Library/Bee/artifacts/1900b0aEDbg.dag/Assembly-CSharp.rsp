@@ -379,7 +379,6 @@
 "Assets/Scripts/ScriptableObject/CommandSO.cs"
 "Assets/Scripts/ScriptableObject/LevelDataSO.cs"
 "Assets/Scripts/ScriptableObject/OperatorDataSO.cs"
-"Assets/Scripts/TooltipSystem.cs"
 "Assets/Scripts/UI/BrushBtn.cs"
 "Assets/Scripts/UI/ColorPickerBtn.cs"
 "Assets/Scripts/UI/Command.cs"
@@ -397,9 +396,12 @@
 "Assets/Scripts/UI/SelectBox.cs"
 "Assets/Scripts/UI/Solution.cs"
 "Assets/Scripts/UI/SolutionSystem.cs"
+"Assets/Scripts/UI/TooltipSystem.cs"
+"Assets/Scripts/UI/TooltipTrigger.cs"
 "Assets/Scripts/UI/TooltipUI.cs"
 "Assets/Scripts/UI/TrackBtn.cs"
-"Assets/Scripts/WarningType.cs"
+"Assets/Scripts/UI/WarningType.cs"
+"Assets/Scripts/UI/WarningUI.cs"
 -langversion:8.0
 
 /deterministic

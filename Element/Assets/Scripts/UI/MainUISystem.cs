@@ -32,6 +32,7 @@ public class MainUISystem : MonoBehaviour
     [SerializeField] Button middleLevelBtn;
     [SerializeField] Button highLevelBtn;
     [SerializeField] Button exLevelBtn;
+    [SerializeField] Button quitBtn;
 
     [SerializeField] LevelPage tutorialLevelPage;
     [SerializeField] LevelPage lowLevelPage;
@@ -47,6 +48,7 @@ public class MainUISystem : MonoBehaviour
     [SerializeField] Transform exLevelSolutionPanel;
 
     [HideInInspector] public Solution currentSolution;
+    public LevelSelectBtn currentLevelSelectBtn;
 
     public List<LevelDataSO> levels;
     LevelPage[] levelPages;
@@ -91,7 +93,10 @@ public class MainUISystem : MonoBehaviour
         {
             SelectLevelPage(LevelType.Ex);
         });
-
+        quitBtn.onClick.AddListener(() =>
+        {
+            Application.Quit();
+        });
         for (int i = 0; i < levels.Count; i++)
         {
             Transform levelPageParent = transform;
@@ -187,10 +192,13 @@ public class MainUISystem : MonoBehaviour
                 exLevelBtnImage.color = pageEnable;
                 break;
         }
+
+        currentLevelSelectBtn = null;
     }
     private void ProcessSystem_OnLevelComplete()
     {
         currentSolution.SetComplete();
+        currentLevelSelectBtn.SetComplete();
     }
 
     public void SwitchToOperatorScene(LevelDataSO levelData, Solution currentSolution_)

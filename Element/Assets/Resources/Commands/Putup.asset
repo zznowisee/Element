@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9709a60843df74eb2c2f53f979e0bb, type: 3}
   m_Name: Putup
   m_EditorClassIdentifier: 
-  name: Putup
+  name: "\u62AC\u8D77"
   key: 120
   icon: {fileID: 21300000, guid: 16ee373e7ce1aed45a155873a39cfe14, type: 3}

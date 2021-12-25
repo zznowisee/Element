@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 9084757697065959979}
   - component: {fileID: 7892495144650582339}
   - component: {fileID: -6831095013702754389}
+  - component: {fileID: 4960572438934330910}
   m_Layer: 5
   m_Name: CommandBtn
   m_TagString: Untagged
@@ -240,6 +241,20 @@ MonoBehaviour:
   pfCommand: {fileID: 5000986918788934971, guid: fb6ccbfbee5740c459b217e30b3ca772, type: 3}
   icon: {fileID: 9084757698274349687}
   keyText: {fileID: 1389038440}
+--- !u!114 &4960572438934330910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9084757697065959957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 706d38ec09d15ad47890aed5a4ad38a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  header: 
+  content: 
 --- !u!1 &9084757698274349681
 GameObject:
   m_ObjectHideFlags: 0

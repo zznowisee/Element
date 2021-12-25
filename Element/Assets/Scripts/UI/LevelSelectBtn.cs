@@ -6,11 +6,12 @@ using UnityEditor;
 
 public class LevelSelectBtn : MonoBehaviour
 {
+    [SerializeField] LevelDataSO levelData;
     public LevelPage page;
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] Button levelSelectBtn;
     [SerializeField] RectTransform rectTransform;
-    [SerializeField] LevelDataSO levelData;
+    [SerializeField] GameObject completeCheck;
 
     public void Setup(LevelPage page_, LevelDataSO levelData_, SolutionSystem levelSolution_, GameObject levelSelectBtnPanel_)
     {
@@ -26,6 +27,11 @@ public class LevelSelectBtn : MonoBehaviour
             page.current = levelSolution_;
             levelSolution_.gameObject.SetActive(true);
             levelSelectBtnPanel_.SetActive(false);
+            MainUISystem.Instance.currentLevelSelectBtn = this;
         });
+
+        completeCheck.SetActive(levelData_.completed);
     }
+
+    public void SetComplete() => completeCheck.gameObject.SetActive(true);
 }

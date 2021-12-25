@@ -12,14 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fc1145bbc6620547b7cbd9f8f569db9, type: 3}
   m_Name: Four-Pointed-Star_s1
   m_EditorClassIdentifier: 
-  hasInitialized: 1
+  hasInitialized: 0
   complete: 0
   solutionIndex: 1
   level: {fileID: 11400000, guid: ed2101f1776b4994f86b39d6dfcafd08, type: 2}
   connectorDatas: []
   controllerDatas: []
-  brushBtnDataSolutions:
-  - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
-    type: 1
-    number: 2
-    brushDatas: []
+  brushBtnDataSolutions: []

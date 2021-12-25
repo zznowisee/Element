@@ -37,6 +37,9 @@ MonoBehaviour:
       color: {fileID: 11400000, guid: 38e2eb06545ed42428307fd5f7f33674, type: 2}
     - coord: {x: 2, y: 0}
       color: {fileID: 11400000, guid: 38e2eb06545ed42428307fd5f7f33674, type: 2}
+    lineArray: []
+    cellArray: []
+  completed: 1
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     type: 0

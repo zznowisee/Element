@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9709a60843df74eb2c2f53f979e0bb, type: 3}
   m_Name: ControllerCW
   m_EditorClassIdentifier: 
-  name: ControllerClockwiseRotate
+  name: "\u987A\u65F6\u9488\u65CB\u8F6C:\u63A7\u5236\u5668"
+  description: 
   key: 100
-  icon: {fileID: 21300000, guid: 46cfc803e4f54e04cb6aec204e8ee7c1, type: 3}
+  icon: {fileID: 21300000, guid: b246e03fe1dc60b479c74f141a10c01c, type: 3}

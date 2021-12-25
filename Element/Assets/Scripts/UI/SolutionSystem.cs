@@ -36,6 +36,7 @@ public class SolutionSystem : MonoBehaviour
             page.current = null;
             levelSelectBtnPanel_.SetActive(true);
             gameObject.SetActive(false);
+            MainUISystem.Instance.currentLevelSelectBtn = null;
         });
 
         createSolutionBtn.onClick.AddListener(() =>
@@ -63,7 +64,6 @@ public class SolutionSystem : MonoBehaviour
 
     void OnPressDeleteBtn(OperatorDataSO data_)
     {
-        print("Delete");
         solutionIndices[data_.solutionIndex - 1] = 0;
 
         string dataPath = $"Assets/OperatorDatas/{levelDataSO.name}_s{data_.solutionIndex}.asset";

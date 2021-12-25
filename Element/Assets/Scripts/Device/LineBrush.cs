@@ -41,7 +41,32 @@ public class LineBrush : Brush
         FinishPainting();
         connectorCallback?.Invoke(controllerCallback);
     }
+    public IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
+    {
+        yield return null;
+        if (connector == null)
+        {
+            connector = connector_;
+            connector_.OnMoveActionStart += Connector_OnMoveActionStart;
+            connector_.OnRotateActionStart += Connector_OnRotateActionStart;
 
+            connectLine = Instantiate(pfConnectLine, transform);
+            connectLine.SetPosition(0, cell.transform.position - transform.position);
+            connectLine.SetPosition(1, connector_.transform.position - transform.position);
+            StartCoroutine(Sleep(callback, secondLevelCallback));
+        }
+        else
+        {
+            if (connector != connector_)
+            {
+                OnWarning?.Invoke(transform.position, WarningType.BrushConnectedByTwoConnectors);
+            }
+            else
+            {
+                StartCoroutine(Sleep(callback, secondLevelCallback));
+            }
+        }
+    }
     void StartPainting()
     {
         cell.beColoring = true;
@@ -73,33 +98,6 @@ public class LineBrush : Brush
     public override void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
         StartCoroutine(ConnectConnector(callback, secondLevelCallback, connector_));
-    }
-
-    IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
-    {
-        yield return null;
-        if (connector == null)
-        {
-            connector = connector_;
-            connector_.OnMoveActionStart += Connector_OnMoveActionStart;
-            connector_.OnRotateActionStart += Connector_OnRotateActionStart;
-
-            connectLine = Instantiate(pfConnectLine, transform);
-            connectLine.SetPosition(0, cell.transform.position - transform.position);
-            connectLine.SetPosition(1, connector_.transform.position - transform.position);
-            StartCoroutine(Sleep(callback, secondLevelCallback));
-        }
-        else
-        {
-            if (connector != connector_)
-            {
-                OnWarning?.Invoke(transform.position, WarningType.BrushConnectedByTwoConnectors);
-            }
-            else
-            {
-                StartCoroutine(Sleep(callback, secondLevelCallback));
-            }
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)

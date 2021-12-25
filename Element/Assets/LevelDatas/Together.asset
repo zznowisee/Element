@@ -31,6 +31,9 @@ MonoBehaviour:
       color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     - coord: {x: 0, y: -1}
       color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+    lineArray: []
+    cellArray: []
+  completed: 0
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     type: 0
@@ -38,5 +41,4 @@ MonoBehaviour:
   - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     type: 0
     number: 1
-  operatorDataList:
-  - {fileID: 11400000, guid: 6d3ab6bc2a9035649bb970d228b3d128, type: 2}
+  operatorDataList: []

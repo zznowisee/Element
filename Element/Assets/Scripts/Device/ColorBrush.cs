@@ -45,7 +45,11 @@ public class ColorBrush : Brush
         TryPainiting();
     }
 
-    IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
+    public override void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
+    {
+        StartCoroutine(ConnectConnector(callback, secondLevelCallback, connector_));
+    }
+    public IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
         yield return null;
         if (connector == null)
@@ -58,7 +62,6 @@ public class ColorBrush : Brush
             connectLine.SetPosition(0, cell.transform.position - transform.position);
             connectLine.SetPosition(1, connector_.transform.position - transform.position);
             StartCoroutine(Sleep(callback, secondLevelCallback));
-            print("Connect ColorBrush");
         }
         else
         {
@@ -72,12 +75,6 @@ public class ColorBrush : Brush
             }
         }
     }
-
-    public override void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
-    {
-        StartCoroutine(ConnectConnector(callback, secondLevelCallback, connector_));
-    }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(other != null)

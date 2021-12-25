@@ -530,7 +530,7 @@ public class ProcessSystem : MonoBehaviour
         finishedHalfLines.ForEach(halfLine => productHalfLines.Add(halfLine));
         finishedColorCells.Clear();
         finishedHalfLines.Clear();
-
+        checkList.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
         TooltipSystem.Instance.HideWarning();
@@ -543,6 +543,7 @@ public class ProcessSystem : MonoBehaviour
         finishedColorCells.Clear();
         productHalfLines.Clear();
         finishedHalfLines.Clear();
+        checkList.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
         solutionCompleted = false;

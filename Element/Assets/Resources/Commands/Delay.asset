@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9709a60843df74eb2c2f53f979e0bb, type: 3}
   m_Name: Delay
   m_EditorClassIdentifier: 
-  name: Delay
+  name: "\u5EF6\u8FDF"
   key: 116
   icon: {fileID: 21300000, guid: 7fda562cba1091e48a24afe0f6d6357f, type: 3}
