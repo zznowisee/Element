@@ -59,6 +59,9 @@ public class OperatorUISystem : MonoBehaviour
             CommandSO commandSO = commandSOList[i];
             CommandBtn command = Instantiate(pfCommandBtn, commandPanel);
             command.Setup(commandSO);
+            TooltipTrigger tooltipTrigger = command.GetComponent<TooltipTrigger>();
+            tooltipTrigger.header = commandSO.name;
+            tooltipTrigger.content = commandSO.description;
 
             keyCodeCommandSODictionary[commandSO.key] = commandSO;
         }

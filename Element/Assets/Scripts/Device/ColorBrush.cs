@@ -39,17 +39,17 @@ public class ColorBrush : Brush
         }
     }
 
-    public override void PutDownUp(Action callback, Action<Action> secondLevelCallback, bool coloring_)
+    public override void PutDownUp(bool coloring_)
     {
-        base.PutDownUp(callback, secondLevelCallback, coloring_);
+        base.PutDownUp(coloring_);
         TryPainiting();
     }
 
     public override void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
-        StartCoroutine(ConnectConnector(callback, secondLevelCallback, connector_));
+        StartCoroutine(ConnectConnector(connector_));
     }
-    public IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
+    public IEnumerator ConnectConnector(Connector connector_)
     {
         yield return null;
         if (connector == null)
@@ -61,17 +61,12 @@ public class ColorBrush : Brush
             connectLine = Instantiate(pfConnectLine, transform);
             connectLine.SetPosition(0, cell.transform.position - transform.position);
             connectLine.SetPosition(1, connector_.transform.position - transform.position);
-            StartCoroutine(Sleep(callback, secondLevelCallback));
         }
         else
         {
             if (connector != connector_)
             {
                 OnWarning?.Invoke(transform.position, WarningType.BrushConnectedByTwoConnectors);
-            }
-            else
-            {
-                StartCoroutine(Sleep(callback, secondLevelCallback));
             }
         }
     }

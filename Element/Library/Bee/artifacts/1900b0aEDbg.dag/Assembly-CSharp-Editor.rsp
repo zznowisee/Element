@@ -354,6 +354,7 @@
 -r:"Library/Bee/artifacts/1900b0aEDbg.dag/UnityEngine.TestRunner.ref.dll"
 -r:"Library/Bee/artifacts/1900b0aEDbg.dag/UnityEngine.UI.ref.dll"
 -r:"Library/Bee/artifacts/1900b0aEDbg.dag/VSSettingsProvider.ref.dll"
+"Assets/LeanTween/Editor/LeanTweenDocumentationEditor.cs"
 "Assets/Scripts/Editor/HexCoordinatesEditor.cs"
 "Assets/Scripts/Editor/HexMapEditor.cs"
 "Assets/Scripts/Editor/MeshRendererEditor.cs"

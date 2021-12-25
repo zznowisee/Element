@@ -17,11 +17,11 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
     public event Action<Action, Action<Action>, Connector, RotateDirection> OnRotateActionStart;
 
     public Action controllerCallback;
-
     public event Action<Vector3, WarningType> OnWarning;
 
-    public int recievedMovingCommandNum = 0;
-    public int targetNum = 0;
+    int recievedMovingCommandNum = 0;
+
+    int totalWaitingNum = 0;
     //recorder:
     HexCell recorderCell;
     Quaternion recorderSpriteObjRotation;
@@ -29,6 +29,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
     void Awake()
     {
         transform.Find("sprite").localScale = radius * Vector3.one;
+
         brushes = new List<Brush>();
     }
 
@@ -63,9 +64,11 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
     IEnumerator RotateToTarget(Action callback, RotateDirection rotateDirection)
     {
         yield return null;
+
         if(recievedMovingCommandNum > 1)
         {
             StopAllCoroutines();
+            totalWaitingNum = 0;
             OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
@@ -99,6 +102,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
         if(recievedMovingCommandNum > 1)
         {
             StopAllCoroutines();
+            totalWaitingNum = 0;
             OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
@@ -147,6 +151,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
     public void ClearCurrentInfo()
     {
         recievedMovingCommandNum = 0;
+        totalWaitingNum = 0;
         cell.currentObject = null;
     }
 
@@ -155,7 +160,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
         cell = recorderCell;
         cell.currentObject = gameObject;
         recorderCell = null;
-
+        totalWaitingNum = 0;
         brushes.Clear();
         transform.position = cell.transform.position;
         spriteObj.transform.rotation = recorderSpriteObjRotation;
@@ -165,13 +170,9 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
     {
         for (int i = 0; i < brushes.Count; i++)
         {
-            brushes[i].PutDownUp(callback, OnBrushFinishCommand, coloring);
+            brushes[i].PutDownUp(coloring);
         }
-
-        if (brushes.Count == 0)
-        {
-            StartCoroutine(Sleep(callback));
-        }
+        StartCoroutine(Sleep(callback));
     }
 
     public void RunConnect(Action callback)
@@ -195,10 +196,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
             }
         }
 
-        if(brushes.Count == 0)
-        {
-            StartCoroutine(Sleep(callback));
-        }
+        StartCoroutine(Sleep(callback));
     }
 
     public void RunSplit(Action callback)
@@ -218,11 +216,10 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
 
     private void OnBrushFinishCommand(Action callback)
     {
-        targetNum++;
-        if (brushes.Count == targetNum)
+        totalWaitingNum--;
+        if (totalWaitingNum == 0)
         {
             recievedMovingCommandNum = 0;
-            targetNum = 0;
             callback?.Invoke();
         }
     }
@@ -230,12 +227,14 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
     public void RunRotate(Action callback, RotateDirection rotateDirection)
     {
         recievedMovingCommandNum++;
+        totalWaitingNum = brushes.Count;
         StartCoroutine(RotateToTarget(callback, rotateDirection));
     }
 
     public void RunMove(Action callback, Direction moveDirection)
     {
         recievedMovingCommandNum++;
+        totalWaitingNum = brushes.Count;
         StartCoroutine(MoveToTarget(callback, moveDirection));
     }
 

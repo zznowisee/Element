@@ -16,10 +16,9 @@ MonoBehaviour:
   complete: 0
   solutionIndex: 1
   level: {fileID: 11400000, guid: f968d9f87072f1a41813b74ce4b4fafc, type: 2}
-  connectorDatas:
-  - cellIndex: 507
+  connectorDatas: []
   controllerDatas:
-  - cellIndex: 355
+  - cellIndex: 326
     consoleIndex: 1
     direction: 0
     consoleData:
@@ -73,8 +72,5 @@ MonoBehaviour:
   brushBtnDataSolutions:
   - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     type: 1
-    number: 0
-    brushDatas:
-    - type: 1
-      cellIndex: 541
-      colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
+    number: 1
+    brushDatas: []

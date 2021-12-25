@@ -2,7 +2,7 @@ using System;
 
 public interface ICommandReader
 {
-    public event Action<Controller> OnFinishCommand;
+    public event Action OnFinishCommand;
     void RunCommand(CommandType commandType);
 }
 

@@ -39,7 +39,7 @@ MonoBehaviour:
       color: {fileID: 11400000, guid: 38e2eb06545ed42428307fd5f7f33674, type: 2}
     lineArray: []
     cellArray: []
-  completed: 1
+  completed: 0
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     type: 0
@@ -47,5 +47,4 @@ MonoBehaviour:
   - colorSO: {fileID: 11400000, guid: 38e2eb06545ed42428307fd5f7f33674, type: 2}
     type: 0
     number: 1
-  operatorDataList:
-  - {fileID: 11400000, guid: bc08a0e5da7deee49a6157ba63178568, type: 2}
+  operatorDataList: []

@@ -44,4 +44,3 @@ MonoBehaviour:
     number: 1
   operatorDataList:
   - {fileID: 11400000, guid: 81d561c7a1bb2484fa1116f2acefca8f, type: 2}
-  - {fileID: 11400000, guid: 473bb6fd3200a8846a0cfe92ca4093fc, type: 2}

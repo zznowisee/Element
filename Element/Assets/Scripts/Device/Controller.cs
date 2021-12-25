@@ -23,7 +23,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
     public event Action OnMouseDragBegin;
     public event Action OnMouseDragEnd;
 
-    public event Action<Controller> OnFinishCommand;
+    public event Action OnFinishCommand;
 
     public event Action<Vector3, WarningType> OnWarning;
 
@@ -31,9 +31,9 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
     Direction recorderDirection;
     Quaternion recorderSpriteRotation;
 
-    int checkNumber = 0;
-
     int recievedMovingCommandNum = 0;
+    int totalWaitingNum = 0;
+
     void Awake()
     {
         predictionLine.gameObject.SetActive(false);
@@ -112,10 +112,10 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
 
     private void OnRecieverFinishedCommand()
     {
-        checkNumber--;
-        if (checkNumber == 0)
+        totalWaitingNum--;
+        if (totalWaitingNum == 0)
         {
-            OnFinishCommand?.Invoke(this);
+            OnFinishCommand?.Invoke();
         }
     }
     public void RunCommand(CommandType commandType)
@@ -141,7 +141,8 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
                 ICommandReciever reciever = next.GetICommandReciever();
                 if (reciever != null)
                 {
-                    checkNumber++;
+                    totalWaitingNum++;
+
                     switch (commandType)
                     {
                         case CommandType.Connect:
@@ -178,7 +179,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
             }
         }
 
-        if (checkNumber == 0)
+        if (totalWaitingNum == 0)
         {
             StartCoroutine(Sleep());
         }
@@ -188,7 +189,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
     public override void ClearCurrentInfo()
     {
         cell.currentObject = null;
-        checkNumber = 0;
+        totalWaitingNum = 0;
         recievedMovingCommandNum = 0;
     }
 
@@ -216,7 +217,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
     {
         yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
         recievedMovingCommandNum = 0;
-        OnFinishCommand?.Invoke(this);
+        OnFinishCommand?.Invoke();
     }
 
     IEnumerator MoveToTarget(Action callback, Direction direction)
@@ -297,17 +298,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         }
 
         recievedMovingCommandNum = 0;
-        OnFinishCommand?.Invoke(this);
-    }
-
-    public void RunPutDownUp(Action callback, bool coloring)
-    {
-        callback?.Invoke();
-    }
-
-    public void RunRotate(Action callback, RotateDirection rotateDirection)
-    {
-        callback?.Invoke();
+        OnFinishCommand?.Invoke();
     }
 
     public void RunMove(Action callback, Direction moveDirection)
@@ -315,19 +306,9 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         recievedMovingCommandNum++;
         StartCoroutine(MoveToTarget(callback, moveDirection));
     }
-
-    public void RunConnect(Action callback)
-    {
-        callback?.Invoke();
-    }
-
-    public void RunSplit(Action callback)
-    {
-        callback?.Invoke();
-    }
-
-    public void RunDelay(Action callback)
-    {
-        callback?.Invoke();
-    }
+    public void RunPutDownUp(Action callback, bool coloring) => callback?.Invoke();
+    public void RunRotate(Action callback, RotateDirection rotateDirection) => callback?.Invoke();
+    public void RunConnect(Action callback) => callback?.Invoke();
+    public void RunSplit(Action callback) => callback?.Invoke();
+    public void RunDelay(Action callback) => callback?.Invoke();
 }

@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Editor\MeshRendererEditor.cs" />
+    <Compile Include="Assets\LeanTween\Editor\LeanTweenDocumentationEditor.cs" />
     <Compile Include="Assets\Scripts\Editor\HexMapEditor.cs" />
     <Compile Include="Assets\Scripts\Editor\HexCoordinatesEditor.cs" />
   </ItemGroup>

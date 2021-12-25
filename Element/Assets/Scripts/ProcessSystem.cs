@@ -47,7 +47,6 @@ public class ProcessSystem : MonoBehaviour
 
     Dictionary<CommandSO, Action<ICommandReader>> commandDictionary;
 
-    public List<Controller> checkList;
     public List<Controller> controllers;
     public List<Connector> connectors;
     public List<Brush> brushes;
@@ -56,8 +55,7 @@ public class ProcessSystem : MonoBehaviour
     public float commandSpacingTime = .3f;
     public float commandDurationTime = .3f;
 
-    int targetNum = 0;
-    int currentNum;
+    int totalWaitingNum;
     [HideInInspector] public int commandLineIndex = 0;
 
     [SerializeField] OperatorUISystem operatorUISystem;
@@ -66,7 +64,6 @@ public class ProcessSystem : MonoBehaviour
 
     [SerializeField] ProductLine pfProductLine;
     [SerializeField] ProductCell pfProductCell;
-
 
     [SerializeField] List<CheckProductColorCell> productColorCells;
     [SerializeField] List<CheckProductHalfLine> productHalfLines;
@@ -328,11 +325,9 @@ public class ProcessSystem : MonoBehaviour
     void Push(ICommandReader reader) => reader.RunCommand(CommandType.Push);
     void Pull(ICommandReader reader) => reader.RunCommand(CommandType.Pull);
 
-    public void OnReaderFinishCommand(Controller controller_)
+    public void OnReaderFinishCommand()
     {
-        currentNum++;
-
-        checkList.Remove(controller_);
+        totalWaitingNum++;
 
         if (CheckFinish())
         {
@@ -350,8 +345,9 @@ public class ProcessSystem : MonoBehaviour
 
         if (processState != ProcessState.Warning)
         {
-            if (targetNum == currentNum)
+            if (totalWaitingNum == controllers.Count)
             {
+                totalWaitingNum = 0;
                 switch (processType)
                 {
                     case ProcessType.PLAY:
@@ -379,13 +375,11 @@ public class ProcessSystem : MonoBehaviour
     void RunOnce()
     {
         int lineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
-        controllers.ForEach(controller => checkList.Add(controller));
         if (commandLineIndex <= lineMaxIndex)
         {
             processState = ProcessState.Running;
             OnReadNextCommandLine?.Invoke(commandLineIndex);
-            targetNum = controllers.Count;
-            currentNum = 0;
+            totalWaitingNum = 0;
 
             for (int i = 0; i < controllers.Count; i++)
             {
@@ -523,14 +517,13 @@ public class ProcessSystem : MonoBehaviour
             brushes[i].StopAllCoroutines();
         }
         commandLineIndex = 0;
-        currentNum = targetNum = 0;
+        totalWaitingNum = 0;
         // read all infos
         Read();
         finishedColorCells.ForEach(colorCell => productColorCells.Add(colorCell));
         finishedHalfLines.ForEach(halfLine => productHalfLines.Add(halfLine));
         finishedColorCells.Clear();
         finishedHalfLines.Clear();
-        checkList.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
         TooltipSystem.Instance.HideWarning();
@@ -538,12 +531,11 @@ public class ProcessSystem : MonoBehaviour
 
     public void OnFinishedExit()
     {
-        commandLineIndex = currentNum = targetNum = 0;
+        commandLineIndex = totalWaitingNum = 0;
         productColorCells.Clear();
         finishedColorCells.Clear();
         productHalfLines.Clear();
         finishedHalfLines.Clear();
-        checkList.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
         solutionCompleted = false;

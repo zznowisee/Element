@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using UnityEngine;
+
 public enum BrushType
 {
     Coloring,
     Line
 }
+
 public class Brush : MonoBehaviour, IMouseAction
 {
 
@@ -125,11 +127,10 @@ public class Brush : MonoBehaviour, IMouseAction
         }
     }
 
-    public virtual void PutDownUp(Action callback, Action<Action> secondLevelCallback, bool putdown_)
+    public virtual void PutDownUp(bool putdown_)
     {
         putdown = putdown_;
         putDownSprite.SetActive(putdown);
-        secondLevelCallback?.Invoke(callback);
     }
 
     public void Connector_OnMoveActionStart(Action callback, Action<Action> secondLevelCallback, Connector connector, Direction direction)
@@ -140,12 +141,6 @@ public class Brush : MonoBehaviour, IMouseAction
     public virtual IEnumerator MoveToTarget(Action callback, Action<Action> secondLevelCallback, Connector connector, HexCell target)
     {
         return null;
-    }
-
-    public IEnumerator Sleep(Action callback, Action<Action> secondLevelCallback)
-    {
-        yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
-        secondLevelCallback?.Invoke(callback);
     }
 
     public void OnDestroyByPlayer()

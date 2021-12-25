@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -31.1}
+  m_AnchoredPosition: {x: 0, y: -30}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &617003453
@@ -226,10 +226,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f2fc6e3f9697ea47b5debfb47603bf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  brushBtnDataSolution:
+    colorSO: {fileID: 0}
+    type: 0
+    number: 0
+    brushDatas: []
+  brushDatas: []
   colorImage: {fileID: 104369415151246087}
   text: {fileID: 104369415970623080}
   numberText: {fileID: 617003452}
   canvasGroup: {fileID: 9192525273218433104}
+  brushType: 0
+  colorSO: {fileID: 0}
 --- !u!225 &9192525273218433104
 CanvasGroup:
   m_ObjectHideFlags: 0
