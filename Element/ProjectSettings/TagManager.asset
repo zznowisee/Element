@@ -50,12 +50,15 @@ TagManager:
   - name: UI
     uniqueID: 2451686179
     locked: 0
-  - name: Brush
-    uniqueID: 441328383
+  - name: Device
+    uniqueID: 2218055951
     locked: 0
-  - name: Mark
-    uniqueID: 2712896355
+  - name: DeviceMark
+    uniqueID: 2675721571
     locked: 0
   - name: Text
-    uniqueID: 1108908059
+    uniqueID: 54244855
+    locked: 0
+  - name: Mask
+    uniqueID: 3835490335
     locked: 0

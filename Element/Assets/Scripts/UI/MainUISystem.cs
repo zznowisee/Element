@@ -8,9 +8,9 @@ using UnityEditor;
 public enum LevelType
 {
     Tutorial,
-    Low,
-    Middle,
-    High,
+    I,
+    II,
+    III,
     Ex
 }
 
@@ -79,15 +79,15 @@ public class MainUISystem : MonoBehaviour
         });
         lowLevelBtn.onClick.AddListener(() =>
         {
-            SelectLevelPage(LevelType.Low);
+            SelectLevelPage(LevelType.I);
         });
         middleLevelBtn.onClick.AddListener(() =>
         {
-            SelectLevelPage(LevelType.Middle);
+            SelectLevelPage(LevelType.II);
         });
         highLevelBtn.onClick.AddListener(() =>
         {
-            SelectLevelPage(LevelType.High);
+            SelectLevelPage(LevelType.III);
         });
         exLevelBtn.onClick.AddListener(() =>
         {
@@ -110,17 +110,17 @@ public class MainUISystem : MonoBehaviour
                     levelSelectParent = tutorialLevelSolutionPanel;
                     page = tutorialLevelPage;
                     break;
-                case LevelType.Low:
+                case LevelType.I:
                     levelPageParent = lowLevelPage.transform;
                     levelSelectParent = lowLevelSolutionPanel;
                     page = lowLevelPage;
                     break;
-                case LevelType.Middle:
+                case LevelType.II:
                     levelPageParent = middleLevelPage.transform;
                     levelSelectParent = middleLevelSolutionPanel;
                     page = middleLevelPage;
                     break;
-                case LevelType.High:
+                case LevelType.III:
                     levelPageParent = highLevelPage.transform;
                     levelSelectParent = highLevelSolutionPanel;
                     page = highLevelPage;
@@ -171,17 +171,17 @@ public class MainUISystem : MonoBehaviour
                 current = tutorialLevelPage;
                 tutorialBtnImage.color = pageEnable;
                 break;
-            case LevelType.Low:
+            case LevelType.I:
                 lowLevelPage.gameObject.SetActive(true);
                 current = lowLevelPage;
                 lowLevelBtnImage.color = pageEnable;
                 break;
-            case LevelType.Middle:
+            case LevelType.II:
                 middleLevelPage.gameObject.SetActive(true);
                 current = middleLevelPage;
                 middleLevelBtnImage.color = pageEnable;
                 break;
-            case LevelType.High:
+            case LevelType.III:
                 highLevelPage.gameObject.SetActive(true);
                 current = highLevelPage;
                 highLevelBtnImage.color = pageEnable;

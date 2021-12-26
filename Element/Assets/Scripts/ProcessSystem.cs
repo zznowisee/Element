@@ -250,39 +250,72 @@ public class ProcessSystem : MonoBehaviour
 
     private void OnLineBrushDrawingLine(HexCell from_, HexCell to_, ColorSO colorSO_)
     {
+        bool partOfProduct = false;
         for (int i = 0; i < productHalfLines.Count; i++)
         {
-            if(productHalfLines[i].from == from_ && productHalfLines[i].to == to_ && productHalfLines[i].colorSO == colorSO_)
+            if(productHalfLines[i].from == from_ && productHalfLines[i].to == to_)
             {
-                CheckProductHalfLine ft = new CheckProductHalfLine(from_, to_, colorSO_);
-                CheckProductHalfLine tf = new CheckProductHalfLine(to_, from_, colorSO_);
-                productHalfLines.Remove(ft);
-                productHalfLines.Remove(tf);
-                finishedHalfLines.Add(ft);
-                finishedHalfLines.Add(tf);
-                break;
+                if (productHalfLines[i].colorSO == colorSO_)
+                {
+                    CheckProductHalfLine ft = new CheckProductHalfLine(from_, to_, colorSO_);
+                    CheckProductHalfLine tf = new CheckProductHalfLine(to_, from_, colorSO_);
+                    productHalfLines.Remove(ft);
+                    productHalfLines.Remove(tf);
+                    finishedHalfLines.Add(ft);
+                    finishedHalfLines.Add(tf);
+                    break;
+                }
             }
+        }
+
+        for (int i = 0; i < finishedHalfLines.Count; i++)
+        {
+            if(finishedHalfLines[i].from == from_ && finishedHalfLines[i].to == to_)
+            {
+                partOfProduct = true;
+            }
+        }
+
+        if (!partOfProduct)
+        {
+            OnWarning(to_.transform.position, WarningType.WrongLine);
         }
     }
 
     private void OnColoringCellColoring(HexCell coloringCell_, ColorSO colorSO_)
     {
+        bool partOfProduct = false;
         for (int i = 0; i < productColorCells.Count; i++)
         {
-            if(productColorCells[i].cell == coloringCell_ && productColorCells[i].colorSO == colorSO_)
+            if(productColorCells[i].cell == coloringCell_)
             {
-                CheckProductColorCell pc = new CheckProductColorCell(coloringCell_, colorSO_);
-                finishedColorCells.Add(pc);
-                productColorCells.Remove(pc);
-                for (int j = 0; j < finishedHalfLines.Count; j++)
+                partOfProduct = true;
+                if (productColorCells[i].colorSO == colorSO_)
                 {
-                    if(finishedHalfLines[j].from == coloringCell_)
+                    CheckProductColorCell pc = new CheckProductColorCell(coloringCell_, colorSO_);
+                    finishedColorCells.Add(pc);
+                    productColorCells.Remove(pc);
+                    for (int j = 0; j < finishedHalfLines.Count; j++)
                     {
-                        productHalfLines.Add(finishedHalfLines[j]);
+                        if (finishedHalfLines[j].from == coloringCell_)
+                        {
+                            productHalfLines.Add(finishedHalfLines[j]);
+                        }
                     }
+                    break;
                 }
-                break;
             }
+        }
+        for (int i = 0; i < finishedColorCells.Count; i++)
+        {
+            if (finishedColorCells[i].cell == coloringCell_)
+            {
+                partOfProduct = true;
+            }
+        }
+        if (!partOfProduct)
+        {
+            OnWarning(coloringCell_.transform.position, WarningType.WrongColoring);
         }
     }
 

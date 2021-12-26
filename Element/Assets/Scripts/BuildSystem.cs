@@ -77,6 +77,7 @@ public class BuildSystem : MonoBehaviour
             HexCell cell = operatorSystem.GetCellFromIndex(cellIndex);
             Controller controller = Instantiate(pfController);
             controller.Setup(cell, controllerDatas[i]);
+            controller.controllerBtn = OperatorUISystem.Instance.GetControllerBtn();
             // index
             operatorUISystem.InitConsole(controller, controllerDatas[i].consoleData);
             processSystem.OnCreateNewControllerByData(controller);
@@ -257,9 +258,11 @@ public class BuildSystem : MonoBehaviour
                 if (InputHelper.IsMouseOverUIObject())
                 {
                     commandReadersIndices[currentController.index - 1] = 0;
+                    currentController.controllerBtn.OnDestroyController();
                     OnDestoryController?.Invoke(currentController);
                     Destroy(currentController.gameObject);
-                }else
+                }
+                else
                 {
                     HexCell cell = InputHelper.GetHexCellUnderPosition3D();
                     if (cell != null)
@@ -273,6 +276,7 @@ public class BuildSystem : MonoBehaviour
                         else
                         {
                             commandReadersIndices[currentController.index - 1] = 0;
+                            currentController.controllerBtn.OnDestroyController();
                             OnDestoryController?.Invoke(currentController);
                             Destroy(currentController.gameObject);
                         }
@@ -285,9 +289,10 @@ public class BuildSystem : MonoBehaviour
         }
     }
 
-    public void CreateNewController()
+    public void CreateNewController(ControllerBtn controllerBtn_)
     {
         currentController = Instantiate(pfController);
+        currentController.controllerBtn = controllerBtn_;
         currentController.SetIndex(InputHelper.GetIndexFromIndicesArray(commandReadersIndices));
         OnCreateNewController?.Invoke(currentController);
     }

@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 104369415151246087}
   - component: {fileID: 9024728038076187926}
   - component: {fileID: 9192525273218433104}
+  - component: {fileID: 3765841810679276458}
   m_Layer: 5
   m_Name: BrushBtn
   m_TagString: Untagged
@@ -250,6 +251,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &3765841810679276458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104369415151246081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 706d38ec09d15ad47890aed5a4ad38a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  header: 
+  content: 
 --- !u!1 &104369415970623082
 GameObject:
   m_ObjectHideFlags: 0

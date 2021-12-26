@@ -14,7 +14,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
 {
     public Direction direction;
     public ControllerData controllerData;
-
+    public ControllerBtn controllerBtn;
     [SerializeField] float predictionLineLength = 200f;
     [SerializeField] TextMeshPro indexText;
     [SerializeField] LineRenderer predictionLine;

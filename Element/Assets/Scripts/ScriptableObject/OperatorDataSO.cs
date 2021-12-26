@@ -11,12 +11,15 @@ public class OperatorDataSO : ScriptableObject
     public LevelDataSO level;
     public List<ConnectorData> connectorDatas;
     public List<ControllerData> controllerDatas;
+    public int ControllerNumber;
     public List<BrushBtnDataSolution> brushBtnDataSolutions;
+
     public void Setup()
     {
         connectorDatas = new List<ConnectorData>();
         controllerDatas = new List<ControllerData>();
         brushBtnDataSolutions = new List<BrushBtnDataSolution>();
+        ControllerNumber = 4;
     }
 }
 

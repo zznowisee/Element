@@ -22,7 +22,7 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
         brushType = brushBtnDataSolution.type;
         number = brushBtnDataSolution.number;
         brushDatas = brushBtnDataSolution.brushDatas;
-
+        TooltipTrigger tooltipTrigger = GetComponent<TooltipTrigger>();
         if (number == 0)
         {
             canvasGroup.alpha = 0.01f;
@@ -34,9 +34,13 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
         {
             case BrushType.Coloring:
                 text.text = "Coloring";
+                tooltipTrigger.header = "上色笔刷";
+                tooltipTrigger.content = "状态工具，无法接收指令";
                 break;
             case BrushType.Line:
                 text.text = "Draw Line";
+                tooltipTrigger.header = "画线笔刷";
+                tooltipTrigger.content = "状态工具，无法接收指令";
                 break;
         }
     }

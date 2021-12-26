@@ -38,6 +38,12 @@ public class TooltipSystem : MonoBehaviour
             case WarningType.ReceiveTwoMoveCommands:
                 warningText = "#Error-03\nTwo move commands were received at the same time!";
                 break;
+            case WarningType.WrongColoring:
+                warningText = "#Error-04\nWrong Coloring";
+                break;
+            case WarningType.WrongLine:
+                warningText = "#Error-05\nWrong Line";
+                break;
         }
         warningUI.SetText(warningText);
     }

@@ -28,13 +28,14 @@ public class OperatorUISystem : MonoBehaviour
     [SerializeField] Button completeContinueBtn;
     [SerializeField] Button completeExitBtn;
 
+    [SerializeField] ControllerBtn controllerBtn;
+
     [SerializeField] TextMeshProUGUI cycleNumText;
     [SerializeField] BrushBtn pfBrushBtn;
     [SerializeField] CommandBtn pfCommandBtn;
     [SerializeField] Command pfCommand;
     [SerializeField] CommandConsole pfCommandConsole;
     [SerializeField] CommandGhost commandGhost;
-
     public List<CommandSO> commandSOList;
     Dictionary<ICommandReader, CommandConsole> commandReaderConsoleDictionary;
     Dictionary<KeyCode, CommandSO> keyCodeCommandSODictionary;
@@ -142,6 +143,11 @@ public class OperatorUISystem : MonoBehaviour
         ProcessSystem.Instance.OnLevelComplete += ProcessSystem_OnPlayerFinishedLevel;
     }
 
+    public ControllerBtn GetControllerBtn()
+    {
+        return controllerBtn;
+    }
+
     void Update()
     {
         trackingCommandSO = null;
@@ -198,6 +204,7 @@ public class OperatorUISystem : MonoBehaviour
 
     void Quit()
     {
+        completePanel.gameObject.SetActive(false);
         if (!ProcessSystem.Instance.CanOperate())
         {
             ProcessSystem.Instance.Stop();
@@ -243,7 +250,7 @@ public class OperatorUISystem : MonoBehaviour
                 }
             }
         }
-
+        controllerBtn.Setup(operatorDataSO_);
         ButtonEnable(playPauseBtn);
         ButtonEnable(stepBtn);
         ButtonDisable(stopBtn);
