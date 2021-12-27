@@ -289,13 +289,13 @@ public class OperatorUISystem : MonoBehaviour
     void SwitchToPauseBtn()
     {
         isPlayBtn = false;
-        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PAUSE";
+        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "‘›Õ£";
     }
 
     void SwitchToPlayBtn()
     {
         isPlayBtn = true;
-        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "PLAY";
+        playPauseBtn.transform.Find("text").GetComponent<TextMeshProUGUI>().text = "‘À––";
     }
 
     void ButtonEnable(Button btn)

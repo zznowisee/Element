@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddd096e2aa5dccb4996a83c96ffa533b, type: 3}
   m_Name: Triangle_Test
   m_EditorClassIdentifier: 
-  name: Triangle_Test
+  name: "\u6D4B\u8BD51"
   levelType: 0
   productData:
     lines: []
@@ -23,10 +23,10 @@ MonoBehaviour:
       color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     - coord: {x: 0, y: 0}
       color: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
-  completed: 0
+  completed: 1
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: d44da7b1998289c459d25138b9470296, type: 2}
     type: 0
     number: 1
   operatorDataList:
-  - {fileID: 11400000, guid: a690e677f777de344918297595a4c7a4, type: 2}
+  - {fileID: 11400000, guid: 16d26769b6508e14b81ca5db1a04ccdc, type: 2}

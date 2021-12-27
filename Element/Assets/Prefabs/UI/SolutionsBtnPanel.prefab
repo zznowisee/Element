@@ -356,10 +356,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Back
+  m_text: "\u540E\u9000"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 77381c7d574e2d74390ba3426eb01cc2, type: 2}
+  m_sharedMaterial: {fileID: -1639367047037645992, guid: 77381c7d574e2d74390ba3426eb01cc2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -490,10 +490,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Create New Solution
+  m_text: "\u65B0\u5EFA\u89E3\u6CD5"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 77381c7d574e2d74390ba3426eb01cc2, type: 2}
+  m_sharedMaterial: {fileID: -1639367047037645992, guid: 77381c7d574e2d74390ba3426eb01cc2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -640,6 +640,7 @@ MonoBehaviour:
   page: {fileID: 0}
   levelDataSO: {fileID: 0}
   operatorDataSO: {fileID: 0}
+  current: {fileID: 0}
   backBtn: {fileID: 7645429788316781611}
   createSolutionBtn: {fileID: 7645429788111619682}
   pfSolution: {fileID: 1969217094879791192, guid: 790e24d03cfd64d42833cef45a394853, type: 3}

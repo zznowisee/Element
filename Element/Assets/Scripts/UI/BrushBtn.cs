@@ -33,12 +33,12 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
         switch (brushType)
         {
             case BrushType.Coloring:
-                text.text = "Coloring";
-                tooltipTrigger.header = "上色笔刷";
+                text.text = "涂色笔刷";
+                tooltipTrigger.header = "涂色笔刷";
                 tooltipTrigger.content = "状态工具，无法接收指令";
                 break;
             case BrushType.Line:
-                text.text = "Draw Line";
+                text.text = "画线笔刷";
                 tooltipTrigger.header = "画线笔刷";
                 tooltipTrigger.content = "状态工具，无法接收指令";
                 break;

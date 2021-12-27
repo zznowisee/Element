@@ -13,8 +13,6 @@ public class HexMap : MonoBehaviour
     HexCell[] cells;
     public Dictionary<Vector2Int, HexCell> coordCellDictionary;
     public Vector2Int centerCellCoord = new Vector2Int(11, 14);
-    [SerializeField] ProductLine pfProductLine;
-    [SerializeField] ProductCell pfProductCell;
     public Transform productHolder;
 
     [SerializeField] OperatorUISystem operatorUISystem;

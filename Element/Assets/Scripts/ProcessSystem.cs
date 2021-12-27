@@ -198,6 +198,8 @@ public class ProcessSystem : MonoBehaviour
 
     private void OnWarning(Vector3 position, WarningType warningType)
     {
+        processState = ProcessState.Warning;
+        processType = ProcessType.PAUSE;
         StopAllCoroutines();
         for (int i = 0; i < connectors.Count; i++)
         {
@@ -213,8 +215,6 @@ public class ProcessSystem : MonoBehaviour
         }
 
         OnFinishAllCommandsOrWarning?.Invoke();
-        processState = ProcessState.Warning;
-        processType = ProcessType.PAUSE;
         TooltipSystem.Instance.ShowWarning(position, warningType);
     }
 
@@ -584,7 +584,7 @@ public class ProcessSystem : MonoBehaviour
 
     public bool CheckFinish()
     {
-        return productHalfLines.Count == 0 && productColorCells.Count == 0 && !solutionCompleted;
+        return productHalfLines.Count == 0 && productColorCells.Count == 0 && !solutionCompleted && processState != ProcessState.Warning;
     }
 
     [Serializable]

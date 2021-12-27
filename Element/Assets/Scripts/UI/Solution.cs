@@ -16,7 +16,7 @@ public class Solution : MonoBehaviour
     public void Setup(OperatorDataSO operatorData_)
     {
         operatorData = operatorData_;
-        text.text = $"Solution {operatorData_.solutionIndex}";
+        text.text = $"½â·¨ {operatorData_.solutionIndex}";
         openBtn.onClick.AddListener(() =>
         {
             OnPressSolutionBtn?.Invoke(this);

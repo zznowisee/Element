@@ -332,8 +332,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Draw Line
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 097ad9dd5a2395a408f812dcc3253c7f, type: 2}
-  m_sharedMaterial: {fileID: 5217293578777204652, guid: 097ad9dd5a2395a408f812dcc3253c7f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 77381c7d574e2d74390ba3426eb01cc2, type: 2}
+  m_sharedMaterial: {fileID: -1639367047037645992, guid: 77381c7d574e2d74390ba3426eb01cc2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

@@ -133,6 +133,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
         else
         {
             OnWarning?.Invoke(transform.position, WarningType.EnteredColoredUnit);
+            yield return null;
         }
 
         if (brushes.Count == 0)

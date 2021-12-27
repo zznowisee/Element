@@ -27,22 +27,22 @@ public class TooltipSystem : MonoBehaviour
         switch (warningType)
         {
             case WarningType.BrushConnectedByTwoConnectors:
-                warningText = "#Error-00\nThe brush is connected by two connectors at the same time!";
+                warningText = "#错误-00\n笔刷同时被两个连接器连接";
                 break;
             case WarningType.Collision:
-                warningText = "#Error-01\nDevices collided!";
+                warningText = "#错误-01\n工具碰撞";
                 break;
             case WarningType.EnteredColoredUnit:
-                warningText = "#Error-02\nEntered the unit that has been colored!";
+                warningText = "#错误-02\n连接器或控制器进入了已经着色过的区域";
                 break;
             case WarningType.ReceiveTwoMoveCommands:
-                warningText = "#Error-03\nTwo move commands were received at the same time!";
+                warningText = "#错误-03\n工具同时接收到两个移动指令";
                 break;
             case WarningType.WrongColoring:
-                warningText = "#Error-04\nWrong Coloring";
+                warningText = "#错误-04\n在规定外的区域着色";
                 break;
             case WarningType.WrongLine:
-                warningText = "#Error-05\nWrong Line";
+                warningText = "#错误-05\n在规定外的区域画线";
                 break;
         }
         warningUI.SetText(warningText);
