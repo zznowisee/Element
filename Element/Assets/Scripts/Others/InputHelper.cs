@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using UnityEditor;
 
 public static class InputHelper
 {
@@ -156,15 +155,5 @@ public static class InputHelper
         }
 
         return 0;
-    }
-
-    public static void Save(params Object[] datas)
-    {
-        for (int i = 0; i < datas.Length; i++)
-        {
-            EditorUtility.SetDirty(datas[i]);
-        }
-
-        AssetDatabase.SaveAssets();
     }
 }

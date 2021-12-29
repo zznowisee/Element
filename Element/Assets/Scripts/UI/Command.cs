@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Command : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class Command : MonoBehaviour, IPointerDownHandler//, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public CommandSO commandSO { get; private set; }
     CommandSlot commandSlot;
@@ -24,29 +24,32 @@ public class Command : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, ID
             {
                 commandSlot.ClearCommand();
                 Destroy(gameObject);
+                return;
             }
+        }
+        else
+        {
+            transform.parent = OperatorUISystem.Instance.transform;
+            if (commandSlot != null)
+            {
+                commandSlot.ClearCommand();
+            }
+            OperatorUISystem.Instance.SetCurrentTrackingCommand(this);
         }
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
+    public void BeginDrag()
     {
-        if (ProcessSystem.Instance.CanOperate())
+        transform.parent = OperatorUISystem.Instance.transform;
+        canvasGroup.blocksRaycasts = false;
+        transform.parent = draggingParent;
+        if(commandSlot != null)
         {
-            canvasGroup.blocksRaycasts = false;
-            transform.parent = draggingParent;
             commandSlot.ClearCommand();
         }
     }
 
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (ProcessSystem.Instance.CanOperate())
-        {
-            transform.position = InputHelper.MouseWorldPositionIn2D;
-        }
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
+    public void TryToDropOnSlot()
     {
         if (ProcessSystem.Instance.CanOperate())
         {
@@ -74,6 +77,7 @@ public class Command : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, ID
         commandSlot = commandSlot_;
         if (!commandSlot.IsEmpty())
         {
+            print("Slot not empty");
             if(commandSlot.command.commandSO == commandSO)
             {
                 Destroy(gameObject);

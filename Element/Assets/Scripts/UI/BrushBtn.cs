@@ -6,7 +6,7 @@ using TMPro;
 
 public class BrushBtn : MonoBehaviour, IPointerDownHandler
 {
-    public BrushBtnDataSolution brushBtnDataSolution;
+    public BrushBtnSolutionData brushBtnDataSolution;
     public List<BrushData> brushDatas;
     [SerializeField] Image colorImage;
     [SerializeField] TextMeshProUGUI text;
@@ -15,10 +15,10 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
     public BrushType brushType;
     public ColorSO colorSO;
     int number;
-    public void Setup(BrushBtnDataSolution brushBtnDataSolution_)
+    public void Setup(BrushBtnSolutionData brushBtnDataSolution_, ColorSO colorSO_)
     {
         brushBtnDataSolution = brushBtnDataSolution_;
-        colorSO = brushBtnDataSolution.colorSO;
+        colorSO = colorSO_;
         brushType = brushBtnDataSolution.type;
         number = brushBtnDataSolution.number;
         brushDatas = brushBtnDataSolution.brushDatas;

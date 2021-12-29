@@ -4,12 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using UnityEditor;
 
 public class OperatorUISystem : MonoBehaviour
 {
-    public LevelDataSO levelData;
-    public OperatorDataSO operatorData;
+    public LevelBuildDataSO levelBuildDataSO;
+    public SolutionData solutionData;
     public event Action OnSwitchToMainScene;
     public static OperatorUISystem Instance { get; private set; }
 
@@ -27,6 +26,7 @@ public class OperatorUISystem : MonoBehaviour
     [SerializeField] Button quitBtn;
     [SerializeField] Button completeContinueBtn;
     [SerializeField] Button completeExitBtn;
+    [SerializeField] TextMeshProUGUI completePanelCycleNumText;
 
     [SerializeField] ControllerBtn controllerBtn;
 
@@ -36,6 +36,24 @@ public class OperatorUISystem : MonoBehaviour
     [SerializeField] Command pfCommand;
     [SerializeField] CommandConsole pfCommandConsole;
     [SerializeField] CommandGhost commandGhost;
+
+    [SerializeField] CommandSO putup;
+    [SerializeField] CommandSO putdown;
+    [SerializeField] CommandSO connect;
+    [SerializeField] CommandSO split;
+    [SerializeField] CommandSO connectorCCR;
+    [SerializeField] CommandSO connectorCR;
+    [SerializeField] CommandSO controllerCCR;
+    [SerializeField] CommandSO controllerCR;
+    [SerializeField] CommandSO delay;
+    [SerializeField] CommandSO push;
+    [SerializeField] CommandSO pull;
+
+    [SerializeField] ColorSO yellow;
+    [SerializeField] ColorSO blue;
+    [SerializeField] ColorSO red;
+    [SerializeField] ColorSO white;
+
     public List<CommandSO> commandSOList;
     Dictionary<ICommandReader, CommandConsole> commandReaderConsoleDictionary;
     Dictionary<KeyCode, CommandSO> keyCodeCommandSODictionary;
@@ -43,6 +61,12 @@ public class OperatorUISystem : MonoBehaviour
 
     CommandSO trackingCommandSO;
     bool isPlayBtn = true;
+    Command currentTrackingCommand;
+
+    public void SetCurrentTrackingCommand(Command command_)
+    {
+        currentTrackingCommand = command_;
+    }
 
     private void Awake()
     {
@@ -151,6 +175,19 @@ public class OperatorUISystem : MonoBehaviour
     void Update()
     {
         trackingCommandSO = null;
+
+        if(currentTrackingCommand != null)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                currentTrackingCommand.TryToDropOnSlot();
+                currentTrackingCommand = null;
+                return;
+            }
+            currentTrackingCommand.transform.position = InputHelper.MouseWorldPositionIn2D;
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Quit();
@@ -213,44 +250,64 @@ public class OperatorUISystem : MonoBehaviour
         SwitchToMainScene();
     }
 
-    private void ProcessSystem_OnPlayerFinishedLevel()
+    private void ProcessSystem_OnPlayerFinishedLevel(LevelData levelData)
     {
         completePanel.gameObject.SetActive(true);
-        levelData.completed = true;
+        completePanelCycleNumText.text = $"¹²{ProcessSystem.Instance.commandLineIndex}ÖÜÆÚ";
     }
 
-    public void OnSwitchToOperatorScene(LevelDataSO levelDataSO_, OperatorDataSO operatorDataSO_)
+    public void OnLoadSolution(LevelBuildDataSO levelBuildDataSO_, LevelData levelData_, SolutionData solutionData_)
     {
-        levelData = levelDataSO_;
-        operatorData = operatorDataSO_;
-        if (!operatorDataSO_.hasInitialized)
+        levelBuildDataSO = levelBuildDataSO_;
+        solutionData = solutionData_;
+
+        if (!solutionData_.hasInitialized)
         {
-            for (int i = 0; i < levelData.brushBtnDatas.Count; i++)
+            for (int i = 0; i < levelBuildDataSO.brushBtnDatas.Count; i++)
             {
-                BrushBtnDataInit brushBtnDataInit = levelData.brushBtnDatas[i];
-                BrushBtnDataSolution data = new BrushBtnDataSolution(brushBtnDataInit);
-                
+                print(levelBuildDataSO_.name);
+                BrushBtnInitData brushBtnDataInit = levelBuildDataSO.brushBtnDatas[i];
+                BrushBtnSolutionData data = new BrushBtnSolutionData(brushBtnDataInit);
+                print(data.colorType);
                 BrushBtn brushBtn = Instantiate(pfBrushBtn, brushesPanel);
-                brushBtn.Setup(data);
-                operatorDataSO_.brushBtnDataSolutions.Add(data);
+                brushBtn.Setup(data, brushBtnDataInit.colorSO);
+                solutionData_.brushBtnDataSolutions.Add(data);
             }
-            operatorDataSO_.hasInitialized = true;
+            solutionData_.hasInitialized = true;
         }
         else
         {
-            for (int i = 0; i < operatorDataSO_.brushBtnDataSolutions.Count; i++)
+            for (int i = 0; i < solutionData_.brushBtnDataSolutions.Count; i++)
             {
-                BrushBtnDataSolution brushBtnDataSolution = operatorDataSO_.brushBtnDataSolutions[i];
+                BrushBtnSolutionData brushBtnSolutionData = solutionData_.brushBtnDataSolutions[i];
                 BrushBtn brushBtn = Instantiate(pfBrushBtn, brushesPanel);
-                brushBtn.Setup(brushBtnDataSolution);
-
-                for (int j = 0; j < brushBtnDataSolution.brushDatas.Count; j++)
+                ColorSO colorSO;
+                switch (brushBtnSolutionData.colorType)
                 {
-                    BuildSystem.Instance.InitBrushFromData(brushBtnDataSolution.brushDatas[j], brushBtn);
+                    case ColorType.Blue:
+                        colorSO = blue;
+                        break;
+                    case ColorType.Red:
+                        colorSO = red;
+                        break;
+                    case ColorType.White:
+                        colorSO = white;
+                        break;
+                    case ColorType.Yellow:
+                        colorSO = yellow;
+                        break;
+                    default:
+                        colorSO = white;
+                        break;
+                }
+                brushBtn.Setup(brushBtnSolutionData, colorSO);
+                for (int j = 0; j < brushBtnSolutionData.brushDatas.Count; j++)
+                {
+                    BuildSystem.Instance.InitBrushFromData(brushBtnSolutionData.brushDatas[j], brushBtn);
                 }
             }
         }
-        controllerBtn.Setup(operatorDataSO_);
+        controllerBtn.Setup(solutionData_);
         ButtonEnable(playPauseBtn);
         ButtonEnable(stepBtn);
         ButtonDisable(stopBtn);
@@ -275,10 +332,9 @@ public class OperatorUISystem : MonoBehaviour
 
         commandReaderConsoleDictionary.Clear();
         //save datas
-        InputHelper.Save(operatorData, levelData);
-
-        levelData = null;
-        operatorData = null;
+        mainUISystem.SaveGameData();
+        levelBuildDataSO = null;
+        solutionData = null;
         OnSwitchToMainScene?.Invoke();
         gameObject.SetActive(false);
         mainUISystem.gameObject.SetActive(true);
@@ -333,13 +389,57 @@ public class OperatorUISystem : MonoBehaviour
         console.Setup(controller, consoleData);
         commandReaderConsoleDictionary[controller] = console;
         console.consoleData = consoleData;
-
-        for (int i = 0; i < consoleData.commandDatas.Length; i++)
+        CommandSO commandSO;
+        for (int i = 0; i < consoleData.commandTypes.Length; i++)
         {
-            if (consoleData.commandDatas[i] == null) continue;
-            Command command = Instantiate(pfCommand, transform);
-            command.Setup(consoleData.commandDatas[i]);
-            command.DroppedOnSlot(console.slots[i]);
+            switch (consoleData.commandTypes[i])
+            {
+                case CommandType.Connect:
+                    commandSO = connect;
+                    break;
+                case CommandType.Split:
+                    commandSO = split;
+                    break;
+                case CommandType.ConnectorCCR:
+                    commandSO = connectorCCR;
+                    break;
+                case CommandType.ConnectorCR:
+                    commandSO = connectorCR;
+                    break;
+                case CommandType.ControllerCCR:
+                    commandSO = controllerCCR;
+                    break;
+                case CommandType.ControllerCR:
+                    commandSO = controllerCR;
+                    break;
+                case CommandType.Delay:
+                    commandSO = delay;
+                    break;
+                case CommandType.Empty:
+                    commandSO = null;
+                    break;
+                case CommandType.Pull:
+                    commandSO = pull;
+                    break;
+                case CommandType.Push:
+                    commandSO = push;
+                    break;
+                case CommandType.PutDown:
+                    commandSO = putdown;
+                    break;
+                case CommandType.PutUp:
+                    commandSO = putup;
+                    break;
+                default:
+                    commandSO = null;
+                    break;
+            }
+            if(commandSO != null)
+            {
+                Command command = Instantiate(pfCommand, transform);
+                command.Setup(commandSO);
+                command.DroppedOnSlot(console.slots[i]);
+            }
         }
     }
 

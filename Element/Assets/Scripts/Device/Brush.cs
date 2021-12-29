@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+[Serializable]
 public enum BrushType
 {
     Coloring,
@@ -23,6 +24,11 @@ public class Brush : MonoBehaviour, IMouseAction
     public Connector connector;
     public virtual event Action<Vector3, WarningType> OnWarning;
 
+    void Start()
+    {
+        putDownSprite.gameObject.SetActive(false);
+    }
+
     public void MouseAction_Drag()
     {
         cell.currentObject = null;
@@ -39,20 +45,18 @@ public class Brush : MonoBehaviour, IMouseAction
     public void SetupFromBtn(BrushBtn brushBtn_)
     {
         brushBtn = brushBtn_;
-        brushData.colorSO = brushBtn.colorSO;
+        brushData.colorType = brushBtn.colorSO.colorType;
         brushData.type = brushBtn.brushType;
         brushBtn.brushDatas.Add(brushData);
-
-        meshRenderer.material.color = brushData.colorSO.drawColor;
+        meshRenderer.material.color = brushBtn.colorSO.drawColor;
     }
 
-    public void SetupFromData(HexCell cell_, BrushData data_, BrushBtn brushBtn_)
+    public void SetupFromData(HexCell cell_, BrushData data_, ColorSO colorSO_, BrushBtn brushBtn_)
     {
         brushData = data_;
         brushBtn = brushBtn_;
         Setup(cell_);
-
-        meshRenderer.material.color = brushData.colorSO.drawColor;
+        meshRenderer.material.color = colorSO_.drawColor;
     }
 
     public void Setup(HexCell cell_)

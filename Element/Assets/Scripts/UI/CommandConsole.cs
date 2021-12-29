@@ -35,8 +35,7 @@ public class CommandConsole : MonoBehaviour
             slots[i].Setup(codeSlotNormalCol, codeSlotHighlightCol, i, this);
             slots[i].gameObject.name = $"CodeSlot_{ i }";
         }
-        consoleData.commandDatas = new CommandSO[slotNum];
-        consoleData.consoleIndex = index;
+        consoleData.commandTypes = new CommandType[slotNum];
         controller.controllerData.consoleData = consoleData;
     }
 
@@ -73,7 +72,14 @@ public class CommandConsole : MonoBehaviour
     public void RecordCommand(int index, CommandSO newCommand)
     {
         commands[index] = newCommand;
-        consoleData.commandDatas[index] = newCommand;
+        if(newCommand == null)
+        {
+            consoleData.commandTypes[index] = CommandType.Empty;
+        }
+        else
+        {
+            consoleData.commandTypes[index] = newCommand.type;
+        }
     }
 
     public int GetLastCommandIndex()

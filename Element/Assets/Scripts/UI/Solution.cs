@@ -9,14 +9,16 @@ public class Solution : MonoBehaviour
     [SerializeField] Button deleteBtn;
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] GameObject completeCheck;
-    public OperatorDataSO operatorData;
+    public SolutionData solutionData;
 
     public event Action<Solution> OnPressSolutionBtn;
-    public event Action<OperatorDataSO> OnPressDeleteBtn;
-    public void Setup(OperatorDataSO operatorData_)
+    public event Action<SolutionData> OnPressDeleteBtn;
+
+    public void Setup(SolutionData solutionData_)
     {
-        operatorData = operatorData_;
-        text.text = $"解法 {operatorData_.solutionIndex}";
+        solutionData = solutionData_;
+        text.text = $"解法 {solutionData_.solutionIndex}";
+        gameObject.name = $"解法 {solutionData_.solutionIndex}";
         openBtn.onClick.AddListener(() =>
         {
             OnPressSolutionBtn?.Invoke(this);
@@ -24,12 +26,12 @@ public class Solution : MonoBehaviour
 
         deleteBtn.onClick.AddListener(() =>
         {
-            OnPressDeleteBtn?.Invoke(operatorData);
+            OnPressDeleteBtn?.Invoke(solutionData);
             Destroy(gameObject);
         });
 
-        transform.SetSiblingIndex(operatorData_.solutionIndex - 1);
-        completeCheck.SetActive(operatorData.complete);
+        transform.SetSiblingIndex(solutionData_.solutionIndex - 1);
+        completeCheck.SetActive(solutionData.complete);
     }
 
     public void SetComplete() => completeCheck.gameObject.SetActive(true);

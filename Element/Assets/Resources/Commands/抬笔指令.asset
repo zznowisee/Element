@@ -16,3 +16,4 @@ MonoBehaviour:
   description: "\u5173\u95ED\u63A7\u5236\u5668\u6307\u4EE4\u53D1\u9001\u65B9\u5411\u4E0A\u6BCF\u4E00\u4E2A\u8FDE\u63A5\u5668\u6240\u8FDE\u63A5\u7B14\u5237\u7684\u4E0A\u8272\u72B6\u6001\u3002\u5FEB\u6377\u952E\uFF1AX"
   key: 120
   icon: {fileID: 21300000, guid: 16ee373e7ce1aed45a155873a39cfe14, type: 3}
+  type: 2

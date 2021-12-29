@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -53,6 +53,9 @@
     <UnityVersion>2021.1.19f1c1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Assets\Scripts\Device\Connector.cs" />
     <Compile Include="Assets\Scripts\UI\Command.cs" />
     <Compile Include="Assets\Scripts\UI\CommandSlot.cs" />
@@ -76,15 +79,14 @@
     <Compile Include="Assets\Scripts\Device\Controller.cs" />
     <Compile Include="Assets\Scripts\Device\Track.cs" />
     <Compile Include="Assets\Scripts\HexMap\HexMap.cs" />
-    <Compile Include="Assets\Scripts\ScriptableObject\OperatorDataSO.cs" />
     <Compile Include="Assets\Scripts\UI\SolutionSystem.cs" />
     <Compile Include="Assets\Scripts\UI\HighlighUnselectableBtn.cs" />
     <Compile Include="Assets\Scripts\Device\PatternLineMesh.cs" />
     <Compile Include="Assets\Scripts\ProductLineMesh.cs" />
     <Compile Include="Assets\Scripts\UI\Solution.cs" />
-    <Compile Include="Assets\Scripts\ScriptableObject\LevelDataSO.cs" />
     <Compile Include="Assets\Scripts\GameSystem.cs" />
     <Compile Include="Assets\Scripts\UI\TooltipUI.cs" />
+    <Compile Include="Assets\Scripts\ScriptableObject\LevelBuildDataSO.cs" />
     <Compile Include="Assets\Scripts\UI\WarningUI.cs" />
     <Compile Include="Assets\Scripts\UI\CommandGhost.cs" />
     <Compile Include="Assets\Scripts\ICommandReader.cs" />
@@ -105,6 +107,7 @@
     <Compile Include="Assets\Scripts\Device\TrackControlPoint.cs" />
     <Compile Include="Assets\Scripts\UI\CommandBtn.cs" />
     <Compile Include="Assets\Scripts\HexMap\GridMap.cs" />
+    <Compile Include="Assets\Scripts\SerializationSystem.cs" />
     <Compile Include="Assets\Scripts\Device\Brush.cs" />
     <Compile Include="Assets\Scripts\UI\TooltipSystem.cs" />
     <Compile Include="Assets\Scripts\IMouseAction.cs" />
@@ -121,7 +124,9 @@
     <Compile Include="Assets\Scripts\ProductData.cs" />
     <Compile Include="Assets\Scripts\UI\MainUISystem.cs" />
     <Compile Include="Assets\Scripts\UI\WarningType.cs" />
+    <Compile Include="Assets\Scripts\FileHandler.cs" />
     <Compile Include="Assets\Scripts\UI\BrushBtn.cs" />
+    <Compile Include="Assets\Scripts\ScriptableObject\GameData.cs" />
     <Compile Include="Assets\Scripts\ColorSystem.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +146,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\Shaders\Unlit.shader" />
+    <None Include="Assets\Thinking.txt" />
     <None Include="Assets\Shaders\ColorHex.shader" />
     <None Include="Assets\Shaders\Hex.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface.shader" />

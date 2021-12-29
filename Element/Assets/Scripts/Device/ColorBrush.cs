@@ -34,8 +34,8 @@ public class ColorBrush : Brush
     {
         if (putdown)
         {
-            cell.PaintingWithColor(brushData.colorSO.drawColor, ProcessSystem.Instance.commandLineIndex);
-            OnColoringCell?.Invoke(cell, brushData.colorSO);
+            cell.PaintingWithColor(brushBtn.colorSO.drawColor, ProcessSystem.Instance.commandLineIndex);
+            OnColoringCell?.Invoke(cell, brushBtn.colorSO);
         }
     }
 

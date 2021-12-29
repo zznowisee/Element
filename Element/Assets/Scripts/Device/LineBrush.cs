@@ -66,7 +66,7 @@ public class LineBrush : Brush
     {
         cell.beColoring = true;
         currentDrawingLine = Instantiate(pfPatternLine);
-        currentDrawingLine.Setup(cell, brushData.colorSO.drawColor, ProcessSystem.Instance.commandLineIndex);
+        currentDrawingLine.Setup(cell, brushBtn.colorSO.drawColor, ProcessSystem.Instance.commandLineIndex);
         ProcessSystem.Instance.recordCells.Add(cell);
     }
 
@@ -79,7 +79,7 @@ public class LineBrush : Brush
             currentDrawingLine.endCell = cell;
             ProcessSystem.Instance.recordCells.Add(cell);
 
-            OnDrawingLine?.Invoke(currentDrawingLine.startCell, currentDrawingLine.endCell, brushData.colorSO);
+            OnDrawingLine?.Invoke(currentDrawingLine.startCell, currentDrawingLine.endCell, brushBtn.colorSO);
 
             currentDrawingLine = null;
         }

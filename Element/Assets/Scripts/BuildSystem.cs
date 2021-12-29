@@ -5,7 +5,7 @@ using System;
 
 public class BuildSystem : MonoBehaviour
 {
-    public OperatorDataSO operatorData;
+    public SolutionData currentSolutionData;
     [SerializeField] HexMap operatorSystem;
     [SerializeField] ProcessSystem processSystem;
     [SerializeField] OperatorUISystem operatorUISystem;
@@ -26,7 +26,10 @@ public class BuildSystem : MonoBehaviour
     [SerializeField] ColorPicker pfColorPicker;
     [SerializeField] Connector pfConnector;
     [SerializeField] Controller pfController;
- 
+    [SerializeField] ColorSO yellow;
+    [SerializeField] ColorSO red;
+    [SerializeField] ColorSO blue;
+    [SerializeField] ColorSO white;
     Brush currentBrush;
     Connector currentConnector;
     Controller currentController;
@@ -40,24 +43,24 @@ public class BuildSystem : MonoBehaviour
 
     void Start()
     {
-        mainUISystem.OnSwitchToOperatorScene += MainUISystem_OnSwitchToOperatorScene;
-        operatorUISystem.OnSwitchToMainScene += OperatorUISystem_OnSwitchToMainScene;
+        mainUISystem.OnLoadSolution += MainUISystem_OnLoadSolution;
+        operatorUISystem.OnSwitchToMainScene += OperatorUISystem_OnReturnMainMenu;
     }
 
-    private void OperatorUISystem_OnSwitchToMainScene()
+    private void OperatorUISystem_OnReturnMainMenu()
     {
-        operatorData = null;
+        currentSolutionData = null;
         commandReadersIndices = new int[15];
         currentBrush = null;
         currentConnector = null;
         currentController = null;
     }
 
-    private void MainUISystem_OnSwitchToOperatorScene(LevelDataSO levelData_, OperatorDataSO operatorData_)
+    private void MainUISystem_OnLoadSolution(LevelBuildDataSO levelBuildDataSO, LevelData levelData, SolutionData solutionData_)
     {
-        operatorData = operatorData_;
-        List<ConnectorData> connectorDatas = operatorData_.connectorDatas;
-        List<ControllerData> controllerDatas = operatorData_.controllerDatas;
+        currentSolutionData = solutionData_;
+        List<ConnectorData> connectorDatas = solutionData_.connectorDatas;
+        List<ControllerData> controllerDatas = solutionData_.controllerDatas;
 
         for (int i = 0; i < connectorDatas.Count; i++)
         {
@@ -89,17 +92,35 @@ public class BuildSystem : MonoBehaviour
     {
         int index = brushData_.cellIndex;
         HexCell cell = operatorSystem.GetCellFromIndex(index);
-
+        ColorSO colorSO;
+        switch (brushData_.colorType)
+        {
+            case ColorType.Blue:
+                colorSO = blue;
+                break;
+            case ColorType.Red:
+                colorSO = red;
+                break;
+            case ColorType.White:
+                colorSO = white;
+                break;
+            case ColorType.Yellow:
+                colorSO = yellow;
+                break;
+            default:
+                colorSO = white;
+                break;
+        }
         switch (brushData_.type)
         {
             case BrushType.Coloring:
                 ColorBrush colorBrush = Instantiate(pfColorBrush);
-                colorBrush.SetupFromData(cell, brushData_, brushBtn_);
+                colorBrush.SetupFromData(cell, brushData_, colorSO, brushBtn_);
                 processSystem.OnCreateNewBrush(colorBrush);
                 break;
             case BrushType.Line:
                 LineBrush lineBrush = Instantiate(pfLineBrush);
-                lineBrush.SetupFromData(cell, brushData_, brushBtn_);
+                lineBrush.SetupFromData(cell, brushData_, colorSO, brushBtn_);
                 processSystem.OnCreateNewBrush(lineBrush);
                 break;
         }

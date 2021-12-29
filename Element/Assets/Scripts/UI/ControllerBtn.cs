@@ -7,12 +7,12 @@ public class ControllerBtn : MonoBehaviour, IPointerDownHandler
     [SerializeField] TextMeshProUGUI numberText;
     [SerializeField] CanvasGroup canvasGroup;
     int number;
-    public OperatorDataSO data;
+    public SolutionData data;
 
-    public void Setup(OperatorDataSO data_)
+    public void Setup(SolutionData data_)
     {
         data = data_;
-        number = data_.ControllerNumber;
+        number = data_.controllerNumber;
         numberText.text = number <= 1 ? "" : $"x{number}";
         if (number == 0)
         {
@@ -33,7 +33,7 @@ public class ControllerBtn : MonoBehaviour, IPointerDownHandler
             if (ProcessSystem.Instance.CanOperate())
             {
                 BuildSystem.Instance.CreateNewController(this);
-                data.ControllerNumber--;
+                data.controllerNumber--;
                 number--;
                 numberText.text = number <= 1 ? "" : $"x{number}";
                 if(number == 0)
@@ -53,7 +53,7 @@ public class ControllerBtn : MonoBehaviour, IPointerDownHandler
             canvasGroup.blocksRaycasts = true;
         }
 
-        data.ControllerNumber++;
+        data.controllerNumber++;
         number++;
         numberText.text = number <= 1 ? "" : $"x{number}";
     }

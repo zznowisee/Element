@@ -6,8 +6,10 @@ public interface ICommandReader
     void RunCommand(CommandType commandType);
 }
 
+[System.Serializable]
 public enum CommandType
 {
+    Empty,
     PutDown,
     PutUp,
     ConnectorCR,
@@ -18,5 +20,5 @@ public enum CommandType
     Push,
     Pull,
     ControllerCCR,
-    ControllerCR
+    ControllerCR,
 }

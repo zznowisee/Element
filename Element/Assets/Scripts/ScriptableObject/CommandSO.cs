@@ -8,4 +8,5 @@ public class CommandSO : ScriptableObject
     public string description;
     public KeyCode key;
     public Sprite icon;
+    public CommandType type;
 }

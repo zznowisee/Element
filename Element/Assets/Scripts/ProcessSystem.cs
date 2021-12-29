@@ -6,7 +6,8 @@ using System;
 public class ProcessSystem : MonoBehaviour
 {
 
-    public OperatorDataSO operatorData;
+    public SolutionData solutionData;
+    public LevelData levelData;
 
     public enum ProcessType
     {
@@ -29,7 +30,7 @@ public class ProcessSystem : MonoBehaviour
 
     public event Action<int> OnReadNextCommandLine;
     public event Action OnFinishAllCommandsOrWarning;
-    public event Action OnLevelComplete;
+    public event Action<LevelData> OnLevelComplete;
     public static ProcessSystem Instance { get; private set; }
 
     [Header("Command SO")]
@@ -116,16 +117,16 @@ public class ProcessSystem : MonoBehaviour
         BuildSystem.Instance.OnDestoryController += OnDestroyController;
 
         operatorUISystem.OnSwitchToMainScene += OperatorUISystem_OnSwitchToMainScene;
-        mainUISystem.OnSwitchToOperatorScene += MainUISystem_OnSwitchToOperatorScene;
+        mainUISystem.OnLoadSolution += MainUISystem_OnSwitchToOperatorScene;
     }
 
-    private void MainUISystem_OnSwitchToOperatorScene(LevelDataSO levelData_, OperatorDataSO operatorData_)
+    private void MainUISystem_OnSwitchToOperatorScene(LevelBuildDataSO levelBuildDataSO_, LevelData levelData_, SolutionData solutionData_)
     {
-        operatorData = operatorData_;
-
-        for (int i = 0; i < levelData_.productData.cells.Length; i++)
+        solutionData = solutionData_;
+        levelData = levelData_;
+        for (int i = 0; i < levelBuildDataSO_.productData.cells.Length; i++)
         {
-            CellData data = levelData_.productData.cells[i];
+            CellData data = levelBuildDataSO_.productData.cells[i];
             Vector2Int coord = data.coord + hexMap.centerCellCoord;
             HexCell cell = hexMap.coordCellDictionary[coord];
             ProductCell productCell = Instantiate(pfProductCell, hexMap.productHolder);
@@ -133,9 +134,9 @@ public class ProcessSystem : MonoBehaviour
 
             productColorCells.Add(new CheckProductColorCell(cell, data.color));
         }
-        for (int i = 0; i < levelData_.productData.lines.Length; i++)
+        for (int i = 0; i < levelBuildDataSO_.productData.lines.Length; i++)
         {
-            LineData data = levelData_.productData.lines[i];
+            LineData data = levelBuildDataSO_.productData.lines[i];
             Vector2Int aCoord = data.pointA + hexMap.centerCellCoord;
             Vector2Int bCoord = data.pointB + hexMap.centerCellCoord;
             HexCell start = hexMap.coordCellDictionary[aCoord];
@@ -152,12 +153,12 @@ public class ProcessSystem : MonoBehaviour
 
     private void OperatorUISystem_OnSwitchToMainScene()
     {
-        operatorData.connectorDatas.Clear();
-        operatorData.controllerDatas.Clear();
+        solutionData.connectorDatas.Clear();
+        solutionData.controllerDatas.Clear();
 
         for (int i = 0; i < controllers.Count; i++)
         {
-            operatorData.controllerDatas.Add(controllers[i].controllerData);
+            solutionData.controllerDatas.Add(controllers[i].controllerData);
             controllers[i].OnSwitchToMainScene();
         }
         for (int i = 0; i < brushes.Count; i++)
@@ -166,7 +167,7 @@ public class ProcessSystem : MonoBehaviour
         }
         for (int i = 0; i < connectors.Count; i++)
         {
-            operatorData.connectorDatas.Add(connectors[i].connectorData);
+            solutionData.connectorDatas.Add(connectors[i].connectorData);
             connectors[i].OnSwitchToMainScene();
         }
         productColorCells.Clear();
@@ -177,13 +178,14 @@ public class ProcessSystem : MonoBehaviour
         brushes.Clear();
         connectors.Clear();
         solutionCompleted = false;
-        operatorData = null;
+        solutionData = null;
+        levelData = null;
     }
 
     private void OnDestroyController(Controller controller)
     {
         controllers.Remove(controller);
-        operatorData.controllerDatas.Remove(controller.controllerData);
+        solutionData.controllerDatas.Remove(controller.controllerData);
         controller.OnFinishCommand -= OnReaderFinishCommand;
         controller.OnWarning -= OnWarning;
     }
@@ -191,7 +193,7 @@ public class ProcessSystem : MonoBehaviour
     public void OnCreateNewController(Controller controller)
     {
         controllers.Add(controller);
-        operatorData.controllerDatas.Add(controller.controllerData);
+        solutionData.controllerDatas.Add(controller.controllerData);
         controller.OnFinishCommand += OnReaderFinishCommand;
         controller.OnWarning += OnWarning;
     }
@@ -335,14 +337,14 @@ public class ProcessSystem : MonoBehaviour
     public void OnDestoryConnector(Connector connector)
     {
         connectors.Remove(connector);
-        operatorData.connectorDatas.Remove(connector.connectorData);
+        solutionData.connectorDatas.Remove(connector.connectorData);
         connector.OnWarning -= OnWarning;
     }
 
     public void OnCreateNewConnector(Connector connector)
     {
         connectors.Add(connector);
-        operatorData.connectorDatas.Add(connector.connectorData);
+        solutionData.connectorDatas.Add(connector.connectorData);
         connector.OnWarning += OnWarning;
     }
 
@@ -370,8 +372,8 @@ public class ProcessSystem : MonoBehaviour
             }
 
             solutionCompleted = true;
-            operatorData.complete = true;
-            OnLevelComplete?.Invoke();
+            solutionData.complete = true;
+            OnLevelComplete?.Invoke(levelData);
             processType = ProcessType.PAUSE;
             processState = ProcessState.Waiting;
         }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
-using UnityEditor;
 
 public enum LevelType
 {
@@ -16,12 +15,12 @@ public enum LevelType
 
 public class MainUISystem : MonoBehaviour
 {
-
+    GameData gameData;
     [SerializeField] Color pageDisable;
     [SerializeField] Color pageEnable;
     public static MainUISystem Instance { get; private set; }
 
-    public event Action<LevelDataSO, OperatorDataSO> OnSwitchToOperatorScene;
+    public event Action<LevelBuildDataSO, LevelData, SolutionData> OnLoadSolution;
     [SerializeField] OperatorUISystem operatorUISystem;
 
     [SerializeField] LevelSelectBtn pfLevelSelectBtn;
@@ -33,6 +32,7 @@ public class MainUISystem : MonoBehaviour
     [SerializeField] Button highLevelBtn;
     [SerializeField] Button exLevelBtn;
     [SerializeField] Button quitBtn;
+    [SerializeField] Button thinkingBtn;
 
     [SerializeField] LevelPage tutorialLevelPage;
     [SerializeField] LevelPage lowLevelPage;
@@ -50,7 +50,7 @@ public class MainUISystem : MonoBehaviour
     [HideInInspector] public Solution currentSolution;
     public LevelSelectBtn currentLevelSelectBtn;
 
-    public List<LevelDataSO> levels;
+    public List<LevelBuildDataSO> levels;
     LevelPage[] levelPages;
     LevelPage current;
 
@@ -73,6 +73,20 @@ public class MainUISystem : MonoBehaviour
         highLevelBtnImage = highLevelBtn.GetComponent<Image>();
         exLevelBtnImage = exLevelBtn.GetComponent<Image>();
 
+        string path = Application.persistentDataPath + "/saves/" + "Data" + ".save";
+        gameData = (GameData)SerializationSystem.Load(path);
+
+        if (gameData == null)
+        {
+            gameData = new GameData();
+            for (int i = 0; i < levels.Count; i++)
+            {
+                gameData.LevelDatas.Add(new LevelData(levels[i].name, levels[i].levelIndex, levels[i].levelType));
+            }
+            SaveGameData();
+        }
+        thinkingBtn.gameObject.SetActive(gameData.FinishedAllLevels());
+        exLevelBtn.gameObject.SetActive(gameData.FinishedAllLevels());
         tutorialLevelBtn.onClick.AddListener(() =>
         {
             SelectLevelPage(LevelType.Tutorial);
@@ -95,15 +109,23 @@ public class MainUISystem : MonoBehaviour
         });
         quitBtn.onClick.AddListener(() =>
         {
+            SaveGameData();
             Application.Quit();
+        });
+        thinkingBtn.onClick.AddListener(() =>
+        {
+            Application.OpenURL(Environment.CurrentDirectory + "/Data/Thinking.txt");
         });
         for (int i = 0; i < levels.Count; i++)
         {
             Transform levelPageParent = transform;
             Transform levelSelectParent = transform;
             LevelPage page = tutorialLevelPage;
-            LevelDataSO levelData = levels[i];
-            switch (levelData.levelType)
+            LevelBuildDataSO levelBuildDataSO = levels[i];
+
+            LevelData levelData = gameData.LevelDatas[levelBuildDataSO.levelIndex];
+
+            switch (levelBuildDataSO.levelType)
             {
                 case LevelType.Tutorial:
                     levelPageParent = tutorialLevelPage.transform;
@@ -131,26 +153,32 @@ public class MainUISystem : MonoBehaviour
                     page = exLevelPage;
                     break;
             }
-
             LevelSelectBtn levelSelectBtn = Instantiate(pfLevelSelectBtn, levelSelectParent);
-            levelSelectBtn.gameObject.name = $"{levelData.name}SelectBtn";
-            SolutionSystem solution = Instantiate(pfLevelSolution, levelPageParent);
-            solution.gameObject.name = $"{levelData.name}SolutionBtnPanel";
+            levelSelectBtn.gameObject.name = $"{levelBuildDataSO.name}SelectBtn";
+            SolutionSystem solutionSystem = Instantiate(pfLevelSolution, levelPageParent);
+            solutionSystem.gameObject.name = $"{levelBuildDataSO.name}SolutionBtnPanel";
 
-            levelSelectBtn.Setup(page, levelData, solution, levelSelectParent.gameObject);
-            solution.Setup(page, levelData, levelSelectParent.gameObject);
-            solution.gameObject.SetActive(false);
+            levelSelectBtn.Setup(page, levelData, solutionSystem, levelSelectParent.gameObject);
+            solutionSystem.Setup(page, levelBuildDataSO, levelData, levelSelectParent.gameObject);
+            solutionSystem.gameObject.SetActive(false);
         }
 
         SelectLevelPage(LevelType.Tutorial);
 
-        OnSwitchToOperatorScene += operatorUISystem.OnSwitchToOperatorScene;
+        OnLoadSolution += operatorUISystem.OnLoadSolution;
+    }
+
+    public void SaveGameData()
+    {
+        string saveName = "Data";
+        SerializationSystem.Save(saveName, gameData);
     }
 
     void Start()
     {
         ProcessSystem.Instance.OnLevelComplete += ProcessSystem_OnLevelComplete;    
     }
+
     void SelectLevelPage(LevelType levelType)
     {
         current.ResetPage();
@@ -195,21 +223,24 @@ public class MainUISystem : MonoBehaviour
 
         currentLevelSelectBtn = null;
     }
-    private void ProcessSystem_OnLevelComplete()
+    private void ProcessSystem_OnLevelComplete(LevelData levelData)
     {
         currentSolution.SetComplete();
         currentLevelSelectBtn.SetComplete();
+        levelData.completed = true;
+        thinkingBtn.gameObject.SetActive(gameData.FinishedAllLevels());
+        exLevelBtn.gameObject.SetActive(gameData.FinishedAllLevels());
     }
 
-    public void SwitchToOperatorScene(LevelDataSO levelData, Solution currentSolution_)
+    public void SwitchToOperatorScene(LevelBuildDataSO levelBuildDataSO_, LevelData levelData, Solution currentSolution_)
     {
         operatorUISystem.gameObject.SetActive(true);
-        operatorUISystem.levelData = levelData;
+        operatorUISystem.levelBuildDataSO = levelBuildDataSO_;
 
-        OnSwitchToOperatorScene?.Invoke(levelData, currentSolution_.operatorData);
-
-        Camera.main.transform.position = new Vector3(300f, 0f, -10f);
         currentSolution = currentSolution_;
+        OnLoadSolution?.Invoke(levelBuildDataSO_, levelData, currentSolution_.solutionData);
+        print(levelBuildDataSO_.name);
+        Camera.main.transform.position = new Vector3(300f, 0f, -10f);
         gameObject.SetActive(false);
     }
 }

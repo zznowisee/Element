@@ -6,19 +6,19 @@ using UnityEditor;
 
 public class LevelSelectBtn : MonoBehaviour
 {
-    [SerializeField] LevelDataSO levelData;
+    [SerializeField] LevelData levelData;
     public LevelPage page;
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] Button levelSelectBtn;
     [SerializeField] RectTransform rectTransform;
     [SerializeField] GameObject completeCheck;
 
-    public void Setup(LevelPage page_, LevelDataSO levelData_, SolutionSystem levelSolution_, GameObject levelSelectBtnPanel_)
+    public void Setup(LevelPage page_, LevelData levelData_, SolutionSystem levelSolution_, GameObject levelSelectBtnPanel_)
     {
         page = page_;
         levelData = levelData_;
 
-        text.text = levelData.name;
+        text.text = levelData_.levelName;
         text.ForceMeshUpdate();
         rectTransform.sizeDelta = Vector2.one * text.GetRenderedValues(false);
 

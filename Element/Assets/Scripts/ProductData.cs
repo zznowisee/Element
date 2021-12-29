@@ -25,7 +25,7 @@ public class LineData
 }
 
 [System.Serializable]
-public class BrushBtnDataInit
+public class BrushBtnInitData
 {
     public ColorSO colorSO;
     public BrushType type;

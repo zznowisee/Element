@@ -1,4 +1,5 @@
-﻿public enum Direction 
+﻿[System.Serializable]
+public enum Direction 
 {
 	NE, E, SE, SW, W, NW
 }
