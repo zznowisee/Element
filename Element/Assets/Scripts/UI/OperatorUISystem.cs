@@ -253,7 +253,7 @@ public class OperatorUISystem : MonoBehaviour
     private void ProcessSystem_OnPlayerFinishedLevel(LevelData levelData)
     {
         completePanel.gameObject.SetActive(true);
-        completePanelCycleNumText.text = $"共{ProcessSystem.Instance.commandLineIndex}周期";
+        completePanelCycleNumText.text = $"周期数:{ProcessSystem.Instance.commandLineIndex}";
     }
 
     public void OnLoadSolution(LevelBuildDataSO levelBuildDataSO_, LevelData levelData_, SolutionData solutionData_)

@@ -57,4 +57,4 @@ MonoBehaviour:
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     type: 1
-    number: 0
+    number: 1

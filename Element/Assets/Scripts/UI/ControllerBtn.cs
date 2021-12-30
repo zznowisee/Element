@@ -12,7 +12,7 @@ public class ControllerBtn : MonoBehaviour, IPointerDownHandler
     public void Setup(SolutionData data_)
     {
         data = data_;
-        number = data_.controllerNumber;
+        number = data_.controllerNum;
         numberText.text = number <= 1 ? "" : $"x{number}";
         if (number == 0)
         {
@@ -33,7 +33,7 @@ public class ControllerBtn : MonoBehaviour, IPointerDownHandler
             if (ProcessSystem.Instance.CanOperate())
             {
                 BuildSystem.Instance.CreateNewController(this);
-                data.controllerNumber--;
+                data.controllerNum--;
                 number--;
                 numberText.text = number <= 1 ? "" : $"x{number}";
                 if(number == 0)
@@ -53,7 +53,7 @@ public class ControllerBtn : MonoBehaviour, IPointerDownHandler
             canvasGroup.blocksRaycasts = true;
         }
 
-        data.controllerNumber++;
+        data.controllerNum++;
         number++;
         numberText.text = number <= 1 ? "" : $"x{number}";
     }

@@ -950,7 +950,7 @@ ScriptsOnlyBuild:
     className: AnimationPlayableAsset
   - hash:
       serializedVersion: 2
-      Hash: 864e006bcc15c009098338d36b7b32a9
+      Hash: c81249db95ccd76b56dde7068a8ce943
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: ProcessSystem

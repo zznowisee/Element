@@ -47,16 +47,19 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (ProcessSystem.Instance.CanOperate())
+        if(eventData.button == PointerEventData.InputButton.Left)
         {
-            BuildSystem.Instance.CreateNewBrush(this);
-            brushBtnDataSolution.number--;
-            number--;
-            numberText.text = number <= 1 ? "" : $"x{number}";
-            if (number == 0)
+            if (ProcessSystem.Instance.CanOperate())
             {
-                canvasGroup.alpha = 0.01f;
-                canvasGroup.blocksRaycasts = false;
+                BuildSystem.Instance.CreateNewBrush(this);
+                brushBtnDataSolution.number--;
+                number--;
+                numberText.text = number <= 1 ? "" : $"x{number}";
+                if (number == 0)
+                {
+                    canvasGroup.alpha = 0.01f;
+                    canvasGroup.blocksRaycasts = false;
+                }
             }
         }
     }

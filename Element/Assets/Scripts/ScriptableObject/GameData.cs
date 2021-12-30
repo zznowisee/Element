@@ -70,17 +70,17 @@ public class SolutionData
     public bool hasInitialized;
     public bool complete;
     public int solutionIndex;
-    public int controllerNumber;
+    public int controllerNum;
 
     public List<ConnectorData> connectorDatas;
     public List<ControllerData> controllerDatas;
     public List<BrushBtnSolutionData> brushBtnDataSolutions;
-    public SolutionData(int solutionIndex_)
+    public SolutionData(int solutionIndex_, int controllerNum_)
     {
         hasInitialized = false;
         complete = false;
         solutionIndex = solutionIndex_;
-        controllerNumber = 4;
+        controllerNum = controllerNum_;
         connectorDatas = new List<ConnectorData>();
         controllerDatas = new List<ControllerData>();
         brushBtnDataSolutions = new List<BrushBtnSolutionData>();

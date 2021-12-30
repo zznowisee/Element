@@ -48,7 +48,7 @@ public class SolutionSystem : MonoBehaviour
             Solution solution = Instantiate(pfSolution, transform);
             solution.OnPressSolutionBtn += OnPressSolutionBtn;
             solution.OnPressDeleteBtn += OnPressDeleteBtn;
-            SolutionData solutionData = new SolutionData(solutionIndex);
+            SolutionData solutionData = new SolutionData(solutionIndex, levelBuildDataSO.controllerNum);
 
             levelData.SolutionDatas.Insert(solutionIndex - 1, solutionData);
 

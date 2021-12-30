@@ -19,12 +19,15 @@ public class CommandBtn : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (ProcessSystem.Instance.CanOperate())
+        if(eventData.button == PointerEventData.InputButton.Left)
         {
-            Command command = Instantiate(pfCommand, transform.position, Quaternion.identity, OperatorUISystem.Instance.transform);
-            command.Setup(commandSO);
-            command.BeginDrag();
-            OperatorUISystem.Instance.SetCurrentTrackingCommand(command);
+            if (ProcessSystem.Instance.CanOperate())
+            {
+                Command command = Instantiate(pfCommand, transform.position, Quaternion.identity, OperatorUISystem.Instance.transform);
+                command.Setup(commandSO);
+                command.BeginDrag();
+                OperatorUISystem.Instance.SetCurrentTrackingCommand(command);
+            }
         }
     }
 }

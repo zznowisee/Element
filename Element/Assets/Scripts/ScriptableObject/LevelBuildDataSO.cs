@@ -8,6 +8,7 @@ public class LevelBuildDataSO : ScriptableObject
     public LevelType levelType;
     public ProductData productData;
     public int levelIndex;
+    public int controllerNum;
     public List<BrushBtnInitData> brushBtnDatas;
 }
 

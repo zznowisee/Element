@@ -18,23 +18,26 @@ public class Command : MonoBehaviour, IPointerDownHandler//, IBeginDragHandler, 
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (InputHelper.IsTheseKeysHeld(KeyCode.Delete))
+        if(eventData.button == PointerEventData.InputButton.Left)
         {
-            if(commandSlot != null)
+            if (InputHelper.IsTheseKeysHeld(KeyCode.Delete))
             {
-                commandSlot.ClearCommand();
-                Destroy(gameObject);
-                return;
+                if (commandSlot != null)
+                {
+                    commandSlot.ClearCommand();
+                    Destroy(gameObject);
+                    return;
+                }
             }
-        }
-        else
-        {
-            transform.parent = OperatorUISystem.Instance.transform;
-            if (commandSlot != null)
+            else
             {
-                commandSlot.ClearCommand();
+                transform.parent = OperatorUISystem.Instance.transform;
+                if (commandSlot != null)
+                {
+                    commandSlot.ClearCommand();
+                }
+                OperatorUISystem.Instance.SetCurrentTrackingCommand(this);
             }
-            OperatorUISystem.Instance.SetCurrentTrackingCommand(this);
         }
     }
 

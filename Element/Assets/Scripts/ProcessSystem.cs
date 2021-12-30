@@ -66,8 +66,12 @@ public class ProcessSystem : MonoBehaviour
     [SerializeField] ProductLine pfProductLine;
     [SerializeField] ProductCell pfProductCell;
 
+    [SerializeField] List<CheckProductColorCell> totalColorCells;
+    [SerializeField] List<CheckProductHalfLine> totalHalfLines;
+
     [SerializeField] List<CheckProductColorCell> productColorCells;
     [SerializeField] List<CheckProductHalfLine> productHalfLines;
+
     [SerializeField] List<CheckProductColorCell> finishedColorCells;
     [SerializeField] List<CheckProductHalfLine> finishedHalfLines;
 
@@ -81,6 +85,8 @@ public class ProcessSystem : MonoBehaviour
         brushes = new List<Brush>();
         controllers = new List<Controller>();
 
+        totalColorCells = new List<CheckProductColorCell>();
+        totalHalfLines = new List<CheckProductHalfLine>();
         productColorCells = new List<CheckProductColorCell>();
         productHalfLines = new List<CheckProductHalfLine>();
         finishedColorCells = new List<CheckProductColorCell>();
@@ -133,6 +139,7 @@ public class ProcessSystem : MonoBehaviour
             productCell.Setup(cell.transform.position, data.color.initColor);
 
             productColorCells.Add(new CheckProductColorCell(cell, data.color));
+            totalColorCells.Add(new CheckProductColorCell(cell, data.color));
         }
         for (int i = 0; i < levelBuildDataSO_.productData.lines.Length; i++)
         {
@@ -148,6 +155,8 @@ public class ProcessSystem : MonoBehaviour
 
             productHalfLines.Add(new CheckProductHalfLine(start, end, data.color));
             productHalfLines.Add(new CheckProductHalfLine(end, start, data.color));
+            totalHalfLines.Add(new CheckProductHalfLine(start, end, data.color));
+            totalHalfLines.Add(new CheckProductHalfLine(end, start, data.color));
         }
     }
 
@@ -170,6 +179,9 @@ public class ProcessSystem : MonoBehaviour
             solutionData.connectorDatas.Add(connectors[i].connectorData);
             connectors[i].OnSwitchToMainScene();
         }
+
+        totalColorCells.Clear();
+        totalHalfLines.Clear();
         productColorCells.Clear();
         productHalfLines.Clear();
         finishedColorCells.Clear();
@@ -253,28 +265,41 @@ public class ProcessSystem : MonoBehaviour
     private void OnLineBrushDrawingLine(HexCell from_, HexCell to_, ColorSO colorSO_)
     {
         bool partOfProduct = false;
-        for (int i = 0; i < productHalfLines.Count; i++)
+        for (int i = 0; i < finishedHalfLines.Count; i++)
         {
-            if(productHalfLines[i].from == from_ && productHalfLines[i].to == to_)
+            if(finishedHalfLines[i].from == from_ && finishedHalfLines[i].to == to_)
             {
-                if (productHalfLines[i].colorSO == colorSO_)
+                if(finishedHalfLines[i].colorSO != colorSO_)
                 {
                     CheckProductHalfLine ft = new CheckProductHalfLine(from_, to_, colorSO_);
                     CheckProductHalfLine tf = new CheckProductHalfLine(to_, from_, colorSO_);
-                    productHalfLines.Remove(ft);
-                    productHalfLines.Remove(tf);
-                    finishedHalfLines.Add(ft);
-                    finishedHalfLines.Add(tf);
+                    finishedHalfLines.Remove(ft);
+                    finishedHalfLines.Remove(tf);
+                    productHalfLines.Add(ft);
+                    productHalfLines.Add(tf);
                     break;
                 }
             }
         }
 
-        for (int i = 0; i < finishedHalfLines.Count; i++)
+        for (int i = 0; i < totalHalfLines.Count; i++)
         {
-            if(finishedHalfLines[i].from == from_ && finishedHalfLines[i].to == to_)
+            if(totalHalfLines[i].from == from_ && totalHalfLines[i].to == to_)
             {
                 partOfProduct = true;
+                if (totalHalfLines[i].colorSO == colorSO_)
+                {
+                    CheckProductHalfLine ft = new CheckProductHalfLine(from_, to_, colorSO_);
+                    CheckProductHalfLine tf = new CheckProductHalfLine(to_, from_, colorSO_);
+                    productHalfLines.Remove(ft);
+                    productHalfLines.Remove(tf);
+                    if(!finishedHalfLines.Contains(ft) && !finishedHalfLines.Contains(tf))
+                    {
+                        finishedHalfLines.Add(ft);
+                        finishedHalfLines.Add(tf);
+                    }
+                    break;
+                }
             }
         }
 
@@ -287,12 +312,26 @@ public class ProcessSystem : MonoBehaviour
     private void OnColoringCellColoring(HexCell coloringCell_, ColorSO colorSO_)
     {
         bool partOfProduct = false;
-        for (int i = 0; i < productColorCells.Count; i++)
+        for (int i = 0; i < finishedColorCells.Count; i++)
         {
-            if(productColorCells[i].cell == coloringCell_)
+            if(finishedColorCells[i].cell == coloringCell_)
+            {
+                if(finishedColorCells[i].colorSO != colorSO_)
+                {
+                    CheckProductColorCell cc = new CheckProductColorCell() { cell = finishedColorCells[i].cell, colorSO = finishedColorCells[i].colorSO };
+                    productColorCells.Add(cc);
+                    finishedColorCells.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < totalColorCells.Count; i++)
+        {
+            if(totalColorCells[i].cell == coloringCell_)
             {
                 partOfProduct = true;
-                if (productColorCells[i].colorSO == colorSO_)
+                if (totalColorCells[i].colorSO == colorSO_)
                 {
                     CheckProductColorCell pc = new CheckProductColorCell(coloringCell_, colorSO_);
                     finishedColorCells.Add(pc);
@@ -308,13 +347,7 @@ public class ProcessSystem : MonoBehaviour
                 }
             }
         }
-        for (int i = 0; i < finishedColorCells.Count; i++)
-        {
-            if (finishedColorCells[i].cell == coloringCell_)
-            {
-                partOfProduct = true;
-            }
-        }
+
         if (!partOfProduct)
         {
             OnWarning(coloringCell_.transform.position, WarningType.WrongColoring);
@@ -571,6 +604,8 @@ public class ProcessSystem : MonoBehaviour
         finishedColorCells.Clear();
         productHalfLines.Clear();
         finishedHalfLines.Clear();
+        totalColorCells.Clear();
+        totalHalfLines.Clear();
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
         solutionCompleted = false;
@@ -622,7 +657,7 @@ public class ProcessSystem : MonoBehaviour
             cell = cell_;
             colorSO = colorSO_;
         }
-        public static bool operator ==(CheckProductColorCell a, CheckProductColorCell b)
+        public static bool operator == (CheckProductColorCell a, CheckProductColorCell b)
         {
             return a.cell == b.cell && a.colorSO == b.colorSO;
         }
