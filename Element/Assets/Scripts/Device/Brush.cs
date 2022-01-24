@@ -9,16 +9,13 @@ public enum BrushType
     Line
 }
 
-public class Brush : MonoBehaviour, IMouseAction
+public class Brush : ConnectableDevice, IMouseAction
 {
 
     public BrushData brushData;
     [HideInInspector] public BrushBtn brushBtn;
-    [HideInInspector] public HexCell cell;
     [HideInInspector] public HexCell recorderCell;
     public bool putdown;
-    public LineRenderer connectLine;
-    [SerializeField] protected LineRenderer pfConnectLine;
     [SerializeField] MeshRenderer meshRenderer;
     [SerializeField] GameObject putDownSprite;
     public Connector connector;
@@ -67,20 +64,14 @@ public class Brush : MonoBehaviour, IMouseAction
         brushData.cellIndex = cell.index;
     }
 
-    public void Record()
+    public override void Record()
     {
         recorderCell = cell;
     }
 
-    public void ClearCurrentInfo()
+    public override void ClearCurrentInfo()
     {
-        if (connector != null)
-        {
-            connector.OnMoveActionStart -= Connector_OnMoveActionStart;
-            connector.OnRotateActionStart -= Connector_OnRotateActionStart;
-            connector = null;
-        }
-
+        
         if (connectLine != null)
         {
             Destroy(connectLine.gameObject);
@@ -90,7 +81,7 @@ public class Brush : MonoBehaviour, IMouseAction
         cell.currentObject = null;
     }
 
-    public void ReadPreviousInfo()
+    public override void ReadPreviousInfo()
     {
         cell = recorderCell;
         cell.currentObject = gameObject;
@@ -103,30 +94,18 @@ public class Brush : MonoBehaviour, IMouseAction
 
     public virtual void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_) { }
 
-    public void SplitWithConnector(Connector connector_)
-    {
-        if (connector == connector_)
-        {
-            connector_.OnMoveActionStart -= Connector_OnMoveActionStart;
-            connector_.OnRotateActionStart -= Connector_OnRotateActionStart;
-            Destroy(connectLine.gameObject);
-            connectLine = null;
-            connector = null;
-        }
-    }
-
     public void Connector_OnRotateActionStart(Action callback, Action<Action> secondLevelCallback, Connector connector, RotateDirection rotateDirection)
     {
         switch (rotateDirection)
         {
             //ccw
-            case RotateDirection.CounterClockwise:
+            case RotateDirection.CCW:
                 //from connector to this 's cell direction
-                StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.PreviousCell(cell)));
+                //StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.PreviousCell(cell)));
                 break;
             //cw
-            case RotateDirection.Clockwise:
-                StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.NextCell(cell)));
+            case RotateDirection.CW:
+                //StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.NextCell(cell)));
                 break;
         }
     }
@@ -137,18 +116,18 @@ public class Brush : MonoBehaviour, IMouseAction
         putDownSprite.SetActive(putdown);
     }
 
-    public void Connector_OnMoveActionStart(Action callback, Action<Action> secondLevelCallback, Connector connector, Direction direction)
-    {
-        StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, cell.GetNeighbor(direction)));
-    }
-
-    public virtual IEnumerator MoveToTarget(Action callback, Action<Action> secondLevelCallback, Connector connector, HexCell target)
-    {
-        return null;
-    }
-
     public void OnDestroyByPlayer()
     {
         brushBtn.OnDestroyBrush(brushData);
+    }
+
+    public override void ConnectWithConnector(ConnectableDevice target)
+    {
+        base.ConnectWithConnector(target);
+    }
+
+    public override void SplitWithConnector(ConnectableDevice target)
+    {
+        base.SplitWithConnector(target);
     }
 }

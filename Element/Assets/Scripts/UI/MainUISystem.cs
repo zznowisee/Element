@@ -73,7 +73,7 @@ public class MainUISystem : MonoBehaviour
         highLevelBtnImage = highLevelBtn.GetComponent<Image>();
         exLevelBtnImage = exLevelBtn.GetComponent<Image>();
 
-        string path = Application.persistentDataPath + "/saves/" + "Data" + ".save";
+        string path = Application.persistentDataPath + "/saves/" + "GameData" + ".save";
         gameData = (GameData)SerializationSystem.Load(path);
 
         if (gameData == null)
@@ -170,7 +170,7 @@ public class MainUISystem : MonoBehaviour
 
     public void SaveGameData()
     {
-        string saveName = "Data";
+        string saveName = "GameData";
         SerializationSystem.Save(saveName, gameData);
     }
 

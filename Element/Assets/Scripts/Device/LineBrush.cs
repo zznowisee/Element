@@ -10,7 +10,7 @@ public class LineBrush : Brush
 
     public override event Action<Vector3, WarningType> OnWarning;
     public event Action<HexCell, HexCell, ColorSO> OnDrawingLine;
-    public override IEnumerator MoveToTarget(Action controllerCallback, Action<Action> connectorCallback, Connector connector, HexCell target)
+    public override IEnumerator MoveToTarget(Action releaserCallback, Action<Action> callback, HexCell target, float executeTime)
     {
         yield return null;
         cell.currentObject = null;
@@ -24,10 +24,9 @@ public class LineBrush : Brush
         Vector3 endPosition = target.transform.position;
         while (percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
+            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
             percent = Mathf.Clamp01(percent);
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
-            connectLine.SetPosition(1, connector.transform.position - transform.position);
             if (currentDrawingLine != null)
             {
                 currentDrawingLine.Painting(transform.position);
@@ -39,20 +38,13 @@ public class LineBrush : Brush
         cell = target;
         cell.currentObject = gameObject;
         FinishPainting();
-        connectorCallback?.Invoke(controllerCallback);
+        //connectorCallback?.Invoke(controllerCallback);
     }
     public IEnumerator ConnectConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
     {
         yield return null;
         if (connector == null)
         {
-            connector = connector_;
-            connector_.OnMoveActionStart += Connector_OnMoveActionStart;
-            connector_.OnRotateActionStart += Connector_OnRotateActionStart;
-
-            connectLine = Instantiate(pfConnectLine, transform);
-            connectLine.SetPosition(0, cell.transform.position - transform.position);
-            connectLine.SetPosition(1, connector_.transform.position - transform.position);
         }
         else
         {

@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class ProductCell : MonoBehaviour
 {
-    [SerializeField] HexCellMesh cellMesh;
+    
     public void Setup(Vector3 position, Color color_)
     {
+        Mesh mesh = MeshHelper.CreateHexMesh();
+        MeshFilter filter = GetComponent<MeshFilter>();
+        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+        filter.mesh = mesh;
+        meshRenderer.material.color = color_;
         transform.position = position;
-        cellMesh.Init(color_, false);
     }
 }

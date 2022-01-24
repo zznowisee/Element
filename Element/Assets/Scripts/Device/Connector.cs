@@ -4,19 +4,14 @@ using UnityEngine;
 using System;
 using TMPro;
 
-public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
+public class Connector : Device, IMouseAction, IReciever
 {
     public ConnectorData connectorData;
 
-    public List<Brush> brushes;
-    public HexCell cell;
+    public List<ConnectableDevice> connectingDevices;
     [SerializeField] float radius = 5f;
     [SerializeField] GameObject spriteObj;
 
-    public event Action<Action, Action<Action>, Connector, Direction> OnMoveActionStart;
-    public event Action<Action, Action<Action>, Connector, RotateDirection> OnRotateActionStart;
-
-    public Action controllerCallback;
     public event Action<Vector3, WarningType> OnWarning;
 
     int recievedMovingCommandNum = 0;
@@ -30,7 +25,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
     {
         transform.Find("sprite").localScale = radius * Vector3.one;
 
-        brushes = new List<Brush>();
+        connectingDevices = new List<ConnectableDevice>();
     }
 
     public void Setup(HexCell cell_)
@@ -56,7 +51,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
 
     IEnumerator Sleep(Action callback)
     {
-        yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
+        yield return new WaitForSeconds(ProcessSystem.Instance.defaultExecuteTime);
         recievedMovingCommandNum = 0;
         callback?.Invoke();
     }
@@ -72,24 +67,20 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
             OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
-        else
-        {
-            OnRotateActionStart?.Invoke(callback, OnBrushFinishCommand, this, rotateDirection);
-        }
 
-        float rotateAngle = rotateDirection == RotateDirection.Clockwise ? -60f : 60f;
+        float rotateAngle = rotateDirection == RotateDirection.CW ? -60f : 60f;
         float percent = 0f;
         Quaternion start = spriteObj.transform.rotation;
         Quaternion end = Quaternion.Euler(spriteObj.transform.eulerAngles + rotateAngle * Vector3.forward);
         while(percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
+            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
             percent = Mathf.Clamp01(percent);
             spriteObj.transform.rotation = Quaternion.Lerp(start, end, percent);
             yield return null;
         }
 
-        if (brushes.Count == 0)
+        if (connectingDevices.Count == 0)
         {
             recievedMovingCommandNum = 0;
             callback?.Invoke();
@@ -106,10 +97,6 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
             OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
-        else
-        {
-            OnMoveActionStart?.Invoke(callback, OnBrushFinishCommand, this, direction);
-        }
 
         HexCell target = cell.GetNeighbor(direction);
         cell.currentObject = null;
@@ -119,7 +106,7 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
         Vector3 endPosition = target.transform.position;
         while (percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
+            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
             percent = Mathf.Clamp01(percent);
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
             yield return null;
@@ -136,86 +123,38 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
             yield return null;
         }
 
-        if (brushes.Count == 0)
+        if (connectingDevices.Count == 0)
         {
             recievedMovingCommandNum = 0;
             callback?.Invoke();
         }
     }
 
-    public void Record()
+    public override void Record()
     {
         recorderCell = cell;
         recorderSpriteObjRotation = spriteObj.transform.rotation;
     }
 
-    public void ClearCurrentInfo()
+    public override void ClearCurrentInfo()
     {
         recievedMovingCommandNum = 0;
         totalWaitingNum = 0;
         cell.currentObject = null;
     }
 
-    public void ReadPreviousInfo()
+    public override void ReadPreviousInfo()
     {
         cell = recorderCell;
         cell.currentObject = gameObject;
         recorderCell = null;
         totalWaitingNum = 0;
-        brushes.Clear();
+        connectingDevices.Clear();
         transform.position = cell.transform.position;
         spriteObj.transform.rotation = recorderSpriteObjRotation;
     }
 
-    public void RunPutDownUp(Action callback, bool coloring)
-    {
-        for (int i = 0; i < brushes.Count; i++)
-        {
-            brushes[i].PutDownUp(coloring);
-        }
-        StartCoroutine(Sleep(callback));
-    }
-
-    public void RunConnect(Action callback)
-    {
-        for (int i = 0; i < cell.neighbors.Length; i++)
-        {
-            if(cell.neighbors[i] != null)
-            {
-                if(cell.neighbors[i].currentObject != null)
-                {
-                    Brush newBrush = cell.neighbors[i].currentObject.GetComponent<Brush>();
-                    if(newBrush != null)
-                    {
-                        if (!brushes.Contains(newBrush))
-                        {
-                            brushes.Add(newBrush);
-                        }
-                        newBrush.ConnectWithConnector(callback, OnBrushFinishCommand, this);
-                    }
-                }
-            }
-        }
-
-        StartCoroutine(Sleep(callback));
-    }
-
-    public void RunSplit(Action callback)
-    {
-        for (int i = 0; i < brushes.Count; i++)
-        {
-            if (brushes[i] != null)
-            {
-                brushes[i].SplitWithConnector(this);
-                brushes.RemoveAt(i);
-                i--;
-            }
-        }
-
-        StartCoroutine(Sleep(callback));
-    }
-
-    private void OnBrushFinishCommand(Action callback)
+    private void ExecuterFinishedCommand(Action callback)
     {
         totalWaitingNum--;
         if (totalWaitingNum == 0)
@@ -223,25 +162,6 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
             recievedMovingCommandNum = 0;
             callback?.Invoke();
         }
-    }
-
-    public void RunRotate(Action callback, RotateDirection rotateDirection)
-    {
-        recievedMovingCommandNum++;
-        totalWaitingNum = brushes.Count;
-        StartCoroutine(RotateToTarget(callback, rotateDirection));
-    }
-
-    public void RunMove(Action callback, Direction moveDirection)
-    {
-        recievedMovingCommandNum++;
-        totalWaitingNum = brushes.Count;
-        StartCoroutine(MoveToTarget(callback, moveDirection));
-    }
-
-    public void RunDelay(Action callback)
-    {
-        StartCoroutine(Sleep(callback));
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -254,5 +174,30 @@ public class Connector : MonoBehaviour, IMouseAction, ICommandReciever
                 OnWarning?.Invoke(transform.position, WarningType.Collision);
             }
         }
+    }
+
+    public void ExecutePutDownUp(Action releaserCallback, float time, BrushState brushState)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteConnect(Action releaserCallback, float time)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteSplit(Action releaserCallback, float time)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteMove(Action releaserCallback, float time, Direction moveDirection)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteRotate(Action releaserCallback, float time, RotateDirection rotateDirection)
+    {
+        throw new NotImplementedException();
     }
 }

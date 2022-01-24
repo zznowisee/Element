@@ -320,11 +320,10 @@ MonoBehaviour:
   meshRenderer: {fileID: 7740635057948332239}
   defaultMat: {fileID: 2100000, guid: ab666e479a92af3479e0bda3c53c5a5d, type: 2}
   highlightMat: {fileID: 2100000, guid: b6daffa17da206b46988866a36b3b0c4, type: 2}
+  defaultCol: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
   beColoring: 0
   index: 0
-  brush: {fileID: 0}
-  connector: {fileID: 0}
-  controller: {fileID: 0}
+  currentObject: {fileID: 0}
   patternLineHolder: {fileID: 81801595702313425}
 --- !u!1 &7737298993414212398
 GameObject:

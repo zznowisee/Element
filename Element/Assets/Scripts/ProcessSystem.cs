@@ -33,28 +33,15 @@ public class ProcessSystem : MonoBehaviour
     public event Action<LevelData> OnLevelComplete;
     public static ProcessSystem Instance { get; private set; }
 
-    [Header("Command SO")]
-    [SerializeField] CommandSO splitSO;
-    [SerializeField] CommandSO brushCWRotateSO;
-    [SerializeField] CommandSO brushCCWRotateSO;
-    [SerializeField] CommandSO connectSO;
-    [SerializeField] CommandSO goAheadSO;
-    [SerializeField] CommandSO backSO;
-    [SerializeField] CommandSO dropSO;
-    [SerializeField] CommandSO pickSO;
-    [SerializeField] CommandSO delaySO;
-    [SerializeField] CommandSO controllerCCWSO;
-    [SerializeField] CommandSO controllerCWSO;
-
-    Dictionary<CommandSO, Action<ICommandReader>> commandDictionary;
-
     public List<Controller> controllers;
     public List<Connector> connectors;
     public List<Brush> brushes;
     public List<HexCell> recordCells;
 
-    public float commandSpacingTime = .3f;
-    public float commandDurationTime = .3f;
+    public float defaultSpacingTime = .3f;
+    public float defaultExecuteTime = .3f;
+    public float jumpSpacingTime = 0f;
+    public float jumpExecuteTime = 0f;
 
     int totalWaitingNum;
     [HideInInspector] public int commandLineIndex = 0;
@@ -79,7 +66,6 @@ public class ProcessSystem : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        commandDictionary = new Dictionary<CommandSO, Action<ICommandReader>>();
         connectors = new List<Connector>();
         recordCells = new List<HexCell>();
         brushes = new List<Brush>();
@@ -91,18 +77,6 @@ public class ProcessSystem : MonoBehaviour
         productHalfLines = new List<CheckProductHalfLine>();
         finishedColorCells = new List<CheckProductColorCell>();
         finishedHalfLines = new List<CheckProductHalfLine>();
-
-        commandDictionary[splitSO] = Split;
-        commandDictionary[brushCWRotateSO] = ConnectorCR;
-        commandDictionary[brushCCWRotateSO] = ConnectorCCR;
-        commandDictionary[connectSO] = Connect;
-        commandDictionary[dropSO] = PutDown;
-        commandDictionary[pickSO] = PutUp;
-        commandDictionary[delaySO] = Delay;
-        commandDictionary[goAheadSO] = Push;
-        commandDictionary[backSO] = Pull;
-        commandDictionary[controllerCWSO] = SelfCR;
-        commandDictionary[controllerCCWSO] = SelfCCR;
 
         processType = ProcessType.EDIT;
         processState = ProcessState.NotStart;
@@ -198,7 +172,7 @@ public class ProcessSystem : MonoBehaviour
     {
         controllers.Remove(controller);
         solutionData.controllerDatas.Remove(controller.controllerData);
-        controller.OnFinishCommand -= OnReaderFinishCommand;
+        controller.OnFinishedOneLineCommand -= OnReaderFinishCommand;
         controller.OnWarning -= OnWarning;
     }
 
@@ -206,7 +180,7 @@ public class ProcessSystem : MonoBehaviour
     {
         controllers.Add(controller);
         solutionData.controllerDatas.Add(controller.controllerData);
-        controller.OnFinishCommand += OnReaderFinishCommand;
+        controller.OnFinishedOneLineCommand += OnReaderFinishCommand;
         controller.OnWarning += OnWarning;
     }
 
@@ -364,7 +338,7 @@ public class ProcessSystem : MonoBehaviour
     {
         controllers.Add(controller);
         controller.OnWarning += OnWarning;
-        controller.OnFinishCommand += OnReaderFinishCommand;
+        controller.OnFinishedOneLineCommand += OnReaderFinishCommand;
     }
 
     public void OnDestoryConnector(Connector connector)
@@ -385,8 +359,8 @@ public class ProcessSystem : MonoBehaviour
     void SelfCCR(ICommandReader reader) => reader.RunCommand(CommandType.ControllerCCR);
     void Split(ICommandReader reader) => reader.RunCommand(CommandType.Split);
     void Connect(ICommandReader reader) => reader.RunCommand(CommandType.Connect);
-    void ConnectorCR(ICommandReader reader) => reader.RunCommand(CommandType.ConnectorCR);
-    void ConnectorCCR(ICommandReader reader) => reader.RunCommand(CommandType.ConnectorCCR);
+    void ConnectorCR(ICommandReader reader) => reader.RunCommand(CommandType.ConnectorCW);
+    void ConnectorCCR(ICommandReader reader) => reader.RunCommand(CommandType.ConnectorCCW);
     void PutDown(ICommandReader reader) => reader.RunCommand(CommandType.PutDown);
     void PutUp(ICommandReader reader) => reader.RunCommand(CommandType.PutUp);
     void Delay(ICommandReader reader) => reader.RunCommand(CommandType.Delay);
@@ -419,7 +393,7 @@ public class ProcessSystem : MonoBehaviour
                 switch (processType)
                 {
                     case ProcessType.PLAY:
-                        StartCoroutine(Spacing(commandSpacingTime));
+                        StartCoroutine(Spacing(defaultSpacingTime));
                         break;
                     case ProcessType.STEP:
                         processType = ProcessType.PAUSE;
@@ -437,10 +411,10 @@ public class ProcessSystem : MonoBehaviour
     {
         processState = ProcessState.Waiting;
         yield return new WaitForSeconds(spacingTime);
-        RunOnce();
+        RunOnce(0);
     }
 
-    void RunOnce()
+    void RunOnce(float executeTime)
     {
         int lineMaxIndex = operatorUISystem.GetCommandLineMaxIndex();
         if (commandLineIndex <= lineMaxIndex)
@@ -451,15 +425,15 @@ public class ProcessSystem : MonoBehaviour
 
             for (int i = 0; i < controllers.Count; i++)
             {
-                ICommandReader readerObj = controllers[i].GetComponent<ICommandReader>();
-                CommandSO cmd = operatorUISystem.GetEachReaderCommandSO(commandLineIndex, readerObj);
+                ICommandReleaser releaser = controllers[i].GetComponent<ICommandReleaser>();
+                CommandSO cmd = operatorUISystem.GetEachReaderCommandSO(commandLineIndex, releaser);
                 if (cmd != null)
                 {
-                    commandDictionary[cmd].Invoke(readerObj);
+                    releaser.ReleaseCommand(cmd.type, executeTime);
                 }
                 else
                 {
-                    readerObj.RunCommand(CommandType.Delay);
+                    releaser.ReleaseCommand(CommandType.Delay, executeTime);
                 }
             }
 
@@ -531,11 +505,11 @@ public class ProcessSystem : MonoBehaviour
             {
                 case ProcessType.EDIT:
                     Record();
-                    RunOnce();
+                    RunOnce(0);
                     processType = ProcessType.PLAY;
                     break;
                 case ProcessType.PAUSE:
-                    RunOnce();
+                    RunOnce(0);
                     processType = ProcessType.PLAY;
                     break;
                 case ProcessType.STEP:
@@ -556,11 +530,11 @@ public class ProcessSystem : MonoBehaviour
         {
             case ProcessType.EDIT:
                 Record();
-                RunOnce();
+                RunOnce(0);
                 processType = ProcessType.STEP;
                 break;
             case ProcessType.PAUSE:
-                RunOnce();
+                RunOnce(0);
                 processType = ProcessType.STEP;
                 break;
             case ProcessType.PLAY:

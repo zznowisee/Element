@@ -268,11 +268,11 @@ public class BuildSystem : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                currentController.Rotate(RotateDirection.CounterClockwise);
+                currentController.Rotate(RotateDirection.CCW);
             }
             else if (Input.GetKeyDown(KeyCode.E))
             {
-                currentController.Rotate(RotateDirection.Clockwise);
+                currentController.Rotate(RotateDirection.CW);
             }
             else if (Input.GetMouseButtonUp(0))
             {

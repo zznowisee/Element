@@ -6,11 +6,11 @@ using TMPro;
 
 public enum RotateDirection
 {
-    Clockwise,
-    CounterClockwise
+    CW,
+    CCW
 }
 
-public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandReciever
+public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
 {
     public Direction direction;
     public ControllerData controllerData;
@@ -23,7 +23,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
     public event Action OnMouseDragBegin;
     public event Action OnMouseDragEnd;
 
-    public event Action OnFinishCommand;
+    public event Action OnFinishedOneLineCommand;
 
     public event Action<Vector3, WarningType> OnWarning;
 
@@ -97,12 +97,12 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         switch (rotateDirection)
         {
             //ccw
-            case RotateDirection.CounterClockwise:
+            case RotateDirection.CCW:
                 direction = direction.Previous();
                 sprite.transform.rotation = Quaternion.Euler(sprite.transform.eulerAngles + Vector3.forward * 60f);
                 break;
             //cw
-            case RotateDirection.Clockwise:
+            case RotateDirection.CW:
                 direction = direction.Next();
                 sprite.transform.rotation = Quaternion.Euler(sprite.transform.eulerAngles - Vector3.forward * 60f);
                 break;
@@ -115,10 +115,11 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         totalWaitingNum--;
         if (totalWaitingNum == 0)
         {
-            OnFinishCommand?.Invoke();
+            OnFinishedOneLineCommand?.Invoke();
         }
     }
-    public void RunCommand(CommandType commandType)
+
+    public void ReleaseCommand(CommandType commandType, float executeTime)
     {
         switch (commandType)
         {
@@ -129,7 +130,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
                 ControllerCWRotate();
                 return;
             case CommandType.Delay:
-                StartCoroutine(Sleep());
+                Delay(executeTime);
                 return;
         }
 
@@ -138,7 +139,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         {
             if (next != null)
             {
-                ICommandReciever reciever = next.GetICommandReciever();
+                IReciever reciever = next.GetICommandReciever();
                 if (reciever != null)
                 {
                     totalWaitingNum++;
@@ -146,28 +147,28 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
                     switch (commandType)
                     {
                         case CommandType.Connect:
-                            reciever.RunConnect(OnRecieverFinishedCommand);
+                            reciever.ExecuteConnect(RecieverFinishedCommand, executeTime);
                             break;
-                        case CommandType.ConnectorCCR:
-                            reciever.RunRotate(OnRecieverFinishedCommand, RotateDirection.CounterClockwise);
+                        case CommandType.ConnectorCCW:
+                            reciever.ExecuteRotate(RecieverFinishedCommand, executeTime, RotateDirection.CCW);
                             break;
-                        case CommandType.ConnectorCR:
-                            reciever.RunRotate(OnRecieverFinishedCommand, RotateDirection.Clockwise);
+                        case CommandType.ConnectorCW:
+                            reciever.ExecuteRotate(RecieverFinishedCommand, executeTime, RotateDirection.CW);
                             break;
                         case CommandType.Pull:
-                            reciever.RunMove(OnRecieverFinishedCommand, direction.Opposite());
+                            reciever.ExecuteMove(RecieverFinishedCommand, executeTime, direction.Opposite());
                             break;
                         case CommandType.Push:
-                            reciever.RunMove(OnRecieverFinishedCommand, direction);
+                            reciever.ExecuteMove(RecieverFinishedCommand, executeTime, direction);
                             break;
                         case CommandType.PutDown:
-                            reciever.RunPutDownUp(OnRecieverFinishedCommand, true);
+                            reciever.ExecutePutDownUp(RecieverFinishedCommand, executeTime, BrushState.PUTDOWN);
                             break;
                         case CommandType.PutUp:
-                            reciever.RunPutDownUp(OnRecieverFinishedCommand, false);
+                            reciever.ExecutePutDownUp(RecieverFinishedCommand, executeTime, BrushState.PUTUP);
                             break;
                         case CommandType.Split:
-                            reciever.RunSplit(OnRecieverFinishedCommand);
+                            reciever.ExecuteSplit(RecieverFinishedCommand, executeTime);
                             break;
                     }
                 }
@@ -181,10 +182,14 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
 
         if (totalWaitingNum == 0)
         {
-            StartCoroutine(Sleep());
+            Delay(executeTime);
         }
     }
 
+    void Delay(float time)
+    {
+        StartCoroutine(Sleep(time));
+    }
 
     public override void ClearCurrentInfo()
     {
@@ -213,11 +218,11 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         recorderSpriteRotation = sprite.transform.rotation;
     }
 
-    IEnumerator Sleep()
+    IEnumerator Sleep(float executeTime)
     {
-        yield return new WaitForSeconds(ProcessSystem.Instance.commandDurationTime);
+        yield return new WaitForSeconds(executeTime);
         recievedMovingCommandNum = 0;
-        OnFinishCommand?.Invoke();
+        OnFinishedOneLineCommand?.Invoke();
     }
 
     IEnumerator MoveToTarget(Action callback, Direction direction)
@@ -238,7 +243,7 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         Vector3 endPosition = target.transform.position;
         while (percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
+            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
             percent = Mathf.Clamp01(percent);
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
             yield return null;
@@ -258,8 +263,8 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         recievedMovingCommandNum = 0;
     }
 
-    public void ControllerCCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CounterClockwise));
-    public void ControllerCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.Clockwise));
+    public void ControllerCCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CCW));
+    public void ControllerCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CW));
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other != null)
@@ -279,11 +284,11 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
         float percent = 0f;
         switch (rotateDirection)
         {
-            case RotateDirection.Clockwise:
+            case RotateDirection.CW:
                 end = Quaternion.Euler(sprite.transform.eulerAngles - Vector3.forward * 60f);
                 direction = direction.Next();
                 break;
-            case RotateDirection.CounterClockwise:
+            case RotateDirection.CCW:
                 end = Quaternion.Euler(sprite.transform.eulerAngles + Vector3.forward * 60f);
                 direction = direction.Previous();
                 break;
@@ -291,24 +296,43 @@ public class Controller : CommandRunner, IMouseAction, ICommandReader, ICommandR
 
         while(percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.commandDurationTime;
+            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
             percent = Mathf.Clamp01(percent);
             sprite.transform.rotation = Quaternion.Lerp(start, end, percent);
             yield return null;
         }
 
         recievedMovingCommandNum = 0;
-        OnFinishCommand?.Invoke();
+        OnFinishedOneLineCommand?.Invoke();
     }
 
-    public void RunMove(Action callback, Direction moveDirection)
+    public void RecieverFinishedCommand()
     {
-        recievedMovingCommandNum++;
-        StartCoroutine(MoveToTarget(callback, moveDirection));
+        
     }
-    public void RunPutDownUp(Action callback, bool coloring) => callback?.Invoke();
-    public void RunRotate(Action callback, RotateDirection rotateDirection) => callback?.Invoke();
-    public void RunConnect(Action callback) => callback?.Invoke();
-    public void RunSplit(Action callback) => callback?.Invoke();
-    public void RunDelay(Action callback) => callback?.Invoke();
+
+    public void ExecutePutDownUp(Action releaserCallback, float time, BrushState brushState)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteConnect(Action releaserCallback, float time)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteSplit(Action releaserCallback, float time)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteMove(Action releaserCallback, float time, Direction moveDirection)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ExecuteRotate(Action releaserCallback, float time, RotateDirection rotateDirection)
+    {
+        throw new NotImplementedException();
+    }
 }

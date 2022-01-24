@@ -55,7 +55,7 @@ public class OperatorUISystem : MonoBehaviour
     [SerializeField] ColorSO white;
 
     public List<CommandSO> commandSOList;
-    Dictionary<ICommandReader, CommandConsole> commandReaderConsoleDictionary;
+    Dictionary<ICommandReleaser, CommandConsole> commandReaderConsoleDictionary;
     Dictionary<KeyCode, CommandSO> keyCodeCommandSODictionary;
     KeyCode[] keys;
 
@@ -71,7 +71,7 @@ public class OperatorUISystem : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        commandReaderConsoleDictionary = new Dictionary<ICommandReader, CommandConsole>();
+        commandReaderConsoleDictionary = new Dictionary<ICommandReleaser, CommandConsole>();
         keyCodeCommandSODictionary = new Dictionary<KeyCode, CommandSO>();
         keys = new KeyCode[commandSOList.Count];
         for (int i = 0; i < keys.Length; i++)
@@ -400,10 +400,10 @@ public class OperatorUISystem : MonoBehaviour
                 case CommandType.Split:
                     commandSO = split;
                     break;
-                case CommandType.ConnectorCCR:
+                case CommandType.ConnectorCCW:
                     commandSO = connectorCCR;
                     break;
-                case CommandType.ConnectorCR:
+                case CommandType.ConnectorCW:
                     commandSO = connectorCR;
                     break;
                 case CommandType.ControllerCCR:
@@ -470,8 +470,8 @@ public class OperatorUISystem : MonoBehaviour
         return maxIndex;
     }
 
-    public CommandSO GetEachReaderCommandSO(int lineIndex, ICommandReader commandReader)
+    public CommandSO GetEachReaderCommandSO(int lineIndex, ICommandReleaser releaser)
     {
-        return commandReaderConsoleDictionary[commandReader].GetCommandSOFromLineIndex(lineIndex);
+        return commandReaderConsoleDictionary[releaser].GetCommandSOFromLineIndex(lineIndex);
     }
 }

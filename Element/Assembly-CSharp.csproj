@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Device\Connector.cs" />
+    <Compile Include="Assets\Scripts\BreakPointSlot.cs" />
     <Compile Include="Assets\Scripts\UI\Command.cs" />
     <Compile Include="Assets\Scripts\UI\CommandSlot.cs" />
     <Compile Include="Assets\Scripts\UI\TooltipTrigger.cs" />
@@ -81,13 +82,17 @@
     <Compile Include="Assets\Scripts\HexMap\HexMap.cs" />
     <Compile Include="Assets\Scripts\UI\SolutionSystem.cs" />
     <Compile Include="Assets\Scripts\UI\HighlighUnselectableBtn.cs" />
+    <Compile Include="Assets\Scripts\IReciever.cs" />
     <Compile Include="Assets\Scripts\Device\PatternLineMesh.cs" />
+    <Compile Include="Assets\Scripts\Device\Device.cs" />
     <Compile Include="Assets\Scripts\ProductLineMesh.cs" />
     <Compile Include="Assets\Scripts\UI\Solution.cs" />
+    <Compile Include="Assets\Scripts\IRecieverChild.cs" />
     <Compile Include="Assets\Scripts\GameSystem.cs" />
     <Compile Include="Assets\Scripts\UI\TooltipUI.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\LevelBuildDataSO.cs" />
     <Compile Include="Assets\Scripts\UI\WarningUI.cs" />
+    <Compile Include="Assets\Scripts\ConnectableDevice.cs" />
     <Compile Include="Assets\Scripts\UI\CommandGhost.cs" />
     <Compile Include="Assets\Scripts\ICommandReader.cs" />
     <Compile Include="Assets\LeanTween\Framework\LTDescrOptional.cs" />
@@ -95,10 +100,12 @@
     <Compile Include="Assets\Scripts\Device\ColorBrush.cs" />
     <Compile Include="Assets\Scripts\UI\TrackBtn.cs" />
     <Compile Include="Assets\Scripts\Device\PatternLine.cs" />
-    <Compile Include="Assets\Scripts\ICommandReciever.cs" />
+    <Compile Include="Assets\Scripts\BreakPointConsole.cs" />
     <Compile Include="Assets\Scripts\Device\CommandRunner.cs" />
+    <Compile Include="Assets\Scripts\ConnectLine.cs" />
     <Compile Include="Assets\Scripts\ProcessSystem.cs" />
     <Compile Include="Assets\Scripts\HexMap\Direction.cs" />
+    <Compile Include="Assets\Scripts\Device\RecordDevice.cs" />
     <Compile Include="Assets\Scripts\UI\SelectBox.cs" />
     <Compile Include="Assets\Scripts\BuildSystem.cs" />
     <Compile Include="Assets\Scripts\UI\ColorPickerBtn.cs" />
@@ -117,7 +124,9 @@
     <Compile Include="Assets\Scripts\ScriptableObject\CommandSO.cs" />
     <Compile Include="Assets\Scripts\UI\LevelSelectBtn.cs" />
     <Compile Include="Assets\Scripts\IControlPointRotateObj.cs" />
+    <Compile Include="Assets\Scripts\Others\MeshHelper.cs" />
     <Compile Include="Assets\Scripts\Device\TrackMesh.cs" />
+    <Compile Include="Assets\Scripts\Device\ConnectableDevice.cs" />
     <Compile Include="Assets\Scripts\Device\ColorPicker.cs" />
     <Compile Include="Assets\LeanTween\Framework\LeanTest.cs" />
     <Compile Include="Assets\Scripts\Others\InputHelper.cs" />
@@ -128,6 +137,7 @@
     <Compile Include="Assets\Scripts\UI\BrushBtn.cs" />
     <Compile Include="Assets\Scripts\ScriptableObject\GameData.cs" />
     <Compile Include="Assets\Scripts\ColorSystem.cs" />
+    <Compile Include="Assets\Scripts\ICommandReleaser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\Point.shader" />
@@ -402,6 +412,12 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.6.1\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+      <HintPath>D:\C#lianxi\2021.1.19f1c1\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Common">
+      <HintPath>D:\C#lianxi\2021.1.19f1c1\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Common.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>D:\C#lianxi\2021.1.19f1c1\Editor\Data\NetStandard\ref\2.0.0\netstandard.dll</HintPath>

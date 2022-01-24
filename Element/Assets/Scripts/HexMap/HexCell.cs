@@ -12,6 +12,7 @@ public class HexCell : MonoBehaviour
     [SerializeField] MeshRenderer meshRenderer;
     [SerializeField] Material defaultMat;
     [SerializeField] Material highlightMat;
+    [SerializeField] Color defaultCol;
     public bool beColoring = false;
     public int index;
     public GameObject currentObject;
@@ -38,11 +39,11 @@ public class HexCell : MonoBehaviour
         }
     }
 
-    public ICommandReciever GetICommandReciever()
+    public IReciever GetICommandReciever()
     {
         if(currentObject != null)
         {
-            return currentObject.GetComponent<ICommandReciever>();
+            return currentObject.GetComponent<IReciever>();
         }
         return null;
     }
@@ -101,7 +102,7 @@ public class HexCell : MonoBehaviour
     void ResetColor()
     {
         meshRenderer.material = defaultMat;
-        meshRenderer.material.color = Color.white;
+        meshRenderer.material.color = defaultCol;
     }
     public void ResetCell()
     {
