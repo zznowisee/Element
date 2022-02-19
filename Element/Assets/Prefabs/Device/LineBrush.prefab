@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2280266382292360855}
   - component: {fileID: 2280266382292360849}
   - component: {fileID: 2280266382292360854}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: indexText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,7 +182,7 @@ GameObject:
   - component: {fileID: 2628038577384439957}
   - component: {fileID: 2628038577384439959}
   - component: {fileID: 2628038577384439958}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: color
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 2628038579326626181}
   - component: {fileID: 2628038579326626183}
   - component: {fileID: 2628038579326626182}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,7 +347,7 @@ GameObject:
   - component: {fileID: 2091610943905926609}
   - component: {fileID: 4335308319612474505}
   - component: {fileID: 8412959393938739738}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: LineBrush
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -421,19 +421,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92bc54aa447d59347ae9a026c47e2edd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brushData:
-    type: 0
-    cellIndex: 0
-    colorType: 0
-  brushBtn: {fileID: 0}
+  deviceType: 0
+  index: 0
   cell: {fileID: 0}
-  recorderCell: {fileID: 0}
-  putdown: 0
+  recordCell: {fileID: 0}
+  target: {fileID: 0}
+  connectingConnector: {fileID: 0}
+  pfConnectLine: {fileID: -5299757014925575432, guid: f0baecea667b645498911d47e9c22c33, type: 3}
   connectLine: {fileID: 0}
-  pfConnectLine: {fileID: 8311449999290214604, guid: f0baecea667b645498911d47e9c22c33, type: 3}
+  brushData:
+    cellIndex: 0
+    deviceType: 0
+    brushBtnData:
+      colorType: 0
+      type: 0
+      number: 0
+      brushDatas: []
+  brushBtn: {fileID: 0}
+  recorderCell: {fileID: 0}
+  brushState: 0
   meshRenderer: {fileID: 2628038577384439958}
   putDownSprite: {fileID: 4954651259834543582}
-  connector: {fileID: 0}
   pfPatternLine: {fileID: 2742756727355140226, guid: 660aad5fcfff986479b548799d414ac4, type: 3}
 --- !u!1001 &7948663588462666482
 PrefabInstance:
@@ -489,6 +497,10 @@ PrefabInstance:
     - target: {fileID: 3066149229237309228, guid: 6cbf881cc257c3a4da9d7ec6dcd8c833, type: 3}
       propertyPath: m_Name
       value: putDownSprite
+      objectReference: {fileID: 0}
+    - target: {fileID: 3066149229237309228, guid: 6cbf881cc257c3a4da9d7ec6dcd8c833, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3066149229237309228, guid: 6cbf881cc257c3a4da9d7ec6dcd8c833, type: 3}
       propertyPath: m_IsActive

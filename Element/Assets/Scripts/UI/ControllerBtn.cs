@@ -2,59 +2,24 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class ControllerBtn : MonoBehaviour, IPointerDownHandler
+public class ControllerBtn : PressDownButton
 {
-    [SerializeField] TextMeshProUGUI numberText;
-    [SerializeField] CanvasGroup canvasGroup;
-    int number;
-    public SolutionData data;
-
-    public void Setup(SolutionData data_)
-    {
-        data = data_;
-        number = data_.controllerNum;
-        numberText.text = number <= 1 ? "" : $"x{number}";
-        if (number == 0)
-        {
-            canvasGroup.alpha = 0.1f;
-            canvasGroup.blocksRaycasts = false;
-        }
-        else
-        {
-            canvasGroup.alpha = 1f;
-            canvasGroup.blocksRaycasts = true;
-        }
-    }
-
-    public void OnPointerDown(PointerEventData eventData)
+    public override void OnPointerDown(PointerEventData eventData)
     {
         if(eventData.button == PointerEventData.InputButton.Left)
         {
-            if (ProcessSystem.Instance.CanOperate())
+            if (ProcessManager.Instance.CanOperate())
             {
-                BuildSystem.Instance.CreateNewController(this);
-                data.controllerNum--;
-                number--;
-                numberText.text = number <= 1 ? "" : $"x{number}";
-                if(number == 0)
-                {
-                    canvasGroup.alpha = 0.1f;
-                    canvasGroup.blocksRaycasts = false;
-                }
+                ControllerCreate();
             }
         }
     }
 
-    public void OnDestroyController()
+    void ControllerCreate()
     {
-        if (number == 0)
-        {
-            canvasGroup.alpha = 1f;
-            canvasGroup.blocksRaycasts = true;
-        }
+        var controller = DeviceManager.Instance.NewController();
 
-        data.controllerNum++;
-        number++;
-        numberText.text = number <= 1 ? "" : $"x{number}";
+        ISelectable selectable = controller.GetComponent<ISelectable>();
+        MouseManager.Instance.SetClickedBeforeDragObj(selectable);
     }
 }

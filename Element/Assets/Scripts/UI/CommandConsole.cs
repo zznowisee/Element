@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class CommandConsole : MonoBehaviour
@@ -11,80 +9,98 @@ public class CommandConsole : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI indexText;
     [SerializeField] Controller controller;
-    [HideInInspector] public int index;
-
     [SerializeField] Color codeSlotNormalCol;
     [SerializeField] Color codeSlotHighlightCol;
     [SerializeField] CommandSlot pfCodeSlot;
-    [HideInInspector] public CommandSlot[] slots;
-    public CommandSO[] commands;
+    [HideInInspector] CommandSlot[] slots;
+    CommandSO[] commands;
     public int slotNum = 40;
+    public int? highlightIndex;
+    public int MaxCommandIndex => GetLastCommandIndex();
 
     public void Setup(Controller controller_)
     {
         controller = controller_;
         slots = new CommandSlot[slotNum];
         commands = new CommandSO[slotNum];
-        index = controller.index;
-        indexText.text = index.ToString();
-        gameObject.name = $"Connecter{index}_Console";
+        indexText.text = controller.index.ToString();
+        gameObject.name = $"Connector{controller.index}_Console";
+
+        controller.OnDestoryByPlayer += Controller_OnDestory;
 
         for (int i = 0; i < slotNum; i++)
         {
             slots[i] = Instantiate(pfCodeSlot, transform);
             slots[i].Setup(codeSlotNormalCol, codeSlotHighlightCol, i, this);
             slots[i].gameObject.name = $"CodeSlot_{ i }";
+            slots[i].OnCommandChanged += RecordCommand;
         }
         consoleData.commandTypes = new CommandType[slotNum];
-        controller.controllerData.consoleData = consoleData;
+        controller.data.consoleData = consoleData;
+        transform.SetSiblingIndex(controller.index);
     }
 
-    public void Setup(Controller controller_, ConsoleData consoleData_)
+    private void Controller_OnDestory(Controller obj)
+    {
+        Destroy(gameObject);
+    }
+
+    public void Rebuild(Controller controller_, ConsoleData consoleData_, Command[] rebuildCommands)
     {
         controller = controller_;
+        consoleData = consoleData_;
         slots = new CommandSlot[slotNum];
         commands = new CommandSO[slotNum];
-        index = controller.index;
-        indexText.text = index.ToString();
-        gameObject.name = $"Connecter{index}_Console";
+        indexText.text = controller.index.ToString();
+        gameObject.name = $"Connecter{controller.index}_Console";
 
+        controller.OnDestoryByPlayer += Controller_OnDestory;
+        print("Rebuild Console");
         for (int i = 0; i < slotNum; i++)
         {
             slots[i] = Instantiate(pfCodeSlot, transform);
             slots[i].Setup(codeSlotNormalCol, codeSlotHighlightCol, i, this);
             slots[i].gameObject.name = $"CodeSlot_{ i }";
+            slots[i].OnCommandChanged += RecordCommand;
         }
-        consoleData = consoleData_;
+
+        for (int i = 0; i < rebuildCommands.Length; i++)
+        {
+            if (rebuildCommands[i] == null)
+                continue;
+
+            rebuildCommands[i].DroppedOnSlot(slots[i]);
+        }
     }
 
-    public CommandSO GetCommandSOFromLineIndex(int lineIndex)
+    public CommandType GetCommandSOFromLineIndex(int lineIndex)
     {
         if(commands[lineIndex] != null)
         {
-            return commands[lineIndex];
-        }
-
-        return null;
-    }
-
-    public CommandSlot GetCommandSlotFromIndex(int index) => slots[index];
-
-    public void RecordCommand(int index, CommandSO newCommand)
-    {
-        commands[index] = newCommand;
-        if(newCommand == null)
-        {
-            consoleData.commandTypes[index] = CommandType.Empty;
+            return commands[lineIndex].type;
         }
         else
         {
-            consoleData.commandTypes[index] = newCommand.type;
+            return CommandType.Delay;
         }
     }
 
-    public int GetLastCommandIndex()
+    void RecordCommand(int index, CommandSO newCommand)
     {
-        int lastCommandIndex = 0;
+        commands[index] = newCommand;
+        if (newCommand != null)
+        {
+            consoleData.commandTypes[index] = newCommand.type;
+        }
+        else
+        {
+            consoleData.commandTypes[index] = CommandType.Empty;
+        }
+    }
+
+    int GetLastCommandIndex()
+    {
+        int lastCommandIndex = -1;
         for (int i = 0; i < commands.Length; i++)
         {
             if(commands[i] != null)
@@ -97,5 +113,28 @@ public class CommandConsole : MonoBehaviour
         }
 
         return lastCommandIndex;
+    }
+
+    public void ResetAll()
+    {
+        if(highlightIndex != null)
+        {
+            slots[(int)highlightIndex].SetNormal();
+            highlightIndex = null;
+        }
+    }
+
+    public void ReadCommand(int lineIndex)
+    {
+        CommandType cmd = GetCommandSOFromLineIndex(lineIndex);
+        controller.ReleaseCommand(cmd, ProcessManager.Instance.ExecuteTime);
+
+        if(highlightIndex != null)
+        {
+            slots[(int)highlightIndex].SetNormal();
+        }
+
+        highlightIndex = lineIndex;
+        slots[lineIndex].SetHighlight();
     }
 }

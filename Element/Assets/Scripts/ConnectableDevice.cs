@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -7,28 +6,25 @@ public class ConnectableDevice : Device
 {
     //after reading each command , get the target 
     public HexCell target;
-    public List<ConnectableDevice> connectingDevices;
+    public Connector connectingConnector;
     [SerializeField] protected ConnectLine pfConnectLine;
     public ConnectLine connectLine;
 
-    public virtual void Awake()
+    public virtual void ConnectWithConnector(Connector target)
     {
-        connectingDevices = new List<ConnectableDevice>();
+        if(target != connectingConnector)
+        {
+            connectingConnector = target;
+            target.connectingDevices.Add(this);
+            connectLine = Instantiate(pfConnectLine, transform);
+            connectLine.Setup(this, target);
+        }
     }
 
-    public virtual void ConnectWithConnector(ConnectableDevice target)
+    public virtual void SplitWithConnector(Connector target)
     {
-        connectingDevices.Add(target);
-        target.connectingDevices.Add(this);
-        target.connectLine = Instantiate(pfConnectLine, transform);
-        target.connectLine.Setup(this, target);
-    }
-
-    public virtual void SplitWithConnector(ConnectableDevice target)
-    {
-        connectingDevices.Remove(target);
+        connectingConnector = null;
         target.connectingDevices.Remove(this);
-
         Destroy(connectLine.gameObject);
     }
 
@@ -48,8 +44,5 @@ public class ConnectableDevice : Device
         StartCoroutine(MoveToTarget(releaserCallback, recieverCallback, target, executeTime));
     }
 
-    public virtual void PutDownUp(Action releaserCallback, Action<Action> recieverCallback, BrushType type, float executeTime)
-    {
-
-    }
+    public virtual void PutDownUp(Action releaserCallback, Action<Action> recieverCallback, BrushState state, float executeTime) { }
 }

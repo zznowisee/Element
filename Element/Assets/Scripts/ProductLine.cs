@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ProductLine : MonoBehaviour
@@ -7,11 +5,12 @@ public class ProductLine : MonoBehaviour
 
     [SerializeField] GameObject startPoint, endPoint;
     [SerializeField] ProductLineMesh productLineMesh;
-    public void Setup(Vector3 start, Vector3 end, Color color_)
+
+    public void Setup(Vector3 startPosition, Vector3 endPosition, Color color_)
     {
-        productLineMesh.Setup(start, end, color_);
-        startPoint.transform.position = start;
-        endPoint.transform.position = end;
+        productLineMesh.Setup(startPosition, endPosition, color_);
+        startPoint.transform.position = startPosition;
+        endPoint.transform.position = endPosition;
 
         startPoint.GetComponent<MeshRenderer>().material.color = color_;
         endPoint.GetComponent<MeshRenderer>().material.color = color_;

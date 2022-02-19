@@ -227,8 +227,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f2fc6e3f9697ea47b5debfb47603bf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brushBtnDataSolution:
-    colorSO: {fileID: 0}
+  brushBtnData:
+    colorType: 0
     type: 0
     number: 0
     brushDatas: []
@@ -464,7 +464,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b5760350fc1cd0c40856e42c044b0e5c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: db9f9096a90820244a0192756a007e3d, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1

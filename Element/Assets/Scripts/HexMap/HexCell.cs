@@ -91,7 +91,7 @@ public class HexCell : MonoBehaviour
         beColoring = true;
         Coloring(col);
         hexMesh.GetComponent<MeshRenderer>().sortingOrder = sortingOrder;
-        ProcessSystem.Instance.recordCells.Add(this);
+        ProcessManager.Instance.recordCells.Add(this);
     }
     void Coloring(Color col)
     {
@@ -112,5 +112,25 @@ public class HexCell : MonoBehaviour
             Destroy(patternLineHolder.GetChild(i).gameObject);
         }
         beColoring = false;
+    }
+
+    public List<ConnectableDevice> GetConnectableDevicesInNeighbor()
+    {
+        List<ConnectableDevice> objs = new List<ConnectableDevice>();
+        for (int i = 0; i < neighbors.Length; i++)
+        {
+            if(neighbors[i] != null)
+            {
+                if(neighbors[i].currentObject != null)
+                {
+                    ConnectableDevice cd = neighbors[i].currentObject.GetComponent<ConnectableDevice>();
+                    if(cd != null)
+                    {
+                        objs.Add(cd);
+                    }
+                }
+            }
+        }
+        return objs;
     }
 }

@@ -4,66 +4,53 @@ using UnityEngine;
 using System;
 using TMPro;
 
-public class Connector : Device, IMouseAction, IReciever
+public class Connector : Device, IReciever
 {
-    public ConnectorData connectorData;
-
+    public ConnectorData data;
     public List<ConnectableDevice> connectingDevices;
     [SerializeField] float radius = 5f;
     [SerializeField] GameObject spriteObj;
 
     public event Action<Vector3, WarningType> OnWarning;
+    public event Action<Connector> OnDestoryByPlayer;
 
     int recievedMovingCommandNum = 0;
 
     int totalWaitingNum = 0;
     //recorder:
-    HexCell recorderCell;
     Quaternion recorderSpriteObjRotation;
 
     void Awake()
     {
         transform.Find("sprite").localScale = radius * Vector3.one;
-
+        deviceType = DeviceType.Connector;
         connectingDevices = new List<ConnectableDevice>();
     }
 
-    public void Setup(HexCell cell_)
+    public override void Setup(HexCell cell_)
     {
-        cell = cell_;
-        cell.currentObject = gameObject;
-        transform.position = cell.transform.position;
-        connectorData.cellIndex = cell.index;
+        base.Setup(cell_);
+        deviceType = DeviceType.Connector;
+        data.cellIndex = cell.index;
     }
 
-    public void OnSwitchToMainScene()
+    void Delay(Action callback, float time)
     {
-        cell.currentObject = null;
-        Destroy(gameObject);
+        StartCoroutine(Sleep(callback, time));
     }
 
-    public void MouseAction_Drag()
+    IEnumerator Sleep(Action callback, float time)
     {
-        cell.currentObject = null;
-        cell = null;
-        BuildSystem.Instance.SetCurrentTrackingConnector(this);
-    }
-
-    IEnumerator Sleep(Action callback)
-    {
-        yield return new WaitForSeconds(ProcessSystem.Instance.defaultExecuteTime);
+        yield return new WaitForSeconds(time);
         recievedMovingCommandNum = 0;
         callback?.Invoke();
     }
 
-    IEnumerator RotateToTarget(Action callback, RotateDirection rotateDirection)
+    IEnumerator RotateToTarget(Action callback, RotateDirection rotateDirection, float executeTime)
     {
         yield return null;
-
         if(recievedMovingCommandNum > 1)
         {
-            StopAllCoroutines();
-            totalWaitingNum = 0;
             OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
@@ -74,7 +61,7 @@ public class Connector : Device, IMouseAction, IReciever
         Quaternion end = Quaternion.Euler(spriteObj.transform.eulerAngles + rotateAngle * Vector3.forward);
         while(percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
+            percent += Time.deltaTime / executeTime;
             percent = Mathf.Clamp01(percent);
             spriteObj.transform.rotation = Quaternion.Lerp(start, end, percent);
             yield return null;
@@ -87,13 +74,12 @@ public class Connector : Device, IMouseAction, IReciever
         }
     }
 
-    IEnumerator MoveToTarget(Action callback, Direction direction)
+
+    IEnumerator MoveToTarget(Action callback, Direction direction, float executeTime)
     {
         yield return null;
         if(recievedMovingCommandNum > 1)
         {
-            StopAllCoroutines();
-            totalWaitingNum = 0;
             OnWarning?.Invoke(transform.position, WarningType.ReceiveTwoMoveCommands);
             yield return null;
         }
@@ -106,7 +92,7 @@ public class Connector : Device, IMouseAction, IReciever
         Vector3 endPosition = target.transform.position;
         while (percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
+            percent += Time.deltaTime / executeTime;
             percent = Mathf.Clamp01(percent);
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
             yield return null;
@@ -132,25 +118,24 @@ public class Connector : Device, IMouseAction, IReciever
 
     public override void Record()
     {
-        recorderCell = cell;
+        base.Record();
+
         recorderSpriteObjRotation = spriteObj.transform.rotation;
     }
 
     public override void ClearCurrentInfo()
     {
+        base.ClearCurrentInfo();
         recievedMovingCommandNum = 0;
         totalWaitingNum = 0;
-        cell.currentObject = null;
     }
 
     public override void ReadPreviousInfo()
     {
-        cell = recorderCell;
-        cell.currentObject = gameObject;
-        recorderCell = null;
+        base.ReadPreviousInfo();
+
         totalWaitingNum = 0;
         connectingDevices.Clear();
-        transform.position = cell.transform.position;
         spriteObj.transform.rotation = recorderSpriteObjRotation;
     }
 
@@ -168,7 +153,7 @@ public class Connector : Device, IMouseAction, IReciever
     {
         if (other != null)
         {
-            if (!ProcessSystem.Instance.CanOperate())
+            if (!ProcessManager.Instance.CanOperate())
             {
                 print("Enter");
                 OnWarning?.Invoke(transform.position, WarningType.Collision);
@@ -178,26 +163,73 @@ public class Connector : Device, IMouseAction, IReciever
 
     public void ExecutePutDownUp(Action releaserCallback, float time, BrushState brushState)
     {
-        throw new NotImplementedException();
+        for (int i = 0; i < connectingDevices.Count; i++)
+        {
+            ConnectableDevice connectableDevice = connectingDevices[i];
+            connectableDevice.PutDownUp(releaserCallback, ExecuterFinishedCommand, brushState, time);
+        }
+
+        // TODO: Animation
+        // without connecting animation
+        Delay(releaserCallback, time);
     }
 
     public void ExecuteConnect(Action releaserCallback, float time)
     {
-        throw new NotImplementedException();
+        List<ConnectableDevice> connectableDevices = cell.GetConnectableDevicesInNeighbor();
+        for (int i = 0; i < connectableDevices.Count; i++)
+        {
+            if (!connectingDevices.Contains(connectableDevices[i]))
+            {
+                connectableDevices[i].ConnectWithConnector(this);
+            }
+        }
+
+        // TODO: Animation
+        // without connecting animation
+        Delay(releaserCallback, time);
     }
 
     public void ExecuteSplit(Action releaserCallback, float time)
     {
-        throw new NotImplementedException();
+        print(connectingDevices.Count);
+        for (int i = 0; i < connectingDevices.Count; i++)
+        {
+            connectingDevices[i].SplitWithConnector(this);
+            i--;
+        }
+
+        // TODO: Animation
+        // without connecting animation
+        Delay(releaserCallback, time);
     }
 
     public void ExecuteMove(Action releaserCallback, float time, Direction moveDirection)
     {
-        throw new NotImplementedException();
+        StartCoroutine(MoveToTarget(releaserCallback, moveDirection, time));
+        totalWaitingNum = connectingDevices.Count;
+
+        for (int i = 0; i < connectingDevices.Count; i++)
+        {
+            connectingDevices[i].MoveAsChild(releaserCallback, ExecuterFinishedCommand, moveDirection, time);
+        }
     }
 
     public void ExecuteRotate(Action releaserCallback, float time, RotateDirection rotateDirection)
     {
-        throw new NotImplementedException();
+        StartCoroutine(RotateToTarget(releaserCallback, rotateDirection, time));
+        totalWaitingNum = connectingDevices.Count;
+
+        for (int i = 0; i < connectingDevices.Count; i++)
+        {
+            HexCell target = rotateDirection == RotateDirection.CCW ? cell.PreviousCell(connectingDevices[i].cell) : cell.NextCell(connectingDevices[i].cell);
+            connectingDevices[i].MoveAsChild(releaserCallback, ExecuterFinishedCommand, target, time);
+        }
+    }
+
+    public override void DestoryDevice()
+    {
+        OnDestoryByPlayer?.Invoke(this);
+        base.DestoryDevice();
     }
 }

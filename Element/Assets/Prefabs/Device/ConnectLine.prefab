@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8311449999290214605}
   - component: {fileID: 8311449999290214604}
+  - component: {fileID: -5299757014925575432}
   m_Layer: 0
   m_Name: ConnectLine
   m_TagString: Untagged
@@ -130,3 +131,18 @@ LineRenderer:
     generateLightingData: 0
   m_UseWorldSpace: 0
   m_Loop: 0
+--- !u!114 &-5299757014925575432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8311449999290214594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f804ab401b30e841a1f6cfec984b2fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  start: {fileID: 0}
+  end: {fileID: 0}
+  lineRenderer: {fileID: 0}

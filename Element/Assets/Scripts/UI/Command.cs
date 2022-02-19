@@ -1,62 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Command : MonoBehaviour, IPointerDownHandler//, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class Command : MonoBehaviour, ISelectable
 {
     public CommandSO commandSO { get; private set; }
+    public SelectableType type { get; set; }
+    public bool selected { get; set; }
+    public bool preSelected { get; set; }
+    public Vector3 delta { get; set; }
+
     CommandSlot commandSlot;
     CanvasGroup canvasGroup;
     Transform draggingParent;
+    GameObject selecting;
     void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
-        draggingParent = FindObjectOfType<OperatorUISystem>().transform;
+        draggingParent = FindObjectOfType<OperatingRoomUI>().transform;
+        selecting = transform.Find("selecting").gameObject;
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    void Update()
     {
-        if(eventData.button == PointerEventData.InputButton.Left)
-        {
-            if (InputHelper.IsTheseKeysHeld(KeyCode.Delete))
-            {
-                if (commandSlot != null)
-                {
-                    commandSlot.ClearCommand();
-                    Destroy(gameObject);
-                    return;
-                }
-            }
-            else
-            {
-                transform.parent = OperatorUISystem.Instance.transform;
-                if (commandSlot != null)
-                {
-                    commandSlot.ClearCommand();
-                }
-                OperatorUISystem.Instance.SetCurrentTrackingCommand(this);
-            }
-        }
+        SelectingVisual();
     }
 
-    public void BeginDrag()
+    void OnEnable() => MouseManager.Instance.AddISelectableObj(this);
+    void OnDisable() => MouseManager.Instance.RemoveISelectableObj(this);
+    public void SelectingVisual()
     {
-        transform.parent = OperatorUISystem.Instance.transform;
-        canvasGroup.blocksRaycasts = false;
-        transform.parent = draggingParent;
-        if(commandSlot != null)
-        {
-            commandSlot.ClearCommand();
-        }
+        selecting.gameObject.SetActive(selected || preSelected);
     }
 
     public void TryToDropOnSlot()
     {
-        if (ProcessSystem.Instance.CanOperate())
+        if (ProcessManager.Instance.CanOperate())
         {
-            CommandSlot slot = InputHelper.GetCommandSlotUnderPosition2D();
+            CommandSlot slot = InputHelper.GetCommandSlotUnder(transform.position);
             if (slot != null)
             {
                 DroppedOnSlot(slot);
@@ -71,31 +52,55 @@ public class Command : MonoBehaviour, IPointerDownHandler//, IBeginDragHandler, 
     public void Setup(CommandSO commandSO_)
     {
         commandSO = commandSO_;
-        GetComponent<Image>().sprite = commandSO.icon;
-        canvasGroup.blocksRaycasts = false;
+        GetComponent<Image>().sprite = commandSO_.icon;
     }
 
     public void DroppedOnSlot(CommandSlot commandSlot_)
     {
         commandSlot = commandSlot_;
-        if (!commandSlot.IsEmpty())
-        {
-            print("Slot not empty");
-            if(commandSlot.command.commandSO == commandSO)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            Destroy(commandSlot.command.gameObject);
-            commandSlot.ClearCommand();
-        }
+        commandSlot.DroppedOn(this);
 
         transform.position = commandSlot.transform.position;
         transform.parent = commandSlot.transform;
         transform.SetSiblingIndex(0);
         canvasGroup.blocksRaycasts = true;
+    }
 
-        commandSlot.SetCommand(this);
+    public void LeftClick()
+    {
+        canvasGroup.blocksRaycasts = false;
+        transform.parent = draggingParent;
+
+        if(commandSlot != null)
+        {
+            commandSlot.ClearCommand();
+            commandSlot = null;
+        }
+    }
+
+    public void RightClick()
+    {
+        DeleteCommand();
+    }
+
+    public void Dragging()
+    {
+        transform.position = InputHelper.MouseWorldPositionIn2D;
+    }
+
+    public void LeftRelease()
+    {
+        TryToDropOnSlot();
+    }
+
+    void DeleteCommand()
+    {
+        commandSlot.ClearCommand();
+        Destroy(gameObject);
+    }
+
+    public void DraggingWithList(Vector3 position)
+    {
+        transform.position = position;
     }
 }

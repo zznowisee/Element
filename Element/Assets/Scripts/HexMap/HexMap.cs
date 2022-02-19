@@ -15,7 +15,7 @@ public class HexMap : MonoBehaviour
     public Vector2Int centerCellCoord = new Vector2Int(11, 14);
     public Transform productHolder;
 
-    [SerializeField] OperatorUISystem operatorUISystem;
+    [SerializeField] OperatingRoomUI operatorUISystem;
     void Awake()
     {
         Init();

@@ -4,33 +4,23 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 
-public class BrushBtn : MonoBehaviour, IPointerDownHandler
+public class BrushBtn : PressDownButton
 {
-    public BrushBtnSolutionData brushBtnDataSolution;
-    public List<BrushData> brushDatas;
+    public BrushBtnData data;
     [SerializeField] Image colorImage;
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] TextMeshProUGUI numberText;
     [SerializeField] CanvasGroup canvasGroup;
-    public BrushType brushType;
     public ColorSO colorSO;
-    int number;
-    public void Setup(BrushBtnSolutionData brushBtnDataSolution_, ColorSO colorSO_)
+    public void Setup(BrushBtnData data_, ColorSO colorSO_)
     {
-        brushBtnDataSolution = brushBtnDataSolution_;
+        data = data_;
         colorSO = colorSO_;
-        brushType = brushBtnDataSolution.type;
-        number = brushBtnDataSolution.number;
-        brushDatas = brushBtnDataSolution.brushDatas;
-        TooltipTrigger tooltipTrigger = GetComponent<TooltipTrigger>();
-        if (number == 0)
-        {
-            canvasGroup.alpha = 0.01f;
-            canvasGroup.blocksRaycasts = false;
-        }
-        numberText.text = number <= 1 ? "" : $"x{number}";
-        colorImage.color = colorSO.drawColor;
-        switch (brushType)
+
+        UpdateButtonVisual();
+
+        var tooltipTrigger = GetComponent<TooltipTrigger>();
+        switch (data.brushType)
         {
             case BrushType.Coloring:
                 text.text = "Í¿É«±ÊË¢";
@@ -45,36 +35,41 @@ public class BrushBtn : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    void UpdateButtonVisual()
+    {
+        canvasGroup.alpha = data.number >= 1 ? 1f : 0.01f;
+        numberText.text = data.number <= 1 ? "" : $"x{data.number}";
+        colorImage.color = colorSO.drawColor;
+    }
+
+    public override void OnPointerDown(PointerEventData eventData)
     {
         if(eventData.button == PointerEventData.InputButton.Left)
         {
-            if (ProcessSystem.Instance.CanOperate())
+            if (ProcessManager.Instance.CanOperate())
             {
-                BuildSystem.Instance.CreateNewBrush(this);
-                brushBtnDataSolution.number--;
-                number--;
-                numberText.text = number <= 1 ? "" : $"x{number}";
-                if (number == 0)
-                {
-                    canvasGroup.alpha = 0.01f;
-                    canvasGroup.blocksRaycasts = false;
-                }
+                if (data.number == 0)
+                    return;
+
+                BrushCreate();
             }
         }
     }
 
-    public void OnDestroyBrush(BrushData brushData_)
+    void BrushCreate()
     {
-        if (number == 0)
-        {
-            canvasGroup.alpha = 1f;
-            canvasGroup.blocksRaycasts = true;
-        }
-        brushBtnDataSolution.number++;
-        number++;
-        numberText.text = number <= 1 ? "" : $"x{number}";
+        Brush brush = DeviceManager.Instance.NewBrush(data.brushType, data.colorType);
+        brush.OnDestoryByPlayer += BrushDestory;
+        ISelectable selectable = brush.GetComponent<ISelectable>();
+        MouseManager.Instance.SetClickedBeforeDragObj(selectable);
 
-        brushBtnDataSolution.brushDatas.Remove(brushData_);
+        data.number--;
+        UpdateButtonVisual();
+    }
+
+    public void BrushDestory(Brush brush)
+    {
+        data.number++;
+        UpdateButtonVisual();
     }
 }

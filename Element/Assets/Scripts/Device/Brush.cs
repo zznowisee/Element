@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 
 [Serializable]
@@ -9,125 +8,104 @@ public enum BrushType
     Line
 }
 
-public class Brush : ConnectableDevice, IMouseAction
+public class Brush : ConnectableDevice, ISelectable
 {
+    public BrushData data;
 
-    public BrushData brushData;
-    [HideInInspector] public BrushBtn brushBtn;
     [HideInInspector] public HexCell recorderCell;
-    public bool putdown;
+    public BrushState brushState;
     [SerializeField] MeshRenderer meshRenderer;
     [SerializeField] GameObject putDownSprite;
-    public Connector connector;
-    public virtual event Action<Vector3, WarningType> OnWarning;
+    public event Action<Brush> OnDestoryByPlayer;
+    public Color drawCol;
 
-    void Start()
+    void Awake()
+    {
+        deviceType = DeviceType.Brush;    
+    }
+
+    public virtual void Start()
     {
         putDownSprite.gameObject.SetActive(false);
+        deviceType = DeviceType.Brush;
     }
 
-    public void MouseAction_Drag()
+    void UpdateColor()
     {
-        cell.currentObject = null;
-        cell = null;
-        BuildSystem.Instance.SetCurrentTrackingBrush(this);
+        drawCol = ColorManager.Instance.GetColorSOFromColorType(data.colorType).drawColor;
+        meshRenderer.material.color = drawCol;
     }
 
-    public void OnSwitchToMainScene()
+    public virtual void Rebuild(HexCell cell_, BrushData data_)
     {
-        cell.currentObject = null;
-        Destroy(gameObject);
-    }
-
-    public void SetupFromBtn(BrushBtn brushBtn_)
-    {
-        brushBtn = brushBtn_;
-        brushData.colorType = brushBtn.colorSO.colorType;
-        brushData.type = brushBtn.brushType;
-        brushBtn.brushDatas.Add(brushData);
-        meshRenderer.material.color = brushBtn.colorSO.drawColor;
-    }
-
-    public void SetupFromData(HexCell cell_, BrushData data_, ColorSO colorSO_, BrushBtn brushBtn_)
-    {
-        brushData = data_;
-        brushBtn = brushBtn_;
-        Setup(cell_);
-        meshRenderer.material.color = colorSO_.drawColor;
-    }
-
-    public void Setup(HexCell cell_)
-    {
+        data = data_;
         cell = cell_;
         cell.currentObject = gameObject;
         transform.position = cell.transform.position;
-        brushData.cellIndex = cell.index;
+
+        UpdateColor();
+    }
+
+    public void Init(BrushType brushType, ColorType colorType)
+    {
+        data.brushType = brushType;
+        data.colorType = colorType;
+
+        UpdateColor();
+    }
+
+    public override void Setup(HexCell cell_)
+    {
+        base.Setup(cell_);
+        data.cellIndex = cell.index;
+        data.deviceType = DeviceType.Brush;
+        brushState = BrushState.PUTUP;
     }
 
     public override void Record()
     {
-        recorderCell = cell;
+        base.Record();
     }
 
     public override void ClearCurrentInfo()
     {
-        
+        base.ClearCurrentInfo();
+
+        connectingConnector = null;
         if (connectLine != null)
         {
             Destroy(connectLine.gameObject);
             connectLine = null;
         }
-
-        cell.currentObject = null;
     }
 
     public override void ReadPreviousInfo()
     {
-        cell = recorderCell;
-        cell.currentObject = gameObject;
+        base.ReadPreviousInfo();
 
-        recorderCell = null;
-        transform.position = cell.transform.position;
         putDownSprite.SetActive(false);
-        putdown = false;
+        brushState = BrushState.PUTUP;
     }
 
-    public virtual void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_) { }
-
-    public void Connector_OnRotateActionStart(Action callback, Action<Action> secondLevelCallback, Connector connector, RotateDirection rotateDirection)
+    public override void PutDownUp(Action releaserCallback, Action<Action> recieverCallback, BrushState state, float executeTime)
     {
-        switch (rotateDirection)
-        {
-            //ccw
-            case RotateDirection.CCW:
-                //from connector to this 's cell direction
-                //StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.PreviousCell(cell)));
-                break;
-            //cw
-            case RotateDirection.CW:
-                //StartCoroutine(MoveToTarget(callback, secondLevelCallback, connector, connector.cell.NextCell(cell)));
-                break;
-        }
+        brushState = state;
+        putDownSprite.gameObject.SetActive(state == BrushState.PUTDOWN);
     }
 
-    public virtual void PutDownUp(bool putdown_)
-    {
-        putdown = putdown_;
-        putDownSprite.SetActive(putdown);
-    }
-
-    public void OnDestroyByPlayer()
-    {
-        brushBtn.OnDestroyBrush(brushData);
-    }
-
-    public override void ConnectWithConnector(ConnectableDevice target)
+    public override void ConnectWithConnector(Connector target)
     {
         base.ConnectWithConnector(target);
     }
 
-    public override void SplitWithConnector(ConnectableDevice target)
+    public override void SplitWithConnector(Connector target)
     {
         base.SplitWithConnector(target);
+    }
+
+    public override void DestoryDevice()
+    {
+        OnDestoryByPlayer?.Invoke(this);
+        base.DestoryDevice();
     }
 }

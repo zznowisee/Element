@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2122431812877059266}
   - component: {fileID: 587192306506301891}
   - component: {fileID: 587192306506301888}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Connector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,10 +67,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf8e9c2544ddcfa4cadc4d230056c164, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deviceType: 0
+  index: 0
+  cell: {fileID: 0}
+  recordCell: {fileID: 0}
   connectorData:
     cellIndex: 0
-  brushes: []
-  cell: {fileID: 0}
+    deviceType: 0
+  connectingDevices: []
   radius: 5
   spriteObj: {fileID: 9159684923876028014}
 --- !u!58 &587192306506301888
@@ -100,7 +104,7 @@ GameObject:
   - component: {fileID: 2818652182670000155}
   - component: {fileID: 8746997182026901339}
   - component: {fileID: 7350635611942449633}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}

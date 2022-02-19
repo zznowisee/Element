@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bd9e448dc3e53640879edf48ac33b64, type: 3}
   m_Name: "2\u732B\u722A"
   m_EditorClassIdentifier: 
+  isSandbox: 0
   name: "\u732B\u722A"
   levelType: 0
   productData:
@@ -26,6 +27,8 @@ MonoBehaviour:
     - coord: {x: -1, y: 0}
       color: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
   levelIndex: 2
+  developerCycle: 6
+  controllerNum: 2
   brushBtnDatas:
   - colorSO: {fileID: 11400000, guid: 55fc0461c7e83b64bb5efeb22f1c2dde, type: 2}
     type: 0

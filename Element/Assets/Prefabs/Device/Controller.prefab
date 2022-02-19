@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1058916153}
   - component: {fileID: 1058916155}
   - component: {fileID: 1058916154}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: indexText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3936995286938303304}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -216,7 +216,7 @@ GameObject:
   - component: {fileID: 931793600666547923}
   - component: {fileID: 8538528339990089790}
   - component: {fileID: 7495469163831997188}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -271,17 +271,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 364c12a953f3ff84792220c0fe3d14e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deviceType: 0
   index: 0
   cell: {fileID: 0}
   recordCell: {fileID: 0}
   direction: 0
   controllerData:
     cellIndex: 0
+    deviceType: 0
     consoleIndex: 0
     direction: 0
     consoleData:
-      consoleIndex: 0
-      commandDatas: []
+      commandTypes: 
   controllerBtn: {fileID: 0}
   predictionLineLength: 400
   indexText: {fileID: 1058916154}
@@ -314,7 +315,7 @@ GameObject:
   - component: {fileID: 5572216016106934456}
   - component: {fileID: 8505677255379465405}
   - component: {fileID: 5673713764245279330}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: spriteObj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -395,6 +396,10 @@ PrefabInstance:
     - target: {fileID: 1571236948936364244, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
       propertyPath: m_Name
       value: PredictionLine
+      objectReference: {fileID: 0}
+    - target: {fileID: 1571236948936364244, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 1571236948936364245, guid: a02093a3131bb2748bc6d62ba7ebd687, type: 3}
       propertyPath: m_Positions.Array.data[1].z

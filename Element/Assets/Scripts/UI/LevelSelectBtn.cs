@@ -1,33 +1,26 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.UI;
-using UnityEditor;
 
 public class LevelSelectBtn : MonoBehaviour
 {
-    [SerializeField] LevelData levelData;
-    public LevelPage page;
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] Button levelSelectBtn;
     [SerializeField] RectTransform rectTransform;
     [SerializeField] GameObject completeCheck;
 
-    public void Setup(LevelPage page_, LevelData levelData_, SolutionSystem levelSolution_, GameObject levelSelectBtnPanel_)
+    public void Setup(LevelData levelData_, SolutionPage solutionPage, GameObject levelSelectionPanel_)
     {
-        page = page_;
-        levelData = levelData_;
-
         text.text = levelData_.levelName;
         text.ForceMeshUpdate();
         rectTransform.sizeDelta = Vector2.one * text.GetRenderedValues(false);
-
+        gameObject.name = $"{levelData_.levelName}SelectBtn";
         levelSelectBtn.onClick.AddListener(() =>
         {
-            page.current = levelSolution_;
-            levelSolution_.gameObject.SetActive(true);
-            levelSelectBtnPanel_.SetActive(false);
-            MainUISystem.Instance.currentLevelSelectBtn = this;
+            solutionPage.gameObject.SetActive(true);
+            levelSelectionPanel_.gameObject.SetActive(false);
+            MainUI.Instance.SelectingLevelBtn(this, solutionPage);
+            DataManager.Instance.LoadLevelData(levelData_);
         });
 
         completeCheck.SetActive(levelData_.completed);

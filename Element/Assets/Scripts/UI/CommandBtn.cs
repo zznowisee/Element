@@ -3,10 +3,9 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class CommandBtn : MonoBehaviour, IPointerDownHandler
+public class CommandBtn : PressDownButton
 {
     public CommandSO commandSO { get; private set; }
-    public Command pfCommand;
     [SerializeField] Image icon;
     [SerializeField] TextMeshProUGUI keyText;
 
@@ -17,16 +16,20 @@ public class CommandBtn : MonoBehaviour, IPointerDownHandler
         keyText.text = commandSO.key.ToString();
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public override void OnPointerDown(PointerEventData eventData)
     {
+        base.OnPointerDown(eventData);
         if(eventData.button == PointerEventData.InputButton.Left)
         {
-            if (ProcessSystem.Instance.CanOperate())
+            if (ProcessManager.Instance.CanOperate())
             {
-                Command command = Instantiate(pfCommand, transform.position, Quaternion.identity, OperatorUISystem.Instance.transform);
+                Transform commandParent = OperatingRoomUI.Instance.transform;
+                Command command = DeviceManager.Instance.NewCommand(transform.position, Quaternion.identity, commandParent);
                 command.Setup(commandSO);
-                command.BeginDrag();
-                OperatorUISystem.Instance.SetCurrentTrackingCommand(command);
+
+/*                ISelectable selectable = command.GetComponent<ISelectable>();
+                selectable.LeftClick();
+                MouseManager.Instance.SetClickedBeforeDragObj(command.GetComponent<ISelectable>());*/
             }
         }
     }

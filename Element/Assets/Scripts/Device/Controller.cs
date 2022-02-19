@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 using TMPro;
@@ -10,20 +9,17 @@ public enum RotateDirection
     CCW
 }
 
-public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
+public class Controller : Device, ICommandReleaser, IReciever
 {
     public Direction direction;
-    public ControllerData controllerData;
-    public ControllerBtn controllerBtn;
+    public ControllerData data;
     [SerializeField] float predictionLineLength = 200f;
     [SerializeField] TextMeshPro indexText;
     [SerializeField] LineRenderer predictionLine;
     [SerializeField] GameObject sprite;
 
-    public event Action OnMouseDragBegin;
-    public event Action OnMouseDragEnd;
-
-    public event Action OnFinishedOneLineCommand;
+    public event Action<Controller> OnDestoryByPlayer;
+    public event Action OnFinishCommand;
 
     public event Action<Vector3, WarningType> OnWarning;
 
@@ -37,13 +33,8 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
     void Awake()
     {
         predictionLine.gameObject.SetActive(false);
+        deviceType = DeviceType.Controller;
         sprite.transform.rotation = Quaternion.Euler(Vector3.forward * -30f);
-    }
-
-    public void OnSwitchToMainScene()
-    {
-        cell.currentObject = null;
-        Destroy(gameObject);
     }
 
     void UpdatePredictionLine()
@@ -55,24 +46,23 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
         });
     }
 
-    public void Setup(HexCell cell, ControllerData controllerData_)
+    public void Rebuild(HexCell cell_, ControllerData data_)
     {
-        controllerData = controllerData_;
-        direction = controllerData.direction;
-        SetIndex(controllerData.consoleIndex);
-        Setup(cell);
+        data = data_;
+        direction = data.direction;
+        UpdatePredictionLine();
+        sprite.transform.rotation = Quaternion.Euler(Vector3.forward * -(int)direction * 60f - Vector3.forward * 30f);
+        SetIndex(data.index);
+        Setup(cell_);
     }
-    public void Setup(HexCell cell_)
+    public override void Setup(HexCell cell_)
     {
-        cell = cell_;
-        cell.currentObject = gameObject;
-
-        transform.position = cell.transform.position;
-
+        base.Setup(cell_);
+        deviceType = DeviceType.Controller;
         predictionLine.gameObject.SetActive(true);
         UpdatePredictionLine();
         sprite.transform.rotation = Quaternion.Euler(Vector3.forward * -(int)direction * 60f - Vector3.forward * 30f);
-        controllerData.cellIndex = cell.index;
+        data.cellIndex = cell.index;
     }
 
     public void SetIndex(int index_)
@@ -80,16 +70,7 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
         index = index_;
         indexText.text = index.ToString();
         indexText.gameObject.SetActive(true);
-        controllerData.consoleIndex = index;
-    }
-
-    public void MouseAction_Drag()
-    {
-        predictionLine.gameObject.SetActive(false);
-        cell.currentObject = null;
-
-        BuildSystem.Instance.SetCurrentTrackingController(this);
-        OnMouseDragBegin?.Invoke();
+        data.index = index;
     }
 
     public void Rotate(RotateDirection rotateDirection)
@@ -107,30 +88,21 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
                 sprite.transform.rotation = Quaternion.Euler(sprite.transform.eulerAngles - Vector3.forward * 60f);
                 break;
         }
-        controllerData.direction = direction;
-    }
-
-    private void OnRecieverFinishedCommand()
-    {
-        totalWaitingNum--;
-        if (totalWaitingNum == 0)
-        {
-            OnFinishedOneLineCommand?.Invoke();
-        }
+        data.direction = direction;
     }
 
     public void ReleaseCommand(CommandType commandType, float executeTime)
     {
         switch (commandType)
         {
-            case CommandType.ControllerCCR:
-                ControllerCCWRotate();
+            case CommandType.ControllerCCW:
+                ControllerCCWRotate(executeTime);
                 return;
-            case CommandType.ControllerCR:
-                ControllerCWRotate();
+            case CommandType.ControllerCW:
+                ControllerCWRotate(executeTime);
                 return;
             case CommandType.Delay:
-                Delay(executeTime);
+                Delay(OnFinishCommand, executeTime);
                 return;
         }
 
@@ -182,50 +154,48 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
 
         if (totalWaitingNum == 0)
         {
-            Delay(executeTime);
+            Delay(OnFinishCommand, executeTime);
         }
     }
 
-    void Delay(float time)
+    void Delay(Action callback, float time)
     {
-        StartCoroutine(Sleep(time));
+        StartCoroutine(Sleep(callback, time));
     }
 
     public override void ClearCurrentInfo()
     {
-        cell.currentObject = null;
+        base.ClearCurrentInfo();
+
         totalWaitingNum = 0;
         recievedMovingCommandNum = 0;
     }
 
     public override void ReadPreviousInfo()
     {
-        cell = recordCell;
+        base.ReadPreviousInfo();
 
-        cell.currentObject = gameObject;
         direction = recorderDirection;
         UpdatePredictionLine();
-        recordCell = null;
         sprite.transform.rotation = recorderSpriteRotation;
         recorderSpriteRotation = Quaternion.identity;
-        transform.position = cell.transform.position;
     }
 
     public override void Record()
     {
-        recordCell = cell;
+        base.Record();
         recorderDirection = direction;
         recorderSpriteRotation = sprite.transform.rotation;
     }
 
-    IEnumerator Sleep(float executeTime)
+    IEnumerator Sleep(Action callback, float executeTime)
     {
         yield return new WaitForSeconds(executeTime);
         recievedMovingCommandNum = 0;
-        OnFinishedOneLineCommand?.Invoke();
+        callback?.Invoke();
     }
 
-    IEnumerator MoveToTarget(Action callback, Direction direction)
+    IEnumerator MoveToTarget(Action callback, Direction direction, float executeTime)
     {
         yield return null;
         if (recievedMovingCommandNum > 1)
@@ -243,7 +213,7 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
         Vector3 endPosition = target.transform.position;
         while (percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
+            percent += Time.deltaTime / executeTime;
             percent = Mathf.Clamp01(percent);
             transform.position = Vector3.Lerp(startPosition, endPosition, percent);
             yield return null;
@@ -263,13 +233,13 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
         recievedMovingCommandNum = 0;
     }
 
-    public void ControllerCCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CCW));
-    public void ControllerCWRotate() => StartCoroutine(RotateToTarget(RotateDirection.CW));
+    public void ControllerCCWRotate(float executeTime) => StartCoroutine(RotateToTarget(executeTime, RotateDirection.CCW));
+    public void ControllerCWRotate(float executeTime) => StartCoroutine(RotateToTarget(executeTime, RotateDirection.CW));
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other != null)
         {
-            if (!ProcessSystem.Instance.CanOperate())
+            if (!ProcessManager.Instance.CanOperate())
             {
                 print("Enter");
                 OnWarning?.Invoke(transform.position, WarningType.Collision);
@@ -277,7 +247,7 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
         }
     }
 
-    IEnumerator RotateToTarget(RotateDirection rotateDirection)
+    IEnumerator RotateToTarget(float time, RotateDirection rotateDirection)
     {
         Quaternion start = sprite.transform.rotation;
         Quaternion end = start;
@@ -296,43 +266,75 @@ public class Controller : Device, IMouseAction, ICommandReleaser, IReciever
 
         while(percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
+            percent += Time.deltaTime / time;
             percent = Mathf.Clamp01(percent);
             sprite.transform.rotation = Quaternion.Lerp(start, end, percent);
             yield return null;
         }
 
         recievedMovingCommandNum = 0;
-        OnFinishedOneLineCommand?.Invoke();
+        OnFinishCommand?.Invoke();
     }
 
     public void RecieverFinishedCommand()
     {
-        
+        totalWaitingNum--;
+        if (totalWaitingNum == 0)
+        {
+            print("Controller Finish");
+            OnFinishCommand?.Invoke();
+        }
     }
 
     public void ExecutePutDownUp(Action releaserCallback, float time, BrushState brushState)
     {
-        throw new NotImplementedException();
+        releaserCallback?.Invoke();
     }
 
     public void ExecuteConnect(Action releaserCallback, float time)
     {
-        throw new NotImplementedException();
+        releaserCallback?.Invoke();
     }
 
     public void ExecuteSplit(Action releaserCallback, float time)
     {
-        throw new NotImplementedException();
+        releaserCallback?.Invoke();
     }
 
     public void ExecuteMove(Action releaserCallback, float time, Direction moveDirection)
     {
-        throw new NotImplementedException();
+        StartCoroutine(MoveToTarget(releaserCallback, moveDirection, time));
     }
 
     public void ExecuteRotate(Action releaserCallback, float time, RotateDirection rotateDirection)
     {
-        throw new NotImplementedException();
+        releaserCallback?.Invoke();
+    }
+
+    public override void LeftClick()
+    {
+        base.LeftClick();
+        predictionLine.gameObject.SetActive(false);
+    }
+
+    public override void Dragging()
+    {
+        base.Dragging();
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Rotate(RotateDirection.CCW);
+        }
+        else if (Input.GetKeyDown(KeyCode.E))
+        {
+            Rotate(RotateDirection.CW);
+        }
+    }
+
+    public override void DestoryDevice()
+    {
+        print("Destory Device");
+        OnDestoryByPlayer?.Invoke(this);
+        base.DestoryDevice();
     }
 }

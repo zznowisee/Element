@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 25, y: 25}
+  m_SizeDelta: {x: 33, y: 33}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1984767047
 CanvasRenderer:
@@ -113,7 +113,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.13659668}
   m_SizeDelta: {x: 1225, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2900268772220364039
@@ -163,7 +163,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2900268772220364040}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d67f9286f31a3d48bac6eacc6b7279f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1c4823e46acde8e4b8cab6e4122808f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   consoleData:
@@ -171,8 +171,8 @@ MonoBehaviour:
   indexText: {fileID: 2239115108518078406}
   controller: {fileID: 0}
   index: 0
-  codeSlotNormalCol: {r: 0.54901963, g: 0.54901963, b: 0.54901963, a: 1}
-  codeSlotHighlightCol: {r: 0.9951428, g: 1, b: 0, a: 0.7058824}
+  codeSlotNormalCol: {r: 0.4339623, g: 0.4339623, b: 0.4339623, a: 1}
+  codeSlotHighlightCol: {r: 0.9858491, g: 1, b: 0.4292453, a: 0.7647059}
   pfCodeSlot: {fileID: 4838164428390581485, guid: 25bb1f95f1171a74c8d86d2b04abcb58, type: 3}
   slots: []
   commands: []

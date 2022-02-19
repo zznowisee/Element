@@ -1,12 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
 public class ColorBrush : Brush
 {
-    public override event Action<Vector3, WarningType> OnWarning;
-    public event Action<HexCell, ColorSO> OnColoringCell;
+    public event Action<HexCell, ColorType> OnColoringCell;
+
     public override IEnumerator MoveToTarget(Action releaserCallback, Action<Action> callback, HexCell target, float executeTime)
     {
         yield return null;
@@ -16,51 +15,42 @@ public class ColorBrush : Brush
         Vector3 endPosition = target.transform.position;
         while (percent < 1f)
         {
-            percent += Time.deltaTime / ProcessSystem.Instance.defaultExecuteTime;
+            percent += Time.deltaTime / executeTime;
             percent = Mathf.Clamp01(percent);
-            transform.position = Vector3.Lerp(startPosition, endPosition, percent);/*
-            connectLine.SetPosition(1, connector.transform.position - transform.position);*/
+            transform.position = Vector3.Lerp(startPosition, endPosition, percent);
+            connectLine.UpdatePosition();
             yield return null;
         }
 
         cell = target;
         cell.currentObject = gameObject;
         TryPainiting();
-
-        //secondLevelCallback?.Invoke(callback);
+        callback?.Invoke(releaserCallback);
     }
 
     void TryPainiting()
     {
-        if (putdown)
+        if (brushState == BrushState.PUTDOWN)
         {
-            cell.PaintingWithColor(brushBtn.colorSO.drawColor, ProcessSystem.Instance.commandLineIndex);
-            OnColoringCell?.Invoke(cell, brushBtn.colorSO);
+            cell.PaintingWithColor(drawCol, ProcessManager.Instance.LineIndex);
+            OnColoringCell?.Invoke(cell, data.colorType);
         }
     }
 
-    public override void PutDownUp(bool coloring_)
+    public override void PutDownUp(Action releaserCallback, Action<Action> recieverCallback, BrushState state, float executeTime)
     {
-        base.PutDownUp(coloring_);
+        base.PutDownUp(releaserCallback, recieverCallback, state, executeTime);
         TryPainiting();
     }
 
-    public override void ConnectWithConnector(Action callback, Action<Action> secondLevelCallback, Connector connector_)
-    {
-        StartCoroutine(ConnectConnector(connector_));
-    }
-    public IEnumerator ConnectConnector(Connector connector_)
-    {
-        yield return null;
-    }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(other != null)
         {
-            if (!ProcessSystem.Instance.CanOperate())
+            if (!ProcessManager.Instance.CanOperate())
             {
                 print("Enter");
-                OnWarning?.Invoke(transform.position, WarningType.Collision);
+                //OnWarning?.Invoke(transform.position, WarningType.Collision);
             }
         }
     }

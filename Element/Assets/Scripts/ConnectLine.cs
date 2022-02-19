@@ -1,16 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ConnectLine : MonoBehaviour
 {
-    public ConnectableDevice start;
-    public ConnectableDevice end;
+    ConnectableDevice start;
+    Connector end;
+    LineRenderer lineRenderer;
 
-    public LineRenderer lineRenderer;
-
-    public void Setup(ConnectableDevice start_, ConnectableDevice end_)
+    public void Setup(ConnectableDevice start_, Connector end_)
     {
+        lineRenderer = GetComponent<LineRenderer>();
         start = start_;
         end = end_;
         lineRenderer.SetPosition(0, start.transform.position - transform.position);

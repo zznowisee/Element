@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public static class InputHelper
 {
@@ -25,6 +26,11 @@ public static class InputHelper
         }
     }
 
+    public static Vector2 GetWorldPosition(Vector3 screenPos)
+    {
+        return MainCamera.ScreenToWorldPoint(screenPos);
+    }
+
     public static bool IsMouseOverUIObject()
     {
         return EventSystem.current.IsPointerOverGameObject();
@@ -46,17 +52,17 @@ public static class InputHelper
         return null;
     }
 
-    public static IMouseAction GetIMouseDragUnderPosition2D()
+    public static Device GetDeviceUnderPosition2D()
     {
         RaycastHit2D[] hits = Physics2D.RaycastAll(MouseWorldPositionIn2D, Vector3.forward, float.MaxValue);
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider)
             {
-                IMouseAction drag = hits[i].collider.GetComponent<IMouseAction>();
-                if (drag != null)
+                Device device = hits[i].collider.GetComponent<Device>();
+                if (device != null)
                 {
-                    return drag;
+                    return device;
                 }
             }
         }
@@ -79,12 +85,13 @@ public static class InputHelper
         }
         return null;
     }
-    public static CommandSlot GetCommandSlotUnderPosition2D()
+    public static CommandSlot GetCommandSlotUnder(Vector3 worldPosition)
     {
         PointerEventData eventData = new PointerEventData(EventSystem.current);
-        eventData.position = Input.mousePosition;
+        eventData.position = mainCamera.WorldToScreenPoint(worldPosition);
         List<RaycastResult> list = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, list);
+
         for (int i = 0; i < list.Count; i++)
         {
             CommandSlot slot = list[i].gameObject.GetComponent<CommandSlot>();
@@ -95,6 +102,8 @@ public static class InputHelper
         }
         return null;
     }
+
+
 
     public static KeyCode HeldKeysInThese(params KeyCode[] keyCodes)
     {
@@ -130,17 +139,6 @@ public static class InputHelper
             }
         }
         return false;
-    }
-
-    public static Direction GetHexDirectionFromAngle(float angle)
-    {
-        if (angle < 0f) angle += 360f;
-        if (angle <= 60f && angle > 0) return Direction.NE;
-        else if (angle > 60f && angle <= 120f) return Direction.E;
-        else if (angle > 120f && angle <= 180f) return Direction.SE;
-        else if (angle > 180f && angle <= 240f) return Direction.SW;
-        else if (angle > 240f & angle <= 300f) return Direction.W;
-        else return Direction.NW;
     }
 
     public static int GetIndexFromIndicesArray(int[] indices)

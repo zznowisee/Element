@@ -1,18 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ConnectorBtn : MonoBehaviour, IPointerDownHandler
+public class ConnectorBtn : PressDownButton
 {
-    public void OnPointerDown(PointerEventData eventData)
+    public override void OnPointerDown(PointerEventData eventData)
     {
         if(eventData.button == PointerEventData.InputButton.Left)
         {
-            if (ProcessSystem.Instance.CanOperate())
+            if (ProcessManager.Instance.CanOperate())
             {
-                BuildSystem.Instance.CreateNewConnecter();
+                ConnectorCreate();
             }
         }
+    }
+
+    void ConnectorCreate()
+    {
+        var connector = DeviceManager.Instance.NewConnector();
+
+        ISelectable selectable = connector.GetComponent<ISelectable>();
+        MouseManager.Instance.SetClickedBeforeDragObj(selectable);
     }
 }

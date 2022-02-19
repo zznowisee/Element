@@ -11,10 +11,10 @@ TagManager:
   - 
   - Water
   - UI
-  - Brush
+  - Device
   - TrackControlPoint
   - HexCell
-  - 
+  - Command
   - 
   - 
   - 
@@ -61,4 +61,7 @@ TagManager:
     locked: 0
   - name: Mask
     uniqueID: 3835490335
+    locked: 0
+  - name: MouseSelection
+    uniqueID: 3560358217
     locked: 0

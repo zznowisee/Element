@@ -1,26 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
 public class ProductData
 {
-    public LineData[] lines;
-    public CellData[] cells;
+    public LineCellData[] lines;
+    public ColorCellData[] cells;
 }
 
 [System.Serializable]
-public class CellData
+public class ColorCellData
 {
     public Vector2Int coord;
     public ColorSO color;
 }
 
 [System.Serializable]
-public class LineData
+public class LineCellData
 {
-    public Vector2Int pointA;
-    public Vector2Int pointB;
+    public Vector2Int coord;
+    public Direction direction;
     public ColorSO color;
 }
 
@@ -28,7 +26,7 @@ public class LineData
 public class BrushBtnInitData
 {
     public ColorSO colorSO;
-    public BrushType type;
+    public BrushType brushType;
     public int number;
 }
 
