@@ -44,6 +44,9 @@ TagManager:
   - name: Cell
     uniqueID: 3790357871
     locked: 0
+  - name: Product
+    uniqueID: 3816255057
+    locked: 0
   - name: PredictionLine
     uniqueID: 1295420725
     locked: 0

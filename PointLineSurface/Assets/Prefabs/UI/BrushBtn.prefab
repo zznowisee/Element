@@ -227,17 +227,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f2fc6e3f9697ea47b5debfb47603bf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brushBtnData:
-    colorType: 0
-    type: 0
+  data:
     number: 0
-    brushDatas: []
-  brushDatas: []
+    colorType: 0
+    brushType: 0
   colorImage: {fileID: 104369415151246087}
   text: {fileID: 104369415970623080}
   numberText: {fileID: 617003452}
   canvasGroup: {fileID: 9192525273218433104}
-  brushType: 0
   colorSO: {fileID: 0}
 --- !u!225 &9192525273218433104
 CanvasGroup:

@@ -58,7 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\com.unity.uiextensions\Editor\RangeSliderEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\uGUITools.cs" />
-    <Compile Include="Assets\Scripts\Editor\MeshRendererEditor.cs" />
+    <Compile Include="Assets\_Scripts\Editor\MeshRendererEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\AccordionElementEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\CUIBezierCurveEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\FancyScrollView\ScrollerEditor.cs" />
@@ -68,8 +68,9 @@
     <Compile Include="Assets\Package\LeanTween\Editor\LeanTweenDocumentationEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\TextPicIconListCopier.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\CanvasGroupActivator.cs" />
+    <Compile Include="Assets\_Scripts\Editor\MapEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\ScrollPositionControllerEditor.cs" />
-    <Compile Include="Assets\Scripts\Editor\HexMapEditor.cs" />
+    <Compile Include="Assets\_Scripts\Editor\HexMapEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\BoxSliderEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\CUIGraphicEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\TextPicIconEditor.cs" />
@@ -79,7 +80,7 @@
     <Compile Include="Assets\com.unity.uiextensions\Editor\TextPicEditor.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\ReadOnlyDrawer.cs" />
     <Compile Include="Assets\com.unity.uiextensions\Editor\CUIImageEditor.cs" />
-    <Compile Include="Assets\Scripts\Editor\HexCoordinatesEditor.cs" />
+    <Compile Include="Assets\_Scripts\Editor\HexCoordinatesEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

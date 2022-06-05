@@ -378,9 +378,10 @@
 "Assets/com.unity.uiextensions/Editor/uGUITools.cs"
 "Assets/com.unity.uiextensions/Editor/UIExtensionsMenuOptions.cs"
 "Assets/Package/LeanTween/Editor/LeanTweenDocumentationEditor.cs"
-"Assets/Scripts/Editor/HexCoordinatesEditor.cs"
-"Assets/Scripts/Editor/HexMapEditor.cs"
-"Assets/Scripts/Editor/MeshRendererEditor.cs"
+"Assets/_Scripts/Editor/HexCoordinatesEditor.cs"
+"Assets/_Scripts/Editor/HexMapEditor.cs"
+"Assets/_Scripts/Editor/MapEditor.cs"
+"Assets/_Scripts/Editor/MeshRendererEditor.cs"
 -langversion:8.0
 
 /deterministic
